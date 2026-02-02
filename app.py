@@ -1,5 +1,5 @@
 """
-Health Tracker - Simple Flask Application
+PhySioLoVe: Health Tracker - Simple Flask Application
 App.py
 
 Author: Jose Guzman, sjm.guzman<at>gmail.com
@@ -13,7 +13,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///health_tracker.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///physiolove.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'dev-secret-key'
 

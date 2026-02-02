@@ -1,4 +1,4 @@
-# 🏃‍PhySioLove: ♂️ Health Tracker
+# 🏃‍PhySioLove: Personal health tracker
 
 A personal health tracking dashboard to visualize weight, body composition, nutrition, sleep, and activity metrics.
 
@@ -57,8 +57,8 @@ You should see something like: `uv 0.x.x`
 
 ```bash
 # If using Git
-git clone https://github.com/yourusername/physiolove.git
-cd health-tracker
+git clone https://github.com/joseguzman/physiolove.git
+cd physiolove
 
 # OR download and extract ZIP, then:
 cd physiolove
@@ -205,7 +205,7 @@ uv sync --upgrade
 ## Project Structure
 
 ```
-health-tracker/
+physiolove/
 ├── app.py                  # Main Flask application
 ├── pyproject.toml          # Project configuration & dependencies
 ├── uv.lock                 # Locked dependency versions
