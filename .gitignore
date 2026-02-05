@@ -44,6 +44,8 @@ uv.lock
 .DS_Store
 
 
+#=========================================================================
 # Data files (optional - uncomment if you want to keep data private)
-# data/*.tsv
-# data/*.csv
+#=========================================================================
+data/*.tsv
+data/*.csv

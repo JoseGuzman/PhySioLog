@@ -175,6 +175,8 @@ The script will skip existing entries and only add new ones.
 
 ### Run the Application
 
+This will create the virtual environment if not already created:
+
 ```bash
 uv run python app.py
 ```

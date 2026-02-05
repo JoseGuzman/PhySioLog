@@ -6,13 +6,14 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 Created: Sun Jan 25 09:23:24 CET 2026
 """
 
-from flask import Flask, render_template, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+
+from flask import Flask, jsonify, render_template, request
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Configuration
+# Configuration to read physiolove.db SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///physiolove.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'dev-secret-key'
@@ -21,7 +22,15 @@ db = SQLAlchemy(app)
 
 # Database Model
 class HealthEntry(db.Model):
-    __tablename__ = 'health_entries'
+    """_summary_
+
+    Args:
+        db (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    __tablename__ = 'health_entries' # set name of resulting table
     
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False, unique=True)
