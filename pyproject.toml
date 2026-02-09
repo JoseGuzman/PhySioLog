@@ -16,6 +16,18 @@ dev = [
     "black>=23.12.0",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Tell setuptools to only look for Python packages, not data folders
+py-modules = ["app"]
+
+[tool.setuptools.packages.find]
+# Don't look for packages in these directories
+exclude = ["data*", "templates*", "static*", "instance*"]
+
 [tool.ruff]
 line-length = 88
 select = ["E", "F", "I"]

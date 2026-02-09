@@ -68,6 +68,7 @@ cd physiolove
 
 ```bash
 uv sync
+uv pip install -e .
 ```
 
 This command will:
