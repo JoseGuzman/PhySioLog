@@ -246,6 +246,21 @@
                 return result;
             }
 
+            function makeTimeRangeXAxis() {
+                return {
+                    type: 'date',
+                    tickangle: -45,
+                    rangeselector: {
+                        buttons: [
+                            { count: 30, label: 'Last 30 days', step: 'day', stepmode: 'backward' },
+                            { count: 90, label: 'Last 90 days', step: 'day', stepmode: 'backward' },
+                            { step: 'all', label: 'All' }
+                        ]
+                    },
+                    rangeslider: { visible: false } // set true if you also want the slider
+                };
+            }
+
             //*******************************
             // Get weight data
             //*******************************
@@ -279,11 +294,11 @@
                 }
             ], {
                 yaxis: { title: 'Weight (kg)' },
-                xaxis: { tickangle: -30 },
+                xaxis: makeTimeRangeXAxis(),
                 hovermode: 'x unified',
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
-            });
+            }, { responsive: true });
 
             // Body Fat chart (right column)
             const bodyFatData = entries.map(e => e.body_fat);
@@ -308,7 +323,7 @@
                 }
             ], {
                 yaxis: { title: 'Body Fat (%)' },
-                xaxis: { tickangle: -30 },
+                xaxis: makeTimeRangeXAxis(),
                 hovermode: 'x unified',
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
@@ -334,7 +349,7 @@
             }
             ], {
                 yaxis: { title: 'Steps (x1000)' },
-                xaxis: { tickangle: -30 },
+                xaxis: makeTimeRangeXAxis(),
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
             });
@@ -369,7 +384,7 @@
                 }
             ], {
                 yaxis: { title: 'Sleep Time (hours)' },
-                xaxis: { tickangle: -30},
+                xaxis: makeTimeRangeXAxis(),
                 hovermode: 'x unified',
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
