@@ -298,7 +298,7 @@
                 hovermode: 'x unified',
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
-            }, { responsive: true });
+            }, { responsive: true, displaylogo: false });
 
             // Body Fat chart (right column)
             const bodyFatData = entries.map(e => e.body_fat);
@@ -327,7 +327,7 @@
                 hovermode: 'x unified',
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
-            });
+            }, { responsive: true, displaylogo: false });
 
             // Steps chart (left column)
             const stepsData = entries.map(e => e.steps);
@@ -352,7 +352,7 @@
                 xaxis: makeTimeRangeXAxis(),
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
-            });
+            }, { responsive: true, displaylogo: false });
 
             // Sleep chart (right column) with moving average
             const sleepData = entries.map(e => e.sleep_total);
@@ -388,7 +388,7 @@
                 hovermode: 'x unified',
                 showlegend: true,
                 legend: { x: 0.6, y: 1.2 }
-            });
+            }, { responsive: true, displaylogo: false });
         }
 
         document.getElementById('entryForm').addEventListener('submit', async (e) => {
