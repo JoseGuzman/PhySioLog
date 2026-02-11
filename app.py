@@ -1,5 +1,5 @@
 """
-PhySioLoVe: Health Tracker - Simple Flask Application
+PhySioLog: Health Tracker - Simple Flask Application
 App.py
 
 This is a multi-view Flask application that serves as a health tracker.
@@ -26,8 +26,8 @@ app = Flask(
     static_url_path="/static",
 )
 
-# Configuration to read physiolove.db SQLite database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///physiolove.db"
+# Configuration to read physiolog.db SQLite database
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///physiolog.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "dev-secret-key"
 
