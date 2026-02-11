@@ -85,10 +85,10 @@ def overview():
     return render_template("overview.html")
 
 
-@app.route("/visualizations")
-def visualizations():
-    """Visualizations page with charts"""
-    return render_template("visualizations.html")
+@app.route("/trends")
+def trends():
+    """Visualizations page with trends charts"""
+    return render_template("trends.html")
 
 
 @app.route("/api/entries", methods=["GET", "POST"])
