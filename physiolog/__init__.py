@@ -31,7 +31,7 @@ from pathlib import Path
 
 from flask import Flask
 
-from config import Config
+from physiolog.config import Config
 
 from .extensions import db
 
