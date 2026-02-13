@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 
 BASEDIR = Path(__file__).resolve().parent
 
+
 # Load .env file from project root
 load_dotenv(BASEDIR / ".env")
 
@@ -34,6 +35,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = environ.get(
         "SQLALCHEMY_DATABASE_URI", "sqlite:///physiolove.db"
     )
+
+    AUTO_CREATE_DB = environ.get("AUTO_CREATE_DB", "True").lower() == "true"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # Convert string to boolean safely

@@ -1,6 +1,6 @@
 [project]
 name = "physiolog"
-version = "0.1.2"
+version = "0.2.0"
 description = "Personal health tracking dashboard"
 requires-python = ">=3.11"
 
@@ -10,6 +10,7 @@ dependencies = [
     "flask-login>=0.6.3",
     "werkzeug>=3.0.0",
     "pandas>=2.1.4",
+    "sqlalchemy>=2.0.0",
     "python-dotenv>=1.0.1",
     "gunicorn>=22.0.0",
 ]
@@ -19,18 +20,22 @@ dependencies = [
 dev = [
     "pytest>=7.4.3",
     "black>=23.12.0",
+    "mypy>=1.8",
+    "sqlalchemy[mypy]>=2.0.0",
+    "types-python-dateutil",
 ]
 
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
+# [tool.setuptools]
 # Tell setuptools to only look for Python packages, not data folders
-py-modules = ["app"]
+# py-modules = ["app"] let tool.setuptools.packages.find find the packages
 
 [tool.setuptools.packages.find]
 # Don't look for packages in these directories
+where = ["."]
 exclude = ["data*", "templates*", "static*", "instance*"]
 
 [tool.ruff]

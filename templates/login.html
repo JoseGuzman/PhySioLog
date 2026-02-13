@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Login - Physiolog{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Login</h1>
+    <p>Access your Physiolog account</p>
+</div>
+
+<div class="form-section" style="max-width:520px;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom:12px;">
+        {% for category, msg in messages %}
+        <div
+            style="padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; color:var(--text); background:#111;">
+            {{ msg }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <div class="form-grid" style="grid-template-columns:1fr;">
+            <div>
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div>
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+        </div>
+        <button type="submit">Login</button>
+
+        <p style="margin-top:12px; color:var(--muted);">
+            No account? <a href="{{ url_for('register') }}" style="color:var(--accent); text-decoration:none;">Create
+                one</a>
+        </p>
+    </form>
+</div>
+{% endblock %}
