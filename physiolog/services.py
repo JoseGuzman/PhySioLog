@@ -38,6 +38,14 @@ from __future__ import annotations
 from typing import Iterable, Protocol
 
 # from .models import HealthEntry
+# Map output statistic keys -> HealthEntry attribute names
+METRICS: dict[str, str] = {
+    "avg_weight": "weight",
+    "avg_body_fat": "body_fat",
+    "avg_calories": "calories",
+    "avg_steps": "steps",
+    "avg_sleep": "sleep_total",
+}
 
 
 class HasHealthMetrics(Protocol):
@@ -89,52 +97,26 @@ def compute_stats(entries: Iterable[HasHealthMetrics]) -> dict[str, float | int 
 
     Returns:
         dict[str, float | int | None]:
-            Dictionary containing averaged metrics and total entry count:
-            - avg_weight
-            - avg_body_fat
-            - avg_calories
-            - avg_steps
-            - avg_sleep
-            - total_entries
+            Dictionary containing averaged metrics and total entry count.
+            Keys are defined by ``METRICS`` plus ``total_entries``.
     """
-
-    sums = {
-        "weight": 0.0,
-        "body_fat": 0.0,
-        "calories": 0.0,
-        "steps": 0.0,
-        "sleep_total": 0.0,
-    }
-
-    counts = {
-        "weight": 0,
-        "body_fat": 0,
-        "calories": 0,
-        "steps": 0,
-        "sleep_total": 0,
-    }
-
+    sums: dict[str, float] = {stat_key: 0.0 for stat_key in METRICS}
+    counts: dict[str, int] = {stat_key: 0 for stat_key in METRICS}
     total_entries = 0
 
     for e in entries:
         total_entries += 1
-
-        for field in sums.keys():
-            value = getattr(e, field)
+        for stat_key, attr_name in METRICS.items():
+            value = getattr(e, attr_name)
             if value is not None:
-                sums[field] += value
-                counts[field] += 1
+                sums[stat_key] += float(value)
+                counts[stat_key] += 1
 
-    def avg(field: str) -> float | None:
-        if counts[field] == 0:
+    def avg(stat_key: str) -> float | None:
+        if counts[stat_key] == 0:
             return None
-        return round(sums[field] / counts[field], 2)
+        return round(sums[stat_key] / counts[stat_key], 2)
 
-    return {
-        "avg_weight": avg("weight"),
-        "avg_body_fat": avg("body_fat"),
-        "avg_calories": avg("calories"),
-        "avg_steps": avg("steps"),
-        "avg_sleep": avg("sleep_total"),
-        "total_entries": total_entries,
-    }
+    result: dict[str, float | int | None] = {k: avg(k) for k in METRICS}
+    result["total_entries"] = total_entries
+    return result
