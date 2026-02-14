@@ -161,11 +161,9 @@ function hexToRgba(hex, alpha = 1) {
 function calculateMovingAverage(data, windowSize = 7) {
     const result = [];
     for (let i = 0; i < data.length; i++) {
-        if (i < windowSize - 1) {
-            result.push(null);
-            continue;
-        }
-        const window = data.slice(i - windowSize + 1, i + 1).filter((v) => v != null);
+        // Use expanding window at the beginning (from start to min(i+1, windowSize))
+        const start = Math.max(0, i - windowSize + 1);
+        const window = data.slice(start, i + 1).filter((v) => v != null);
         if (window.length === 0) {
             result.push(null);
             continue;
