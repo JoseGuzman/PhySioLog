@@ -39,7 +39,7 @@ Assume the developer values **understanding** and **intentional design**.
 
 ### 3.1 Layer separation (non‑negotiable)
 
-**Routes (HTTP layer)**
+### Routes (HTTP layer)
 
 * Request parsing and validation
 * Parameter normalization
@@ -47,14 +47,14 @@ Assume the developer values **understanding** and **intentional design**.
 * Calling services
 * **No business logic**
 
-**Services (domain logic)**
+### Services (domain logic)
 
 * Pure Python where possible
 * No Flask dependencies
 * Minimal SQLAlchemy awareness
 * Deterministic and unit‑testable
 
-**Models (data layer)**
+### Models (data layer)
 
 * Persistence structure only
 * Light serialization helpers allowed
@@ -248,25 +248,25 @@ When helping, use:
 
 ## 15) Known roadmap context
 
-**Current phase**
+### Current phase
 
 [x] Local development
 [ ] Architecture stabilization
 [ ] Stats + trends synchronization
 
-**Near‑term**
+### Near-term
 
 [ ] Unified window filtering
 [ ] Cleaner API contracts
 [ ] Improved JavaScript state flow
 
-**Medium‑term**
+### Medium-term
 
 [ ] Authentication (Flask‑Login)
 [ ] Multi‑user data
 [ ] Migrations
 
-**Deployment**
+### Deployment
 
 [ ] Docker container
 [ ] Gunicorn
@@ -356,4 +356,3 @@ I will respond with the structure in section 14 and highlight:
 If a decision is fine for now but risky later:
 
 → I will **explicitly call it out** and offer a **low‑cost path** to future‑proof it.
-
