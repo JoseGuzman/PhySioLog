@@ -128,7 +128,7 @@ uv run python scripts/import_data.py data/health_data.csv
 
 You should see:
 
-```
+```bash
 📊 Importing data from data/health_data.csv...
 📋 Found columns: ['Date', 'Weight (kg)', 'Body Fat (%)', ...]
 ✓ Import complete!
@@ -143,7 +143,7 @@ uv run python app.py
 
 You should see:
 
-```
+```bash
 ✓ Database initialized
 
 🏃‍♂️ Health Tracker Starting...
@@ -211,21 +211,62 @@ border: 1px solid #cccccc;  /* Light grey borders */
 
 ## 📁 Project Structure
 
-```
-physiolog/
-├── app.py                  # Main Flask application
-├── pyproject.toml          # Project configuration & dependencies
-├── uv.lock                 # Locked dependency versions
-├── .venv/                  # Virtual environment (auto-created)
-├── templates/
-│   ├── base.html          # Base template with sidebar
-│   ├── overview.html      # Overview page
-│   └── visualizations.html # Charts page
-├── scripts/
-│   └── import_data.py     # Data import script
-├── data/
-│   └── health_data.csv    # Your health data (gitignored)
-└── physiolog.db           # SQLite database (auto-created)
+```bash
+├── LICENSE
+├── README.md
+├── __pycache__
+│   ├── app.cpython-312.pyc
+│   ├── config.cpython-312.pyc
+│   └── wsgi.cpython-39.pyc
+├── app.py
+├── data
+│   └── health_data.csv
+├── docs
+│   ├── AI_CONTEXT.md
+│   ├── API_test.md
+│   ├── API_test.pdf
+│   ├── ChatGPT_instructions.md
+│   └── codex.md
+├── instance
+│   └── physiolog.db
+├── main.py
+├── physiolog
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── config.py
+│   ├── extensions.py
+│   ├── models.py
+│   ├── routes_api.py
+│   ├── routes_web.py
+│   └── services.py
+├── physiolog.egg-info
+│   ├── PKG-INFO
+│   ├── SOURCES.txt
+│   ├── dependency_links.txt
+│   ├── requires.txt
+│   └── top_level.txt
+├── pyproject.toml
+├── scripts
+│   ├── __init__.py
+│   └── import_data.py
+├── static
+│   ├── css
+│   └── js
+├── templates
+│   ├── base.html
+│   ├── coach.html
+│   ├── entry.html
+│   ├── login.html
+│   ├── overview.html
+│   ├── test.html
+│   └── trends.html
+├── tests
+│   ├── __pycache__
+│   └── test_services.py
+├── utils
+│   └── __init__.py
+├── uv.lock
+└── wsgi.py
 ```
 
 ## � Production Deployment
@@ -380,7 +421,7 @@ Your health data stays **local**:
 - Never sent to any server
 - You have complete control
 
-## 🎯 Roadmap
+## 🎯 Deployment Roadmap
 
 - [ ] Docker containerization
 - [ ] AWS deployment (Lightsail/ECS)

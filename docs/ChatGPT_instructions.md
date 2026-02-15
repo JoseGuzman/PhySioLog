@@ -271,7 +271,9 @@ When helping, use:
 [ ] Docker container
 [ ] Gunicorn
 [ ] AWS EC2 or Amazon Elastic Container Service (Amazon ECS)
-[ ] PostgreSQL
+[ ] PostgreSQL support
+[ ] Logging and monitoring setup
+[ ] Mobile-responsive improvements
 
 ---
 
