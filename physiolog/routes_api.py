@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 
 from .extensions import db
 from .models import HealthEntry
-from .services import compute_stats
+from .services import compute_stats, run_smoke_test
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -21,6 +21,15 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 # =========================================================================
 # API Routes
 # =========================================================================
+@api_bp.route("/llm-smoke", methods=["GET"])
+def llm_smoke():
+    try:
+        result = run_smoke_test()
+        return jsonify(result), 200
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
 @api_bp.route("/entries", methods=["GET", "POST"])
 def entries() -> Response | tuple[Response, int]:
     """
