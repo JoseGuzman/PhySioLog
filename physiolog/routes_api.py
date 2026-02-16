@@ -106,7 +106,7 @@ def entries() -> Response | tuple[Response, int]:
     return jsonify([entry.to_dict() for entry in all_entries])
 
 
-@api_bp.route("/stats")
+@api_bp.route("/stats")  # GET only (default when no methods specified)
 def stats() -> Response | tuple[Response, int]:
     """
     Return aggregated statitistics for health entries.

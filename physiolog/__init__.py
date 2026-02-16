@@ -3,6 +3,12 @@ __init__.py
 
 Main Flask Application Factory with Blueprints.
 
+PhySioLog: Health Tracker is a multi-view Flask application that serves as a health tracker.
+It allows users to log daily health metrics such as weight, body fat percentage,
+calories consumed, steps taken, sleep duration, and quality.
+The application provides an API to create new entries and retrieve statistics based on
+the logged data.
+
 Author: Jose Guzman, sjm.guzman<at>gmail.com
 Created: Sun Jan 25 09:23:24 CET 2026
 

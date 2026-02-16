@@ -1,16 +1,57 @@
 # PhySioLog API Testing Guide
 
 This document provides curl commands to test the PhySioLog API endpoints.
+A brief description of the data flow is described bellow:
+
+1. Dropdown Selection (UI Layer)
+   └─> trends.html ```<select id="windowSelect">```
+       (user picks "7d", "30d", etc.)
+
+2. Event Listener (dashboard.js)
+   └─> ```wireWindowSelect()``` detects change on windowSelect
+   └─> Calls onChange callback → ```loadTrendsStats()```
+
+3. API Call (dashboard.js)
+   └─> ```loadTrendsStats()``` reads windowSelect.value
+   └─> calls ```fetchStatsPayload(windowValue)```
+   └─> FETCH → /api/stats?window=7d  ← GET request
+
+4. Backend Route (routes_api.py)
+   └─> ```@api_bp.route("/stats")``` catches GET request
+   └─> Parses window="7d" query param
+   └─> Converts "7d" → 7 days
+   └─> Queries database: HealthEntry.query.filter(date >= today-7days)
+
+5. Business Logic (services.py)
+   └─> compute_stats(entries) processes the filtered entries
+   └─> Calculates: avg_weight, avg_body_fat, avg_calories, etc.
+   └─> Returns dict with aggregated statistics
+
+6. Response (routes_api.py)
+   └─> Returns JSON: { window, window_days, start_date, end_date, stats: {...} }
+
+7. DOM Update (dashboard.js)
+   └─> renderTrendsStats(payload) receives JSON
+   └─> Updates each #stat-* element with formatted values
+   └─> Updates #windowMeta with date range
+
+The blueprint (api_bp in routes_api.py) is registered in __init__.py so all /api/* routes are automatically wired up when the Flask app starts.
+
+The API layer is agnostic to the  frontend and can be tested indepdently using curl or Postman. The JavaScript code in dashboard.js is responsible for calling the API, and routes_api.py doesn't care whether the request comes from a browser, curl, Postman, mobile app, etc and updating the UI based on the responses.
+
+So the flow can be shortened to just:
+
+curl → /api/stats?window=7d → routes_api.py → services.py → JSON response
 
 ## Prerequisites
 
-1. **Start the Flask app:**
+1. __Start the Flask app:__
 
    ```bash
    uv run python app.py
    ```
 
-2. **Ensure you have test data** (optional, but recommended for testing `/api/stats`):
+2. __Ensure you have test data__ (optional, but recommended for testing `/api/stats`):
 
    ```bash
    uv run python scripts/import_data.py data/health_data.csv
@@ -26,13 +67,13 @@ The app runs on `http://localhost:5000` by default.
 
 Retrieve all health entries ordered by date (descending).
 
-**Command:**
+__Command:__
 
 ```bash
 curl http://localhost:5000/api/entries
 ```
 
-**Response (200 OK):**
+__Response (200 OK):__
 
 ```json
 [
@@ -57,7 +98,7 @@ curl http://localhost:5000/api/entries
 
 Create a new health entry.
 
-**Command:**
+__Command:__
 
 ```bash
 curl -X POST http://localhost:5000/api/entries \
@@ -74,7 +115,7 @@ curl -X POST http://localhost:5000/api/entries \
   }'
 ```
 
-**Response (201 Created):**
+__Response (201 Created):__
 
 ```json
 {
@@ -88,10 +129,10 @@ curl -X POST http://localhost:5000/api/entries \
 }
 ```
 
-**Error Cases:**
+__Error Cases:__
 
-- **400 Bad Request:** Missing date, invalid JSON, or invalid date format
-- **409 Conflict:** Entry for the provided date already exists
+- __400 Bad Request:__ Missing date, invalid JSON, or invalid date format
+- __409 Conflict:__ Entry for the provided date already exists
 
 ---
 
@@ -136,7 +177,7 @@ curl "http://localhost:5000/api/stats?days=7"
 curl "http://localhost:5000/api/stats?days=30"
 ```
 
-**Response (200 OK):**
+__Response (200 OK):__
 
 ```json
 {
@@ -155,10 +196,10 @@ curl "http://localhost:5000/api/stats?days=30"
 }
 ```
 
-**Error Cases:**
+__Error Cases:__
 
-- **400 Bad Request:** Invalid window format or non-positive `days` parameter
-- **404 Not Found:** No data available for the requested window
+- __400 Bad Request:__ Invalid window format or non-positive `days` parameter
+- __404 Not Found:__ No data available for the requested window
 
 ---
 
