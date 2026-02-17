@@ -29,9 +29,24 @@ def run_smoke_test() -> dict:
         input="Reply with exactly: OK",
     )
 
+    # usage monitors cost per coach call
+    usage_obj = getattr(response, "usage", None)
+    # Make usage JSON-serializable
+    if usage_obj is None:
+        usage = None
+    elif hasattr(usage_obj, "model_dump"):
+        usage = usage_obj.model_dump()
+    else:
+        usage = {
+            "input_tokens": getattr(usage_obj, "input_tokens", None),
+            "output_tokens": getattr(usage_obj, "output_tokens", None),
+            "total_tokens": getattr(usage_obj, "total_tokens", None),
+        }
+
     return {
         "ok": True,
         "model": "gpt-5.2",
         "output_text": response.output_text,
         "response_id": getattr(response, "id", None),
+        "usage": usage,
     }
