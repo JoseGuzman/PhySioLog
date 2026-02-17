@@ -29,6 +29,7 @@ The `/api/llm-smoke` endpoint is a **lightweight health check** for the OpenAI A
 4. Returns `"ok": true` if the integration is working, `false` otherwise
 
 **Use cases:**
+
 - Verify OpenAI credentials are valid before running heavy operations
 - Debug connection issues with OpenAI service
 - Monitor API availability during deployment/startup
@@ -105,10 +106,12 @@ Here's how a GET request flows through the application:
 ### Why This Structure?
 
 **Separation of Concerns:**
+
 - **routes_api.py** = HTTP handling (request/response, status codes)
 - **services/openai_service.py** = Business logic (what data to fetch, how to process it)
 
 **Benefits:**
+
 - Easy to test services independently (no Flask needed)
 - Reusable across multiple endpoints
 - Easy to swap implementations (e.g., switch OpenAI providers)
