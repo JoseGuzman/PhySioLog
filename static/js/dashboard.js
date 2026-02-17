@@ -1,6 +1,8 @@
 // static/js/dashboard.js
 
-// -----------------------------
+console.log("✏️ dashboard.js loaded");
+
+// ------------------------------ 
 // Small DOM helpers (page-safe)
 // -----------------------------
 function $(id) {
@@ -275,6 +277,126 @@ async function loadLegacyStats() {
 }
 
 // -----------------------------
+// Synchronized zoom/pan - INTERCEPT Plotly.relayout
+// -----------------------------
+let isSyncing = false;
+
+function setupSyncZoom() {
+    console.log("🔗 Setting up sync zoom...");
+
+    if (!window.Plotly) {
+        console.error("Plotly not loaded yet");
+        return;
+    }
+
+    const originalRelayout = window.Plotly.relayout;
+    let relayoutCallCount = 0;
+
+    window.Plotly.relayout = function (div, update, ...args) {
+        relayoutCallCount++;
+        const chartId = typeof div === "string" ? div : div?.id;
+
+        console.log(`[${relayoutCallCount}] 📊 Plotly.relayout on ${chartId}`, update);
+
+        // Call original
+        const result = originalRelayout.call(this, div, update, ...args);
+
+        // Sync if this is one of our charts and we're not already syncing
+        const hasAxisUpdate = !!(
+            update &&
+            (
+                update["xaxis.range"] ||
+                update["yaxis.range"] ||
+                update["xaxis.range[0]"] !== undefined ||
+                update["xaxis.range[1]"] !== undefined ||
+                update["yaxis.range[0]"] !== undefined ||
+                update["yaxis.range[1]"] !== undefined ||
+                update["xaxis.autorange"] !== undefined ||
+                update["yaxis.autorange"] !== undefined
+            )
+        );
+
+        if (!isSyncing && chartId && CHART_IDS.includes(chartId) && hasAxisUpdate) {
+            console.log(`✨ Syncing triggered by ${chartId}`);
+            syncAllCharts(chartId);
+        }
+
+        return result;
+    };
+
+    console.log("✅ Sync setup complete");
+
+    // Also poll layout changes every 500ms as fallback
+    setInterval(() => {
+        if (isSyncing) return;
+
+        CHART_IDS.forEach((chartId) => {
+            const el = $(chartId);
+            if (!el) return;
+
+            // Access layout from Plotly's internal structure
+            const layout = el.layout;
+            if (!layout) return;
+
+            if (!el._lastLayout) {
+                el._lastLayout = JSON.stringify(layout);
+                return;
+            }
+
+            const current = JSON.stringify(layout);
+            if (current !== el._lastLayout) {
+                console.log(`🔍 Layout change detected in ${chartId}`);
+                el._lastLayout = current;
+                syncAllCharts(chartId);
+            }
+        });
+    }, 500);
+}
+
+function syncAllCharts(sourceChartId) {
+    if (isSyncing) {
+        console.log("⏸️  Already syncing, skipping");
+        return;
+    }
+
+    isSyncing = true;
+
+    setTimeout(() => {
+        try {
+            const el = $(sourceChartId);
+            if (!el || !el.layout) {
+                console.log("   No element or layout found");
+                isSyncing = false;
+                return;
+            }
+
+            const layout = el.layout;
+            const xRange = layout.xaxis?.range;
+            const xAutorange = layout.xaxis?.autorange;
+
+            console.log(`🔄 Syncing from ${sourceChartId}:`, { xRange, xAutorange });
+
+            CHART_IDS.forEach((targetId) => {
+                if (targetId === sourceChartId) return;
+
+                console.log(`   → Updating ${targetId}`);
+                const update = { "yaxis.autorange": true };
+                if (Array.isArray(xRange) && xRange.length === 2) {
+                    update["xaxis.range"] = xRange;
+                } else if (xAutorange !== undefined) {
+                    update["xaxis.autorange"] = xAutorange;
+                }
+                Plotly.relayout(targetId, update);
+            });
+        } catch (e) {
+            console.error("Sync error:", e);
+        } finally {
+            isSyncing = false;
+        }
+    }, 50);
+}
+
+// -----------------------------
 // Charts
 // -----------------------------
 async function loadCharts() {
@@ -450,8 +572,11 @@ function wireEntryForm() {
 // Init: clear flow + no unnecessary work
 // -----------------------------
 async function init() {
+    console.log("🚀 Init starting...");
+
     wireEntryForm();
     wireRangeButtons();
+    setupSyncZoom(); // Setup the sync early
 
     // trends-specific controls
     wireWindowSelect(async () => {
