@@ -438,7 +438,7 @@ async function loadCharts() {
                 ...BASE_LAYOUT,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Weight (kg)" },
                 xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
-                hovermode: "x unified",
+                hovermode: "x closest",
             },
             PLOTLY_CONFIG
         );
@@ -465,7 +465,7 @@ async function loadCharts() {
                 ...BASE_LAYOUT,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Body Fat (%)" },
                 xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
-                hovermode: "x unified",
+                hovermode: "x closets",
             },
             PLOTLY_CONFIG
         );
@@ -482,7 +482,6 @@ async function loadCharts() {
                 {
                     x: dates, y: stepsData, name: "Daily Steps", type: "bar",
                     marker: { color: MYCOLORS.steps.bar, line: { width: 0 } },
-                    hovertemplate: "%{x}<br>Steps: %{y}<extra></extra>"
                 },
                 {
                     x: dates, y: stepsMA, name: "7-Day Average", type: "scatter", mode: "lines",
@@ -491,13 +490,21 @@ async function loadCharts() {
             ],
             {
                 ...BASE_LAYOUT,
+                hovermode: "closest", // or "closest"
                 bargap: 0.15,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Steps" },
-                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
+                xaxis: {
+                    ...BASE_LAYOUT.xaxis,
+                    ...makeXAxis(-30),
+                    showspikes: true,
+                    spikemode: "across",
+                    spikesnap: "cursor"
+                },
             },
             PLOTLY_CONFIG
         );
     }
+
 
     // Sleep
     if ($("sleepChart")) {
@@ -510,7 +517,6 @@ async function loadCharts() {
                 {
                     x: dates, y: sleepData, name: "Daily Sleep", type: "bar",
                     marker: { color: MYCOLORS.sleep.bar, line: { width: 0 } },
-                    hovertemplate: "%{x}<br>Sleep: %{y:.1f} h<extra></extra>"
                 },
                 {
                     x: dates, y: sleepMA, name: "7-Day Average", type: "scatter", mode: "lines",
@@ -519,8 +525,14 @@ async function loadCharts() {
             ],
             {
                 ...BASE_LAYOUT,
+                hovermode: "closest",
+                bargap: 0.15,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Sleep (hours)" },
-                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
+                xaxis: {
+                    ...BASE_LAYOUT.xaxis, ...makeXAxis(-30), showspikes: true,
+                    spikemode: "across",
+                    spikesnap: "cursor"
+                },
             },
             PLOTLY_CONFIG
         );

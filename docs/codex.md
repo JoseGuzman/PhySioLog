@@ -1,6 +1,9 @@
+# Codex Instructions 
+
 Work in REVIEW-FIRST mode.
 
 Rules:
+
 1) Do NOT edit or apply changes automatically.
 2) First propose a minimal patch with:
    - File path
