@@ -127,8 +127,8 @@ const BASE_LAYOUT = {
     hovermode: "x unified",
     showlegend: false,
     margin: { t: 20, r: 20, b: 60, l: 60 },
-    xaxis: { gridcolor: "#2e2e2e", zerolinecolor: "#2e2e2e" },
-    yaxis: { gridcolor: "#2e2e2e", zerolinecolor: "#2e2e2e" },
+    xaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e" },
+    yaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e" },
 };
 
 const MYCOLORS = {
@@ -435,8 +435,8 @@ async function loadCharts() {
             ],
             {
                 ...BASE_LAYOUT,
-                yaxis: { title: "Weight (kg)", gridcolor: "#333", tickcolor: "#888", linecolor: "#888" },
-                xaxis: { ...makeXAxis(-30), gridcolor: "#333" },
+                yaxis: { ...BASE_LAYOUT.yaxis, title: "Weight (kg)" },
+                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
                 hovermode: "x unified",
             },
             PLOTLY_CONFIG
@@ -462,8 +462,8 @@ async function loadCharts() {
             ],
             {
                 ...BASE_LAYOUT,
-                yaxis: { title: "Body Fat (%)", tickcolor: "#888", linecolor: "#888", gridcolor: "#333" },
-                xaxis: { ...makeXAxis(-30), gridcolor: "#333" },
+                yaxis: { ...BASE_LAYOUT.yaxis, title: "Body Fat (%)" },
+                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
                 hovermode: "x unified",
             },
             PLOTLY_CONFIG
@@ -491,8 +491,8 @@ async function loadCharts() {
             {
                 ...BASE_LAYOUT,
                 bargap: 0.15,
-                yaxis: { title: "Steps", linecolor: "#888", tickcolor: "#888" },
-                xaxis: { ...makeXAxis(-30), linecolor: "#888", tickcolor: "#888" },
+                yaxis: { ...BASE_LAYOUT.yaxis, title: "Steps" },
+                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
             },
             PLOTLY_CONFIG
         );
@@ -518,8 +518,8 @@ async function loadCharts() {
             ],
             {
                 ...BASE_LAYOUT,
-                yaxis: { title: "Sleep (hours)", linecolor: "#888", tickcolor: "#888" },
-                xaxis: { ...makeXAxis(-30), linecolor: "#888", tickcolor: "#888" },
+                yaxis: { ...BASE_LAYOUT.yaxis, title: "Sleep (hours)" },
+                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
             },
             PLOTLY_CONFIG
         );
