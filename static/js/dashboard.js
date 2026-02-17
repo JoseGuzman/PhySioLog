@@ -127,15 +127,16 @@ const BASE_LAYOUT = {
     hovermode: "x unified",
     showlegend: false,
     margin: { t: 20, r: 20, b: 60, l: 60 },
-    xaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e" },
-    yaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e" },
+    xaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e", layer: "below traces" },
+    yaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e", layer: "below traces" },
 };
 
 const MYCOLORS = {
     weight: { dots: "#2dd4bf", line: "#fb7185" },
     fat: { dots: "#38bdf8", line: "#fb923c" },
-    steps: { main: "#22c55e", line: "#fb7185" },
-    sleep: { main: "#a78bfa", line: "#fb923c" },
+    // Opaque equivalents of 35% alpha over #252525 plot background
+    steps: { main: "#22c55e", bar: "#245d39", line: "#fb7185" },
+    sleep: { main: "#a78bfa", bar: "#534970", line: "#fb923c" },
 };
 
 const CHART_IDS = ["weightChart", "bodyFatChart", "stepsChart", "sleepChart"];
@@ -480,7 +481,7 @@ async function loadCharts() {
             [
                 {
                     x: dates, y: stepsData, name: "Daily Steps", type: "bar",
-                    marker: { color: hexToRgba(MYCOLORS.steps.main, 0.35), line: { width: 0 } },
+                    marker: { color: MYCOLORS.steps.bar, line: { width: 0 } },
                     hovertemplate: "%{x}<br>Steps: %{y}<extra></extra>"
                 },
                 {
@@ -508,7 +509,7 @@ async function loadCharts() {
             [
                 {
                     x: dates, y: sleepData, name: "Daily Sleep", type: "bar",
-                    marker: { color: hexToRgba(MYCOLORS.sleep.main, 0.35), line: { width: 0 } },
+                    marker: { color: MYCOLORS.sleep.bar, line: { width: 0 } },
                     hovertemplate: "%{x}<br>Sleep: %{y:.1f} h<extra></extra>"
                 },
                 {
