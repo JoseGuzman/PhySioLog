@@ -175,7 +175,7 @@ function calculateMovingAverage(data, windowSize = 7) {
 }
 
 function makeXAxis(angle = -45) {
-    return { type: "date", tickangle: angle };
+    return { type: "date", tickangle: angle, dtick: "M1" };
 }
 
 // -----------------------------
