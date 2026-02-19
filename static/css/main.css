@@ -1,5 +1,5 @@
 /* static/css/main.css
-   ChatGPT-ish dark UI: clean sidebar, subtle borders, soft hover, calm typography
+ChatGPT-ish dark UI: clean sidebar, subtle borders, soft hover, calm typography
 */
 
 :root {
@@ -18,8 +18,8 @@
     --hover: #202020;
     --active: #232323;
 
-    --accent: #10a37f;
     /* ChatGPT-ish green */
+    --accent: #10a37f;
     --focus: #10a37f;
 
     --radius: 12px;
@@ -49,7 +49,7 @@ body {
 }
 
 /* =========================
-   Sidebar
+Sidebar
 ========================= */
 
 .sidebar {
@@ -83,9 +83,14 @@ body {
     line-height: 1;
 }
 
+/* this is the green color of the App */
+.sidebar-header .brand .icon {
+    color: var(--accent);
+}
+
 /* =========================
-   Lucide icon normalization (header + menu)
-   Lucide injects an <svg> into <i>. Ensure consistent sizing & baseline.
+Lucide icon normalization (header + menu)
+Lucide injects an <svg> into <i>. Ensure consistent sizing & baseline.
 ========================= */
 
 .sidebar .icon {
@@ -107,7 +112,7 @@ body {
 }
 
 /* =========================
-   Sections & menu items
+Sections & menu items
 ========================= */
 
 .sidebar-section {
@@ -190,7 +195,7 @@ body {
 }
 
 /* =========================
-   Main content
+Main content
 ========================= */
 
 .main-content {
@@ -206,7 +211,7 @@ body {
 }
 
 /* =========================
-   Page header + cards
+Page header + cards
 ========================= */
 
 .page-header {
@@ -260,7 +265,7 @@ body {
 }
 
 /* =========================
-   Charts
+Charts
 ========================= */
 
 .chart {
@@ -278,7 +283,7 @@ body {
 }
 
 /* =========================
-   Forms
+Forms
 ========================= */
 
 .form-section {
@@ -348,7 +353,7 @@ button:hover {
 }
 
 /* =========================
-   Scrollbar
+Scrollbar
 ========================= */
 
 ::-webkit-scrollbar {
@@ -369,7 +374,7 @@ button:hover {
 }
 
 /* =========================
-   Responsive: icon-only sidebar
+Responsive: icon-only sidebar
 ========================= */
 
 @media (max-width: 900px) {
@@ -406,10 +411,8 @@ button:hover {
         bottom: 12px;
     }
 
-    /* =========================
-   AI Coach Chat UI
-========================= */
 
+    /* AI Coach Chat UI */
     .coach-container {
         background: var(--panel);
         border: 1px solid var(--border);
@@ -423,7 +426,6 @@ button:hover {
     }
 
     /* Chat window */
-
     .chat-window {
         flex: 1;
         padding: 18px;
@@ -461,7 +463,6 @@ button:hover {
     }
 
     /* User bubble */
-
     .chat-message.user .bubble {
         background: var(--accent);
         color: #0b0b0b;
@@ -469,7 +470,6 @@ button:hover {
     }
 
     /* Bot bubble */
-
     .chat-message.bot .bubble {
         background: #222;
         color: var(--text);
@@ -478,7 +478,6 @@ button:hover {
     }
 
     /* Input bar */
-
     .chat-input-bar {
         display: flex;
         gap: 10px;

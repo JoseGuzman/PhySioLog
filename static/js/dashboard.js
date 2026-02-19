@@ -490,7 +490,7 @@ async function loadCharts() {
             ],
             {
                 ...BASE_LAYOUT,
-                hovermode: "closest", // or "closest"
+                hovermode: "closest",
                 bargap: 0.15,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Steps" },
                 xaxis: {
@@ -516,7 +516,7 @@ async function loadCharts() {
             [
                 {
                     x: dates, y: sleepData, name: "Daily Sleep", type: "bar",
-                    marker: { color: MYCOLORS.sleep.bar, line: { width: 0 } },
+                    marker: { color: MYCOLORS.sleep.bar, line: { width: 0 } }
                 },
                 {
                     x: dates, y: sleepMA, name: "7-Day Average", type: "scatter", mode: "lines",

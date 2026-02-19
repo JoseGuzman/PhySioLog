@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Health Tracker{% endblock %}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
     <!-- CSS style -->
@@ -18,7 +20,7 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <h2 class="brand">
-                <i data-lucide="activity" class="icon"></i>
+                <i data-lucide="heart" class="icon"></i>
                 PHYSIOLOG
             </h2>
         </div>
