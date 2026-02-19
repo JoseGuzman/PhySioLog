@@ -559,6 +559,7 @@ function wireEntryForm() {
             calories: parseInt($("calories")?.value) || null,
             steps: parseInt($("steps")?.value) || null,
             sleep_total: parseFloat($("sleep")?.value) || null,
+            observations: $("observations")?.value?.trim() || null,
         };
 
         try {

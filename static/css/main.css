@@ -307,6 +307,20 @@ Forms
     margin: 16px 0;
 }
 
+.form-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--border-2) 10%, var(--border-2) 90%, transparent 100%);
+    margin: 6px 0 14px;
+}
+
+.observations-block {
+    background: #141414;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
 label {
     display: block;
     color: var(--muted);
