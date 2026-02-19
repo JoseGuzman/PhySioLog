@@ -57,9 +57,36 @@ function renderTrendsStats(payload) {
     const meta = $("windowMeta");
     if (meta) {
         const { start_date, end_date, window_days } = payload || {};
-        if (start_date && end_date && window_days) {
-            meta.textContent = `${start_date} → ${end_date} (${window_days} days)`;
+        if (start_date && end_date) {
+            let days = window_days;
+            if (!days) {
+                const start = new Date(`${start_date}T00:00:00`);
+                const end = new Date(`${end_date}T00:00:00`);
+                if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+                    days = Math.max(1, Math.round((end - start) / 86400000) + 1);
+                }
+            }
+            meta.textContent = days
+                ? `${start_date} → ${end_date} (${days} days)`
+                : `${start_date} → ${end_date}`;
         } else {
+            const isAllTime = !getSelectedWindowValue();
+            if (isAllTime && Array.isArray(CURRENT_WINDOW_ENTRIES) && CURRENT_WINDOW_ENTRIES.length) {
+                const sorted = [...CURRENT_WINDOW_ENTRIES].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const startDate = sorted[0]?.date;
+                const endDate = sorted[sorted.length - 1]?.date;
+                if (startDate && endDate) {
+                    const start = new Date(`${startDate}T00:00:00`);
+                    const end = new Date(`${endDate}T00:00:00`);
+                    const days = (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()))
+                        ? Math.max(1, Math.round((end - start) / 86400000) + 1)
+                        : null;
+                    meta.textContent = days
+                        ? `${startDate} → ${endDate} (${days} days)`
+                        : `${startDate} → ${endDate}`;
+                    return;
+                }
+            }
             meta.textContent = "All time";
         }
     }
@@ -320,29 +347,42 @@ function filterEntriesByWindow(entries, windowValue) {
     const days = windowValueToDays(windowValue);
     if (!days) return entries;
 
-    const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
-    const latest = sorted.length ? new Date(`${sorted[sorted.length - 1].date}T00:00:00`) : null;
-    if (!latest || Number.isNaN(latest.getTime())) return sorted;
-
-    const start = new Date(latest);
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+    const start = new Date(end);
     start.setDate(start.getDate() - days + 1);
 
-    return sorted.filter((e) => {
+    return entries.filter((e) => {
         const d = new Date(`${e.date}T00:00:00`);
-        return !Number.isNaN(d.getTime()) && d >= start && d <= latest;
+        return !Number.isNaN(d.getTime()) && d >= start && d <= end;
     });
+}
+
+function getWindowXAxisRange(windowValue) {
+    const days = windowValueToDays(windowValue);
+    if (!days) return null;
+
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - days + 1);
+
+    return [
+        start.toISOString().slice(0, 10),
+        end.toISOString().slice(0, 10),
+    ];
 }
 
 async function refreshTrendsWindow() {
     const windowValue = getSelectedWindowValue();
     ACTIVE_X_RANGE = null;
-    await loadTrendsStats(windowValue);
-
     try {
         await loadCharts(windowValue);
     } catch (err) {
         console.error(err);
     }
+
+    await loadTrendsStats(windowValue);
 }
 
 
@@ -362,6 +402,7 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
 
     entries = filterEntriesByWindow(entries, windowValue);
     CURRENT_WINDOW_ENTRIES = entries;
+    const xAxisRange = getWindowXAxisRange(windowValue);
 
     // Sort ascending by date (oldest -> newest)
     entries.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -389,7 +430,11 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
             {
                 ...BASE_LAYOUT,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Weight (kg)" },
-                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
+                xaxis: {
+                    ...BASE_LAYOUT.xaxis,
+                    ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
+                },
                 hovermode: "x closest",
             },
             PLOTLY_CONFIG
@@ -416,7 +461,11 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
             {
                 ...BASE_LAYOUT,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Body Fat (%)" },
-                xaxis: { ...BASE_LAYOUT.xaxis, ...makeXAxis(-30) },
+                xaxis: {
+                    ...BASE_LAYOUT.xaxis,
+                    ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
+                },
                 hovermode: "x closets",
             },
             PLOTLY_CONFIG
@@ -448,6 +497,7 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
                 xaxis: {
                     ...BASE_LAYOUT.xaxis,
                     ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
                     showspikes: false
                 },
             },
@@ -481,6 +531,7 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
                 xaxis: {
                     ...BASE_LAYOUT.xaxis,
                     ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
                     showspikes: false
                 },
             },
