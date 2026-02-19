@@ -6,7 +6,7 @@ Author: Jose Guzman
 Created: Thu Feb  5 09:29:27 CET 2026
 
 Usage:
-  uv run python scripts/import_data.py data/health_data.csv
+>>>  uv run python scripts/import_data.py data/health_data.csv
 """
 
 import sys

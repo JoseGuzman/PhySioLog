@@ -75,13 +75,11 @@ async function fetchStatsPayload(windowValue) {
     return fetchJson(url);
 }
 
-async function loadTrendsStats() {
+async function loadTrendsStats(windowValue = getSelectedWindowValue()) {
     // Only run on trends-like pages
     const statsGrid = $("statsGrid");
     const hasTrendsPanel = !!statsGrid || TRENDS_STAT_FIELDS.some((k) => $(`stat-${k}`));
     if (!hasTrendsPanel) return;
-
-    const windowValue = getSelectedWindowValue();
 
     try {
         const payload = await fetchStatsPayload(windowValue);
@@ -100,6 +98,7 @@ async function loadTrendsStats() {
     }
 }
 
+/* detects change in windowsSelect in trends.html */
 function wireWindowSelect(onChange) {
     const sel = $("windowSelect");
     if (!sel) return;
@@ -149,6 +148,9 @@ const PLOTLY_CONFIG = {
 };
 
 let LATEST_DATE_ISO = null;
+let CURRENT_WINDOW_ENTRIES = [];
+let ACTIVE_X_RANGE = null;
+let IS_SYNCING_ZOOM = false;
 
 // -----------------------------
 // Chart utilities
@@ -181,226 +183,173 @@ function makeXAxis(angle = -45) {
     return { type: "date", tickangle: angle, dtick: "M1" };
 }
 
-// -----------------------------
-// Global range controls (optional)
-// -----------------------------
-function setButtonActive(activeId) {
-    const ids = ["btn30", "btn90", "btnAll"];
-    ids.forEach((id) => {
-        const el = $(id);
-        if (!el) return;
-        el.style.opacity = id === activeId ? "1" : "0.7";
-        el.style.transform = id === activeId ? "translateY(-1px)" : "none";
+function calculateAverages(entries) {
+    const fields = [
+        ["weight", "avg_weight"],
+        ["body_fat", "avg_body_fat"],
+        ["calories", "avg_calories"],
+        ["steps", "avg_steps"],
+        ["sleep_total", "avg_sleep"],
+    ];
+
+    const stats = {};
+    for (const [sourceKey, targetKey] of fields) {
+        const values = entries
+            .map((e) => e?.[sourceKey])
+            .filter((v) => typeof v === "number" && Number.isFinite(v));
+        stats[targetKey] = values.length
+            ? values.reduce((a, b) => a + b, 0) / values.length
+            : null;
+    }
+    return stats;
+}
+
+function filterEntriesByDateRange(entries, xRange) {
+    if (!Array.isArray(xRange) || xRange.length !== 2) return entries;
+    const start = new Date(xRange[0]);
+    const end = new Date(xRange[1]);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return entries;
+
+    return entries.filter((e) => {
+        const d = new Date(`${e.date}T00:00:00`);
+        return !Number.isNaN(d.getTime()) && d >= start && d <= end;
     });
 }
 
-function setGlobalRange(days) {
-    if (!hasAnyElement(CHART_IDS)) return;
-    if (!LATEST_DATE_ISO) return;
+function getRangeFromRelayoutUpdate(update) {
+    if (!update || typeof update !== "object") return null;
 
-    if (days == null) {
-        CHART_IDS.forEach((id) => {
-            if ($(id)) Plotly.relayout(id, { "xaxis.autorange": true });
-        });
-        setButtonActive("btnAll");
+    if (Array.isArray(update["xaxis.range"]) && update["xaxis.range"].length === 2) {
+        return update["xaxis.range"];
+    }
+
+    const r0 = update["xaxis.range[0]"];
+    const r1 = update["xaxis.range[1]"];
+    if (r0 !== undefined && r1 !== undefined) {
+        return [r0, r1];
+    }
+
+    return null;
+}
+
+async function refreshStatsForCurrentView() {
+    if (!ACTIVE_X_RANGE) {
+        await loadTrendsStats(getSelectedWindowValue());
         return;
     }
 
-    const end = new Date(LATEST_DATE_ISO + "T00:00:00");
-    const start = new Date(end);
-    start.setDate(start.getDate() - days);
+    const inRange = filterEntriesByDateRange(CURRENT_WINDOW_ENTRIES, ACTIVE_X_RANGE);
+    if (!inRange.length) {
+        for (const key of TRENDS_STAT_FIELDS) {
+            const el = $(`stat-${key}`);
+            if (el) el.textContent = "--";
+        }
+        const meta = $("windowMeta");
+        if (meta) meta.textContent = "No data in selected zoom range";
+        return;
+    }
 
-    const update = {
-        "xaxis.range": [start.toISOString().slice(0, 10), end.toISOString().slice(0, 10)],
-    };
+    const sorted = [...inRange].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const startDate = sorted[0]?.date ?? null;
+    const endDate = sorted[sorted.length - 1]?.date ?? null;
 
-    CHART_IDS.forEach((id) => {
-        if ($(id)) Plotly.relayout(id, update);
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T00:00:00`);
+    const spanDays = Math.max(1, Math.round((end - start) / 86400000) + 1);
+
+    renderTrendsStats({
+        stats: calculateAverages(inRange),
+        start_date: startDate,
+        end_date: endDate,
+        window_days: spanDays,
     });
-
-    setButtonActive(days === 30 ? "btn30" : "btn90");
 }
 
-function wireRangeButtons() {
-    const btn30 = $("btn30");
-    const btn90 = $("btn90");
-    const btnAll = $("btnAll");
+function wireChartZoomSync() {
+    for (const chartId of CHART_IDS) {
+        const el = $(chartId);
+        if (!el || typeof el.on !== "function" || el.__zoomSyncBound) continue;
 
-    if (btn30) btn30.addEventListener("click", () => setGlobalRange(30));
-    if (btn90) btn90.addEventListener("click", () => setGlobalRange(90));
-    if (btnAll) btnAll.addEventListener("click", () => setGlobalRange(null));
+        el.on("plotly_relayout", async (update) => {
+            if (IS_SYNCING_ZOOM) return;
+
+            const resetRequested = update?.["xaxis.autorange"] === true;
+            const nextRange = getRangeFromRelayoutUpdate(update);
+            if (!resetRequested && !nextRange) return;
+
+            ACTIVE_X_RANGE = resetRequested ? null : nextRange;
+
+            IS_SYNCING_ZOOM = true;
+            try {
+                for (const targetId of CHART_IDS) {
+                    if (targetId === chartId || !$(targetId)) continue;
+                    if (ACTIVE_X_RANGE) {
+                        await Plotly.relayout(targetId, { "xaxis.range": ACTIVE_X_RANGE });
+                    } else {
+                        await Plotly.relayout(targetId, { "xaxis.autorange": true });
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                IS_SYNCING_ZOOM = false;
+            }
+
+            await refreshStatsForCurrentView();
+        });
+
+        el.__zoomSyncBound = true;
+    }
 }
 
-// -----------------------------
-// Legacy stats (overview.html - #stats)
-// -----------------------------
-function renderLegacyStats(stats) {
-    const statsEl = $("stats");
-    if (!statsEl) return;
+function windowValueToDays(windowValue) {
+    if (!windowValue) return null;
+    const m = String(windowValue).trim().toLowerCase().match(/^(\d+)([dmy])$/);
+    if (!m) return null;
 
-    const s = stats || {};
-    statsEl.innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Avg Weight</div>
-      <div class="stat-value">${s.avg_weight ?? "--"} kg</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg Body Fat</div>
-      <div class="stat-value">${s.avg_body_fat ?? "--"}%</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg Calories</div>
-      <div class="stat-value">${s.avg_calories ?? "--"}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg Steps</div>
-      <div class="stat-value">${s.avg_steps ?? "--"}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Entries</div>
-      <div class="stat-value">${s.total_entries ?? "--"}</div>
-    </div>
-  `;
+    const amount = parseInt(m[1], 10);
+    const unit = m[2];
+    if (!Number.isFinite(amount) || amount <= 0) return null;
+    if (unit === "d") return amount;
+    if (unit === "m") return amount * 30;
+    if (unit === "y") return amount * 365;
+    return null;
 }
 
-async function loadLegacyStats() {
-    const statsEl = $("stats");
-    if (!statsEl) return;
+function filterEntriesByWindow(entries, windowValue) {
+    const days = windowValueToDays(windowValue);
+    if (!days) return entries;
+
+    const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const latest = sorted.length ? new Date(`${sorted[sorted.length - 1].date}T00:00:00`) : null;
+    if (!latest || Number.isNaN(latest.getTime())) return sorted;
+
+    const start = new Date(latest);
+    start.setDate(start.getDate() - days + 1);
+
+    return sorted.filter((e) => {
+        const d = new Date(`${e.date}T00:00:00`);
+        return !Number.isNaN(d.getTime()) && d >= start && d <= latest;
+    });
+}
+
+async function refreshTrendsWindow() {
+    const windowValue = getSelectedWindowValue();
+    ACTIVE_X_RANGE = null;
+    await loadTrendsStats(windowValue);
 
     try {
-        const payload = await fetchJson("/api/stats");
-        const stats = payload.stats ?? payload; // support both shapes
-        renderLegacyStats(stats);
+        await loadCharts(windowValue);
     } catch (err) {
         console.error(err);
-        renderLegacyStats(null);
     }
 }
 
-// -----------------------------
-// Synchronized zoom/pan - INTERCEPT Plotly.relayout
-// -----------------------------
-let isSyncing = false;
-
-function setupSyncZoom() {
-    console.log("🔗 Setting up sync zoom...");
-
-    if (!window.Plotly) {
-        console.error("Plotly not loaded yet");
-        return;
-    }
-
-    const originalRelayout = window.Plotly.relayout;
-    let relayoutCallCount = 0;
-
-    window.Plotly.relayout = function (div, update, ...args) {
-        relayoutCallCount++;
-        const chartId = typeof div === "string" ? div : div?.id;
-
-        console.log(`[${relayoutCallCount}] 📊 Plotly.relayout on ${chartId}`, update);
-
-        // Call original
-        const result = originalRelayout.call(this, div, update, ...args);
-
-        // Sync if this is one of our charts and we're not already syncing
-        const hasAxisUpdate = !!(
-            update &&
-            (
-                update["xaxis.range"] ||
-                update["yaxis.range"] ||
-                update["xaxis.range[0]"] !== undefined ||
-                update["xaxis.range[1]"] !== undefined ||
-                update["yaxis.range[0]"] !== undefined ||
-                update["yaxis.range[1]"] !== undefined ||
-                update["xaxis.autorange"] !== undefined ||
-                update["yaxis.autorange"] !== undefined
-            )
-        );
-
-        if (!isSyncing && chartId && CHART_IDS.includes(chartId) && hasAxisUpdate) {
-            console.log(`✨ Syncing triggered by ${chartId}`);
-            syncAllCharts(chartId);
-        }
-
-        return result;
-    };
-
-    console.log("✅ Sync setup complete");
-
-    // Also poll layout changes every 500ms as fallback
-    setInterval(() => {
-        if (isSyncing) return;
-
-        CHART_IDS.forEach((chartId) => {
-            const el = $(chartId);
-            if (!el) return;
-
-            // Access layout from Plotly's internal structure
-            const layout = el.layout;
-            if (!layout) return;
-
-            if (!el._lastLayout) {
-                el._lastLayout = JSON.stringify(layout);
-                return;
-            }
-
-            const current = JSON.stringify(layout);
-            if (current !== el._lastLayout) {
-                console.log(`🔍 Layout change detected in ${chartId}`);
-                el._lastLayout = current;
-                syncAllCharts(chartId);
-            }
-        });
-    }, 500);
-}
-
-function syncAllCharts(sourceChartId) {
-    if (isSyncing) {
-        console.log("⏸️  Already syncing, skipping");
-        return;
-    }
-
-    isSyncing = true;
-
-    setTimeout(() => {
-        try {
-            const el = $(sourceChartId);
-            if (!el || !el.layout) {
-                console.log("   No element or layout found");
-                isSyncing = false;
-                return;
-            }
-
-            const layout = el.layout;
-            const xRange = layout.xaxis?.range;
-            const xAutorange = layout.xaxis?.autorange;
-
-            console.log(`🔄 Syncing from ${sourceChartId}:`, { xRange, xAutorange });
-
-            CHART_IDS.forEach((targetId) => {
-                if (targetId === sourceChartId) return;
-
-                console.log(`   → Updating ${targetId}`);
-                const update = { "yaxis.autorange": true };
-                if (Array.isArray(xRange) && xRange.length === 2) {
-                    update["xaxis.range"] = xRange;
-                } else if (xAutorange !== undefined) {
-                    update["xaxis.autorange"] = xAutorange;
-                }
-                Plotly.relayout(targetId, update);
-            });
-        } catch (e) {
-            console.error("Sync error:", e);
-        } finally {
-            isSyncing = false;
-        }
-    }, 50);
-}
 
 // -----------------------------
-// Charts
+// Loading Charts with custom windows
 // -----------------------------
-async function loadCharts() {
+async function loadCharts(windowValue = getSelectedWindowValue()) {
     if (!hasAnyElement(CHART_IDS)) return;
 
     let entries;
@@ -410,6 +359,9 @@ async function loadCharts() {
         console.error(err);
         return;
     }
+
+    entries = filterEntriesByWindow(entries, windowValue);
+    CURRENT_WINDOW_ENTRIES = entries;
 
     // Sort ascending by date (oldest -> newest)
     entries.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -496,9 +448,7 @@ async function loadCharts() {
                 xaxis: {
                     ...BASE_LAYOUT.xaxis,
                     ...makeXAxis(-30),
-                    showspikes: true,
-                    spikemode: "across",
-                    spikesnap: "cursor"
+                    showspikes: false
                 },
             },
             PLOTLY_CONFIG
@@ -529,14 +479,16 @@ async function loadCharts() {
                 bargap: 0.15,
                 yaxis: { ...BASE_LAYOUT.yaxis, title: "Sleep (hours)" },
                 xaxis: {
-                    ...BASE_LAYOUT.xaxis, ...makeXAxis(-30), showspikes: true,
-                    spikemode: "across",
-                    spikesnap: "cursor"
+                    ...BASE_LAYOUT.xaxis,
+                    ...makeXAxis(-30),
+                    showspikes: false
                 },
             },
             PLOTLY_CONFIG
         );
     }
+
+    wireChartZoomSync();
 }
 
 // -----------------------------
@@ -569,11 +521,8 @@ function wireEntryForm() {
             form.reset();
 
             // Reload only what exists on the page
-            await loadLegacyStats();
-            await loadTrendsStats();
-            await loadCharts();
+            await refreshTrendsWindow();
 
-            if ($("btn90")) setGlobalRange(90);
         } catch (err) {
             console.error(err);
             alert("Error adding entry");
@@ -588,22 +537,16 @@ async function init() {
     console.log("🚀 Init starting...");
 
     wireEntryForm();
-    wireRangeButtons();
-    setupSyncZoom(); // Setup the sync early
 
     // trends-specific controls
     wireWindowSelect(async () => {
-        await loadTrendsStats();
+        await refreshTrendsWindow();
         // (Optional later) also filter charts by window
     });
 
     // Load only what the page can show
-    await loadLegacyStats();  // only if #stats exists
-    await loadTrendsStats();  // only if trends stats exist
-    await loadCharts();       // only if any chart exists
+    await refreshTrendsWindow();
 
-    // Default view if buttons exist
-    if ($("btn90")) setGlobalRange(90);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -1,4 +1,4 @@
-# Codex Instructions 
+# Codex Instructions
 
 Work in REVIEW-FIRST mode.
 
