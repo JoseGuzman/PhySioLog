@@ -185,10 +185,20 @@ def stats() -> Response | tuple[Response, int]:
     if not entries:
         return jsonify({"error": "No data available"}), 404
 
+    # For all-time, expose an actual date span so the UI can show day count.
+    if days is None:
+        latest_entry_date = entries[0].date
+        oldest_entry_date = entries[-1].date
+        start_date = oldest_entry_date
+        end_date = latest_entry_date
+        window_days = (end_date - start_date).days + 1
+    else:
+        window_days = days
+
     return jsonify(
         {
             "window": window or "all",
-            "window_days": days,
+            "window_days": window_days,
             "start_date": start_date.isoformat() if start_date else None,
             "end_date": end_date.isoformat(),
             "stats": compute_stats(entries),

@@ -1,7 +1,7 @@
 # PhySioLog API Testing Guide
 
 This document provides curl commands to test the PhySioLog API endpoints.
-A brief description of the data flow is described bellow:
+A brief description of the current data flow is described below:
 
 1. Dropdown Selection (UI Layer)
    └─> trends.html ```<select id="windowSelect">```
@@ -9,12 +9,14 @@ A brief description of the data flow is described bellow:
 
 2. Event Listener (dashboard.js)
    └─> ```wireWindowSelect()``` detects change on windowSelect
-   └─> Calls onChange callback → ```loadTrendsStats()```
+   └─> Calls onChange callback → ```refreshTrendsWindow()```
 
-3. API Call (dashboard.js)
-   └─> ```loadTrendsStats()``` reads windowSelect.value
+3. API Calls + UI Refresh (dashboard.js)
+   └─> ```refreshTrendsWindow()``` reads windowSelect.value
    └─> calls ```fetchStatsPayload(windowValue)```
    └─> FETCH → /api/stats?window=7d  ← GET request
+   └─> calls ```loadCharts(windowValue)```
+   └─> FETCH → /api/entries (frontend then filters by selected window for plots)
 
 4. Backend Route (routes_api.py)
    └─> ```@api_bp.route("/stats")``` catches GET request
@@ -37,7 +39,7 @@ A brief description of the data flow is described bellow:
 
 The blueprint (api_bp in routes_api.py) is registered in __init__.py so all /api/* routes are automatically wired up when the Flask app starts.
 
-The API layer is agnostic to the  frontend and can be tested indepdently using curl or Postman. The JavaScript code in dashboard.js is responsible for calling the API, and routes_api.py doesn't care whether the request comes from a browser, curl, Postman, mobile app, etc and updating the UI based on the responses.
+The API layer is agnostic to the frontend and can be tested independently using curl or Postman. The JavaScript code in dashboard.js is responsible for calling the API, and routes_api.py doesn't care whether the request comes from a browser, curl, Postman, mobile app, etc.
 
 So the flow can be shortened to just:
 
@@ -195,6 +197,14 @@ __Response (200 OK):__
   }
 }
 ```
+
+__All-time response note:__
+
+For `GET /api/stats` without `window`/`days`, the response now includes:
+
+- `start_date`: oldest entry date in the dataset
+- `end_date`: latest entry date in the dataset
+- `window_days`: inclusive day span between `start_date` and `end_date`
 
 __Error Cases:__
 
