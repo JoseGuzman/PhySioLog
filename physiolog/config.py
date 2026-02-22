@@ -26,20 +26,15 @@ BASEDIR = Path(__file__).resolve().parent
 # Load .env file from project root (above physiolog/ folder)
 load_dotenv(BASEDIR / ".env")
 
-# Set SQLALCHEMY_DATABASE_URI from environment variable to absolute path
-default_db_path = BASEDIR.parent / "instance" / "physiolog.db"
-SQLALCHEMY_DATABASE_URI = environ.get(
-    "SQLALCHEMY_DATABASE_URI", f"sqlite:///{default_db_path}"
-)
-
 
 class Config:
     """Base configuration (shared by all environments)."""
 
     SECRET_KEY = environ.get("SECRET_KEY", "dev-fallback-key")
-
+    # Set SQLALCHEMY_DATABASE_URI from environment variable to absolute path
+    default_db_path = BASEDIR.parent / "instance" / "physiolog.db"
     SQLALCHEMY_DATABASE_URI = environ.get(
-        "SQLALCHEMY_DATABASE_URI", "sqlite:///physiolog.db"
+        "SQLALCHEMY_DATABASE_URI", f"sqlite:///{default_db_path}"
     )
 
     AUTO_CREATE_DB = environ.get("AUTO_CREATE_DB", "True").lower() == "true"
