@@ -1,3 +1,9 @@
+"""
 # physiolog/services/__init__.py
-from .openai_services import run_smoke_test
+
+Serves as the entry point for the services package in the PhysioLog project. 
+It imports and exposes service functions to use within the application.
+"""
+
+from .openai import run_smoke_test
 from .stats import compute_stats

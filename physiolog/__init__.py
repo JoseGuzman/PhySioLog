@@ -16,18 +16,18 @@ Usage:
 ------
 Shell context (only available in development):
 (see here: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database)
-Typing flask shell will permit access to the app and database:
->>> flask shell
->>> Python 3.9.16 (main, Dec  7 2022, 10:15:43)
-[Clang 14.0.0 (clang-1400.0.29.202)] on darwin
-App: organostation
-Instance: /Users/joseguzman/git/og/instance
+Typing flask shell will permit access to the app and database. Note that
+we need a .flaskenv file with FLASK_ENV=physiology:create_app:
+>>> uv run flask shell
+Python 3.12.12 (main, Jan 27 2026, 23:31:45) [Clang 21.1.4 ] on darwin
+App: physiolog
+Instance: /path/to/repo/instance
 >>> app
->>> <Flask 'organostation'>
+>>> <Flask 'physiolog'>
 >>> db
->>> <SQLAlchemy sqlite:////Users/joseguzman/git/og/instance/organostation_users.db>
+>>> <SQLAlchemy sqlite:////path/to/repo/instance/physiolog_users.db>
 >>> User
->>> User <class 'organostation.models.User'>
+>>> User <class 'physiolog.models.User'>
 >>> myuser = User.query.filter_by(username='jose').first()
 >>> myuser = User.query.filter(User.email == 'jose.guzman@example.com').first()
 >>> db.session.commit()

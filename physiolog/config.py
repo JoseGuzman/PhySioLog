@@ -23,8 +23,8 @@ from dotenv import load_dotenv
 BASEDIR = Path(__file__).resolve().parent
 
 
-# Load .env file from project root
-load_dotenv(BASEDIR / ".env")
+# Load .env file from project root (above physiolog/ folder)
+load_dotenv(BASEDIR.parent / ".env")
 
 
 class Config:

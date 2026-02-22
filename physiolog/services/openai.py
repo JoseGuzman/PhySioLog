@@ -1,5 +1,5 @@
 """
-openai_services.py
+openai.py
 
 Service functions to verify OpenAI API connectivity from the backend.
 No Flask dependencies here (service-layer friendly).
@@ -21,6 +21,7 @@ def run_smoke_test() -> dict:
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not set")
 
+    api_suffix = api_key[-4:] if api_key else None
     client = OpenAI(api_key=api_key)
 
     # Responses API (recommended for new integrations)
@@ -49,4 +50,5 @@ def run_smoke_test() -> dict:
         "output_text": response.output_text,
         "response_id": getattr(response, "id", None),
         "usage": usage,
+        "API": api_suffix,
     }
