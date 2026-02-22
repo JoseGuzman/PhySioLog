@@ -24,7 +24,13 @@ BASEDIR = Path(__file__).resolve().parent
 
 
 # Load .env file from project root (above physiolog/ folder)
-load_dotenv(BASEDIR.parent / ".env")
+load_dotenv(BASEDIR / ".env")
+
+# Set SQLALCHEMY_DATABASE_URI from environment variable to absolute path
+default_db_path = BASEDIR.parent / "instance" / "physiolog.db"
+SQLALCHEMY_DATABASE_URI = environ.get(
+    "SQLALCHEMY_DATABASE_URI", f"sqlite:///{default_db_path}"
+)
 
 
 class Config:
