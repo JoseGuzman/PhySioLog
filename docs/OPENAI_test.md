@@ -1,5 +1,8 @@
 # OpenAI Integration Testing
 
+This file contains relevant information to test/execute the OpenAI
+integration in Physiolog
+
 ## Smoke Test Endpoint
 
 ### Basic Command
@@ -7,6 +10,8 @@
 ```bash
 curl -s http://localhost:5000/api/llm-smoke | python -m json.tool
 ```
+
+The python -m json.tool validates it's JSON and prints formatted version.
 
 ### Response Example
 

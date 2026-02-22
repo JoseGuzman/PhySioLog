@@ -1,4 +1,4 @@
-# Codex Instructions
+# Agent Instructions
 
 Work in REVIEW-FIRST mode.
 
@@ -14,4 +14,7 @@ Rules:
 5) No refactors unless I ask. Preserve architecture and naming.
 6) If you need context, ask me to open specific files rather than guessing.
 
-Use docs/AI_CONTEXT.md as the project contract. Follow it strictly.
+Follow it strictly.
+
+    - Use docs/AI_CONTEXT.md as the project contract. 
+    - Use docs/AI_INSTRUCTIONS.md as the repository's agent instructions

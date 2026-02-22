@@ -1,6 +1,6 @@
 # PhysioLog — Project Instructions (Principal Engineer Mode)
 
-> **Purpose:** These instructions define how we collaborate in this ChatGPT project while you build PhysioLog (Flask + Plotly dashboard) locally first, then deploy to AWS in Docker.
+> **Purpose:** These instructions define how we collaborate to build PhysioLog (Flask + Plotly dashboard) locally first, then deploy to AWS in Docker.
 
 ---
 
@@ -94,7 +94,7 @@ Prefer:
 * Flask Application Factory
 * Blueprints: `web_bp`, `api_bp`
 * SQLAlchemy extension pattern
-* Services layer for statistics (`compute_stats`)
+* Services layer for statistics (`stats`)
 * `.env` configuration loading
 
 ### Frontend
@@ -153,7 +153,7 @@ Even if usage is small now:
 
 Current good example:
 
-* `compute_stats` accepts an iterable → future‑proof for query streaming
+* `stats` accepts an iterable → future‑proof for query streaming
 
 ---
 
@@ -251,8 +251,10 @@ When helping, use:
 ### Current phase
 
 [x] Local development
+[x] Stats + trends synchronization
+[ ] Metabolism service and form validation
+[ ] Basic database handling (e.g., edit entries)
 [ ] Architecture stabilization
-[ ] Stats + trends synchronization
 
 ### Near-term
 
