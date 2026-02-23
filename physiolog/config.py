@@ -21,10 +21,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 BASEDIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASEDIR.parent
 
 
 # Load .env file from project root (above physiolog/ folder)
-load_dotenv(BASEDIR / ".env")
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 class Config:
@@ -32,7 +33,7 @@ class Config:
 
     SECRET_KEY = environ.get("SECRET_KEY", "dev-fallback-key")
     # Set SQLALCHEMY_DATABASE_URI from environment variable to absolute path
-    default_db_path = BASEDIR.parent / "instance" / "physiolog.db"
+    default_db_path = PROJECT_ROOT / "instance" / "physiolog.db"
     SQLALCHEMY_DATABASE_URI = environ.get(
         "SQLALCHEMY_DATABASE_URI", f"sqlite:///{default_db_path}"
     )

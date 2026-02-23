@@ -10,17 +10,28 @@ integration in Physiolog
 ```bash
 curl -s http://localhost:5000/api/llm-smoke | python -m json.tool
 ```
-
 The python -m json.tool validates it's JSON and prints formatted version.
 
 ### Response Example
 
 ```json
 {
+    "API": "b7YA",
     "model": "gpt-5.2",
     "ok": true,
     "output_text": "OK",
-    "response_id": "resp_03c3d41a6a69bfc4006993282742608190850df71ae11f489f"
+    "response_id": "resp_04606bcd69a35e1500699af22be524819ca90eee8c758cee51",
+    "usage": {
+        "input_tokens": 11,
+        "input_tokens_details": {
+            "cached_tokens": 0
+        },
+        "output_tokens": 5,
+        "output_tokens_details": {
+            "reasoning_tokens": 0
+        },
+        "total_tokens": 16
+    }
 }
 ```
 
