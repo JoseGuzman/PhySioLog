@@ -12,10 +12,37 @@ from openai import OpenAI
 
 def run_smoke_test() -> dict:
     """
-    test function to verify OpenAI API connectivity from the backend
+        test function to verify OpenAI API connectivity from the backend
 
-    Returns:
-        dict: _description_
+        Returns:
+            dict: _description_
+
+        Example:
+
+        ```bash
+        curl -s http://localhost:5000/api/llm-smoke | python -m json.tool
+        ```
+        Response Example:
+        ```json
+        {
+        "API": "b7YA",
+        "model": "gpt-5.2",
+        "ok": true,
+        "output_text": "OK",
+        "response_id": "resp_04606bcd69a35e1500699af22be524819ca90eee8c758cee51",
+        "usage": {
+            "input_tokens": 11,
+            "input_tokens_details": {
+                "cached_tokens": 0
+            },
+            "output_tokens": 5,
+            "output_tokens_details": {
+                "reasoning_tokens": 0
+            },
+            "total_tokens": 16
+        }
+    }```
+
     """
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:

@@ -147,11 +147,11 @@
                 <div class="full">
                     <label>Activity</label>
                     <select id="activity">
-                        <option value="1.2">Sedentary (0–1 days/week)</option>
-                        <option value="1.375">Light (2–3 days/week)</option>
-                        <option value="1.55">Moderate (3–5 days/week)</option>
-                        <option value="1.7" selected>High (6–7 days/week)</option>
-                        <option value="1.9">Very high (2x/day)</option>
+                        <option value="1.2">Sedentary (0–1 days/week): 1.2</option>
+                        <option value="1.375">Light (2–3 days/week): 1. 375</option>
+                        <option value="1.55">Moderate (3–5 days/week): 1.55</option>
+                        <option value="1.7" selected>High (6–7 days/wee): 1.7 </option>
+                        <option value="1.9">Very high (2x/day): 1.9</option>
                     </select>
                 </div>
 
@@ -171,7 +171,7 @@
 
             <div class="result-row">
                 <div class="result-label">Basal Metabolic Rate (BMR)</div>
-                <div class="result-value result-big"><span id="bmrOut">—</span> kcal/day</div>
+                <div class="result-value result-big"><span id="bmrOut">—</span> kcal</div>
             </div>
 
             <div class="result-row">
@@ -182,12 +182,7 @@
                         <span>max: <span id="tdeeMaxOut">—</span></span>
                     </div>
                 </div>
-                <div class="result-value result-big"><span id="tdeeOut">—</span> kcal/day</div>
-            </div>
-
-            <div class="result-row">
-                <div class="result-label">Activity factor</div>
-                <div class="result-value"><span id="activityOut">—</span></div>
+                <div class="result-value result-big"><span id="tdeeOut">—</span> kcal</div>
             </div>
 
         </div>
@@ -204,11 +199,19 @@
                         <span>max: <span id="cutMaxOut">—</span></span>
                     </div>
                 </div>
-                <div class="result-value result-big"><span id="cutCaloriesOut">—</span> kcal/day</div>
+                <div class="result-value result-big"><span id="cutCaloriesOut">—</span> kcal</div>
             </div>
 
             <div class="result-row">
-                <div class="result-label">Protein (g/day)</div>
+                <div class="result-label">
+                    Protein (per day)
+                    <div class="minmax">
+                        <span>min: <span id="cutProteinMinOut">—</span></span>
+                        <span>max: <span id="cutProteinMaxOut">—</span></span>
+                    </div>
+                </div>
+
+
                 <div class="result-value result-big"><span id="cutProteinOut">—</span> g</div>
             </div>
         </div>
@@ -219,17 +222,23 @@
 
             <div class="result-row">
                 <div class="result-label">
-                    Calories (surplus)
+                    Calories (surplus per day)
                     <div class="minmax">
                         <span>min: <span id="bulkMinOut">—</span></span>
                         <span>max: <span id="bulkMaxOut">—</span></span>
                     </div>
                 </div>
-                <div class="result-value result-big"><span id="bulkCaloriesOut">—</span> kcal/day</div>
+                <div class="result-value result-big"><span id="bulkCaloriesOut">—</span> kcal</div>
             </div>
 
             <div class="result-row">
-                <div class="result-label">Protein (g/day)</div>
+                <div class="result-label">
+                    Protein (per day)
+                    <div class="minmax">
+                        <span>min: <span id="bulkProteinMinOut">—</span></span>
+                        <span>max: <span id="bulkProteinMaxOut">—</span></span>
+                    </div>
+                </div>
                 <div class="result-value result-big"><span id="bulkProteinOut">—</span> g</div>
             </div>
         </div>
@@ -240,14 +249,14 @@
 
 {% block scripts %}
 <script>
-    // Dummy placeholders for now.
-    // When you give me the formulas, we’ll replace this with real calculations.
-
     function setText(id, val) {
         const el = document.getElementById(id);
         if (el) el.textContent = val;
     }
 
+    /* Basal Metabolic Rate (BMR) 
+    Harris-Benedict Equation
+    */
     function calculateBMR(weight, height, age, gender) {
         if (gender === 'male') {
             return (10 * weight) + (6.25 * height) - (5 * age) + 5;
@@ -262,11 +271,12 @@
 
     function recalc() {
 
+        // for MBR calculation 
         const age = parseFloat(document.getElementById('age').value);
         const height = parseFloat(document.getElementById('height').value);
         const weight = parseFloat(document.getElementById('tdeeWeight').value);
-
         const gender = document.getElementById('gender').value;
+        // for TDEE calculation 
         const activity = parseFloat(document.getElementById('activity').value);
 
         if (!age || !height || !weight) return;
@@ -274,7 +284,7 @@
         // ---- BMR ----
         const bmr = calculateBMR(weight, height, age, gender);
 
-        // ---- TDEE ----
+        // Total Daily Energy Expenditure is BMR * activity
         const tdee = bmr * activity;
 
         // ---- Display ----
@@ -290,16 +300,25 @@
         setText('tdeeMinOut', round(min));
         setText('tdeeMaxOut', round(max));
 
-        // TEMP placeholders (next step)
-        setText('cutCaloriesOut', '—');
-        setText('cutMinOut', '—');
-        setText('cutMaxOut', '—');
-        setText('cutProteinOut', '—');
+        // Weight Loss suggestions
+        // −10–15 % TDEE
+        // Protein 2.0 – 2.4 g/kg per day
+        setText('cutCaloriesOut', round(tdee * 0.875));
+        setText('cutMinOut', round(tdee * 0.85));
+        setText('cutMaxOut', round(tdee * 0.90));
+        setText('cutProteinOut', round(weight * 2.2));
+        setText('cutProteinMinOut', round(weight * 2.0));
+        setText('cutProteinMaxOut', round(weight * 2.4));
 
-        setText('bulkCaloriesOut', '—');
-        setText('bulkMinOut', '—');
-        setText('bulkMaxOut', '—');
-        setText('bulkProteinOut', '—');
+        // Lean Bulk
+        // +5–10 % over TDEE
+        // Protein 1.6 – 2.2 g/kg per day
+        setText('bulkCaloriesOut', round(tdee * 1.075));
+        setText('bulkMinOut', round(tdee * 1.05));
+        setText('bulkMaxOut', round(tdee * 1.10));
+        setText('bulkProteinOut', round(weight * 2.0));
+        setText('bulkProteinMinOut', round(weight * 1.6));
+        setText('bulkProteinMaxOut', round(weight * 2.2));
     }
 
     // listeners

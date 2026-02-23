@@ -252,7 +252,7 @@ When helping, use:
 
 [x] Local development
 [x] Stats + trends synchronization
-[ ] Metabolism service and form validation (range value calculations)
+[ ] Metabolism range value calculations based on normal distribution)
 [ ] Basic database handling (e.g., edit entries)
 [ ] Architecture stabilization
 
