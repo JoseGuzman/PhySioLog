@@ -161,11 +161,13 @@ const MYCOLORS = {
     weight: { dots: "#2dd4bf", line: "#fb7185" },
     fat: { dots: "#38bdf8", line: "#fb923c" },
     // Opaque equivalents of 35% alpha over #252525 plot background
-    steps: { main: "#22c55e", bar: "#245d39", line: "#fb7185" },
-    sleep: { main: "#a78bfa", bar: "#534970", line: "#fb923c" },
+    steps: { bar: "#245d39", line: "#fb7185" },
+    sleep: { bar: "#534970", line: "#fb923c" },
+    calories: { bar: "#475569", line: "#f59e0b" },
+    training: { line: "#38bdf8", dots: "#f97316" },
 };
 
-const CHART_IDS = ["weightChart", "bodyFatChart", "stepsChart", "sleepChart"];
+const CHART_IDS = ["weightChart", "bodyFatChart", "stepsChart", "sleepChart", "caloriesChart", "trainingVolumeChart"];
 
 const PLOTLY_CONFIG = {
     responsive: true,
@@ -539,6 +541,70 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
         );
     }
 
+    // Calories
+    if ($("caloriesChart")) {
+        const caloriesData = entries.map((e) => e.calories);
+        const caloriesMA = calculateMovingAverage(caloriesData, 7);
+
+        Plotly.react(
+            "caloriesChart",
+            [
+                {
+                    x: dates, y: caloriesData, name: "Daily Calories", type: "bar",
+                    marker: { color: MYCOLORS.calories.bar, line: { width: 0 } }
+                },
+                {
+                    x: dates, y: caloriesMA, name: "7-Day Average", type: "scatter", mode: "lines",
+                    line: { width: 2, color: MYCOLORS.calories.line }
+                },
+            ],
+            {
+                ...BASE_LAYOUT,
+                hovermode: "closest",
+                bargap: 0.15,
+                yaxis: { ...BASE_LAYOUT.yaxis, title: "Calories (kcal)" },
+                xaxis: {
+                    ...BASE_LAYOUT.xaxis,
+                    ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
+                    showspikes: false
+                },
+            },
+            PLOTLY_CONFIG
+        );
+    }
+
+    // Training volume (dot plot)
+    if ($("trainingVolumeChart")) {
+        const tvData = entries.map((e) => e.training_volume);
+        const tvMA = calculateMovingAverage(tvData, 7);
+
+        Plotly.react(
+            "trainingVolumeChart",
+            [
+                {
+                    x: dates, y: tvData, name: "Training Volume", type: "scatter", mode: "markers",
+                    marker: { opacity: 0.6, line: { width: 0 }, color: MYCOLORS.training.dots }
+                },
+                {
+                    x: dates, y: tvMA, name: "7-Day Average", type: "scatter", mode: "lines",
+                    line: { width: 2, color: MYCOLORS.training.line }
+                },
+            ],
+            {
+                ...BASE_LAYOUT,
+                hovermode: "x closest",
+                yaxis: { ...BASE_LAYOUT.yaxis, title: "Training Volume (kg)" },
+                xaxis: {
+                    ...BASE_LAYOUT.xaxis,
+                    ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
+                },
+            },
+            PLOTLY_CONFIG
+        );
+    }
+
     wireChartZoomSync();
 }
 
@@ -557,6 +623,7 @@ function wireEntryForm() {
             weight: parseFloat($("weight")?.value) || null,
             body_fat: parseFloat($("bodyFat")?.value) || null,
             calories: parseInt($("calories")?.value) || null,
+            training_volume: parseFloat($("trainingVolume")?.value) || null,
             steps: parseInt($("steps")?.value) || null,
             sleep_total: parseFloat($("sleep")?.value) || null,
             observations: $("observations")?.value?.trim() || null,

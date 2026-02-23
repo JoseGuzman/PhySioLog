@@ -93,6 +93,7 @@ def entries() -> Response | tuple[Response, int]:
             weight=data.get("weight"),
             body_fat=data.get("body_fat"),
             calories=data.get("calories"),
+            training_volume=data.get("training_volume"),
             steps=data.get("steps"),
             sleep_total=data.get("sleep_total"),
             sleep_quality=data.get("sleep_quality"),

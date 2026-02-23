@@ -21,7 +21,9 @@
     #weightChart,
     #bodyFatChart,
     #stepsChart,
-    #sleepChart {
+    #sleepChart,
+    #caloriesChart,
+    #trainingVolumeChart {
         height: 340px;
     }
 
@@ -91,11 +93,6 @@
     </div>
 
     <div class="stat-card">
-        <span class="label">Avg Calories (kcal) </span>
-        <span class="value" id="stat-avg_calories">--</span>
-    </div>
-
-    <div class="stat-card">
         <span class="label">Avg Steps</span>
         <span class="value" id="stat-avg_steps">--</span>
     </div>
@@ -105,6 +102,10 @@
         <span class="value" id="stat-avg_sleep">--</span>
     </div>
 
+    <div class="stat-card">
+        <span class="label">Avg Calories (kcal) </span>
+        <span class="value" id="stat-avg_calories">--</span>
+    </div>
 </div>
 
 
@@ -112,12 +113,12 @@
 <!-- Cards with Plotty graphs-->
 <div class="charts-grid">
     <div class="chart">
-        <h2>Weight Trend</h2>
+        <h2>Body Weight</h2>
         <div id="weightChart"></div>
     </div>
 
     <div class="chart">
-        <h2>Body Fat Trend</h2>
+        <h2>Body Fat Percentage</h2>
         <div id="bodyFatChart"></div>
     </div>
 </div>
@@ -131,6 +132,17 @@
     <div class="chart">
         <h2>Sleep Total</h2>
         <div id="sleepChart"></div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart">
+        <h2>Daily Calories</h2>
+        <div id="caloriesChart"></div>
+    </div>
+    <div class="chart">
+        <h2>Training Volume</h2>
+        <div id="trainingVolumeChart"></div>
     </div>
 </div>
 {% endblock %}

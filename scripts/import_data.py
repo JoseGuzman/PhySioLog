@@ -131,6 +131,10 @@ def import_data(app, filepath: str) -> None:
             column_map["body_fat"] = col
         elif "calorie" in col_lower:
             column_map["calories"] = col
+        elif (
+            "training" in col_lower and "volume" in col_lower
+        ) or "volumen" in col_lower:
+            column_map["training_volume"] = col
         elif "step" in col_lower:
             column_map["steps"] = col
         elif "sleep total" in col_lower or (
@@ -152,6 +156,7 @@ def import_data(app, filepath: str) -> None:
         sys.exit(1)
 
     added = 0
+    updated = 0
     skipped = 0
     errors = 0
 
@@ -165,9 +170,22 @@ def import_data(app, filepath: str) -> None:
                     errors += 1
                     continue
 
+                training_volume_val = (
+                    parse_number(row.get(column_map.get("training_volume")))
+                    if "training_volume" in column_map
+                    else None
+                )
+
                 existing = HealthEntry.query.filter_by(date=entry_date).first()
                 if existing:
-                    skipped += 1
+                    if (
+                        training_volume_val is not None
+                        and existing.training_volume != training_volume_val
+                    ):
+                        existing.training_volume = training_volume_val
+                        updated += 1
+                    else:
+                        skipped += 1
                     continue
 
                 calories_val = (
@@ -190,6 +208,7 @@ def import_data(app, filepath: str) -> None:
                     if "body_fat" in column_map
                     else None,
                     calories=int(calories_val) if calories_val is not None else None,
+                    training_volume=training_volume_val,
                     steps=int(steps_val) if steps_val is not None else None,
                     sleep_total=parse_time(row.get(column_map.get("sleep_total")))
                     if "sleep_total" in column_map
@@ -218,6 +237,7 @@ def import_data(app, filepath: str) -> None:
 
     print("✓ Import complete!")
     print(f"  • Added: {added} entries")
+    print(f"  • Updated: {updated} entries (existing dates)")
     print(f"  • Skipped: {skipped} entries (already exist)")
     print(f"  • Errors: {errors} entries (invalid data)")
     print(f"  • Total in database: {total}\n")

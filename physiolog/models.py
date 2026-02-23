@@ -42,6 +42,7 @@ class HealthEntry(db.Model):
     weight: Mapped[float | None] = mapped_column(nullable=True)
     body_fat: Mapped[float | None] = mapped_column(nullable=True)
     calories: Mapped[float | None] = mapped_column(nullable=True)
+    training_volume: Mapped[float | None] = mapped_column(nullable=True)
     steps: Mapped[int | None] = mapped_column(nullable=True)
     sleep_total: Mapped[float | None] = mapped_column(nullable=True)
 
@@ -56,6 +57,7 @@ class HealthEntry(db.Model):
             "weight": self.weight,
             "body_fat": self.body_fat,
             "calories": self.calories,
+            "training_volume": self.training_volume,
             "steps": self.steps,
             "sleep_total": self.sleep_total,
             "sleep_quality": self.sleep_quality,
