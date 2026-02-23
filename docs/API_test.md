@@ -50,7 +50,7 @@ curl → /api/stats?window=7d → routes_api.py → services.py → JSON respons
 1. __Start the Flask app:__
 
    ```bash
-   uv run python app.py
+   uv run python app.py # will start in debug mode
    ```
 
 2. __Ensure you have test data__ (optional, but recommended for testing `/api/stats`):

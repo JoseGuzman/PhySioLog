@@ -95,7 +95,7 @@ Prefer:
 * Blueprints: `web_bp`, `api_bp`
 * SQLAlchemy extension pattern
 * Services layer for statistics (`stats`)
-* `.env` configuration loading
+* `.env` configuration loading in root directory
 
 ### Frontend
 
@@ -248,27 +248,27 @@ When helping, use:
 
 ## 15) Known roadmap context
 
-### Current phase
+### Current phase (v 0.2)
 
 [x] Local development
 [x] Stats + trends synchronization
-[ ] Metabolism range value calculations based on normal distribution)
-[ ] Basic database handling (e.g., edit entries)
+[x] Metabolism range value calculations based
+[ ] Basic database handling (e.g., GET/POST entries)
 [ ] Architecture stabilization
 
-### Near-term
+### Near-term (v 0.3)
 
 [ ] Unified window filtering
 [ ] Cleaner API contracts
 [ ] Improved JavaScript state flow
 
-### Medium-term
+### Medium-term (v 0.4)
 
 [ ] Authentication (Flask‑Login)
 [ ] Multi‑user data
 [ ] Migrations
 
-### Deployment
+### Deployment (v 1.0)
 
 [ ] Docker container
 [ ] Gunicorn

@@ -18,7 +18,8 @@ Shell context (only available in development):
 (see here: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database)
 Typing flask shell will permit access to the app and database. Note that
 we need a .flaskenv file with FLASK_ENV=physiology:create_app:
->>> uv run flask shell
+python -m flask guarantees Flask runs with the same interpreter uv selected 
+>>> uv run python -m flask shell
 Python 3.12.12 (main, Jan 27 2026, 23:31:45) [Clang 21.1.4 ] on darwin
 App: physiolog
 Instance: /path/to/repo/instance
