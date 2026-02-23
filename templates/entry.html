@@ -20,32 +20,32 @@
 
             <div>
                 <label>Weight (kg)</label>
-                <input type="number" step="0.1" id="weight" inputmode="decimal">
+                <input type="number" step="0.1" id="weight" inputmode="decimal" placeholder="--">
             </div>
 
             <div>
                 <label>Body Fat (%)</label>
-                <input type="number" step="0.1" id="bodyFat" inputmode="decimal">
+                <input type="number" step="0.1" id="bodyFat" inputmode="decimal" placeholder="--">
             </div>
 
             <div>
                 <label>Calories</label>
-                <input type="number" id="calories" inputmode="numeric">
+                <input type="number" id="calories" inputmode="numeric" placeholder="--">
             </div>
 
             <div>
                 <label>Training Volume (kg)</label>
-                <input type="number" step="0.1" id="trainingVolume" inputmode="decimal">
+                <input type="number" step="0.1" id="trainingVolume" inputmode="decimal" placeholder="--">
             </div>
 
             <div>
                 <label>Steps</label>
-                <input type="number" id="steps" inputmode="numeric">
+                <input type="number" id="steps" inputmode="numeric" placeholder="--">
             </div>
 
             <div>
-                <label>Sleep (hours)</label>
-                <input type="number" step="0.1" id="sleep" inputmode="decimal">
+                <label>Sleep (HH:MM)</label>
+                <input type="text" id="sleep" inputmode="numeric" placeholder="--" pattern="^([01]\d|2[0-3]):[0-5]\d$">
             </div>
         </div>
 
@@ -53,7 +53,7 @@
 
         <div class="observations-block">
             <label for="observations">Comments / Observations</label>
-            <textarea id="observations" rows="4" placeholder="Optional notes about today"></textarea>
+            <textarea id="observations" rows="4" placeholder="Enter here your notes or reflexions about today"></textarea>
         </div>
 
         <button type="submit">Add Entry</button>
@@ -62,13 +62,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    // Optional: set default date = today
-    document.addEventListener('DOMContentLoaded', () => {
-        const dateEl = document.getElementById('date');
-        if (dateEl && !dateEl.value) {
-            dateEl.value = new Date().toISOString().slice(0, 10);
-        }
-    });
-</script>
+<script src="{{ url_for('static', filename='js/entry.js') }}"></script>
 {% endblock %}

@@ -7,6 +7,7 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 """
 
 from datetime import date, datetime, timedelta
+import re
 
 from flask import Blueprint, Response, jsonify, request
 from sqlalchemy.exc import IntegrityError
@@ -16,6 +17,7 @@ from .models import HealthEntry
 from .services import compute_stats, run_smoke_test
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
+SLEEP_HHMM_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 
 
 # =========================================================================
@@ -37,7 +39,7 @@ def llm_smoke() -> Response | tuple[Response, int]:
         return jsonify({"ok": False, "error": str(exc)}), 500
 
 
-@api_bp.route("/entries", methods=["GET", "POST"])
+@api_bp.route("/entries", methods=["GET", "POST", "PUT"])
 def entries() -> Response | tuple[Response, int]:
     """
         Handle health entry retrieval and creation.
@@ -74,7 +76,7 @@ def entries() -> Response | tuple[Response, int]:
             - body_fat (float, optional)
             - calories (int, optional)
             - steps (int, optional)
-            - sleep_total (float, optional)
+            - sleep_total (str, optional): Format HH:MM
             - sleep_quality (str, optional)
             - observations (str, optional)
 
@@ -90,7 +92,7 @@ def entries() -> Response | tuple[Response, int]:
             flask.Response or (flask.Response, int):
                 JSON response containing success status and data or error message.
     """
-    if request.method == "POST":
+    if request.method in {"POST", "PUT"}:
         if not request.is_json:
             return jsonify(
                 {"success": False, "error": "Content-Type must be application/json"}
@@ -109,6 +111,46 @@ def entries() -> Response | tuple[Response, int]:
         except ValueError:
             return jsonify({"success": False, "error": "Invalid date format"}), 400
 
+        sleep_raw = data.get("sleep_total")
+        sleep_decimal = None
+        if sleep_raw is not None and sleep_raw != "":
+            if not isinstance(sleep_raw, str):
+                return jsonify(
+                    {"success": False, "error": "sleep_total must be in HH:MM format"}
+                ), 400
+            sleep_match = SLEEP_HHMM_RE.match(sleep_raw.strip())
+            if not sleep_match:
+                return jsonify(
+                    {"success": False, "error": "sleep_total must be in HH:MM format"}
+                ), 400
+            hours = int(sleep_match.group(1))
+            minutes = int(sleep_match.group(2))
+            sleep_decimal = hours + (minutes / 60.0)
+
+        if request.method == "PUT":
+            entry = HealthEntry.query.filter_by(date=parsed_date).first()
+            if not entry:
+                return jsonify(
+                    {"success": False, "error": "Entry not found for the given date"}
+                ), 404
+
+            entry.weight = data.get("weight")
+            entry.body_fat = data.get("body_fat")
+            entry.calories = data.get("calories")
+            entry.training_volume = data.get("training_volume")
+            entry.steps = data.get("steps")
+            entry.sleep_total = sleep_decimal
+            entry.sleep_quality = data.get("sleep_quality")
+            entry.observations = data.get("observations")
+
+            try:
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({"success": False, "error": str(e)}), 400
+
+            return jsonify({"success": True, "entry": entry.to_dict()}), 200
+
         entry = HealthEntry(
             date=parsed_date,
             weight=data.get("weight"),
@@ -116,7 +158,7 @@ def entries() -> Response | tuple[Response, int]:
             calories=data.get("calories"),
             training_volume=data.get("training_volume"),
             steps=data.get("steps"),
-            sleep_total=data.get("sleep_total"),
+            sleep_total=sleep_decimal,
             sleep_quality=data.get("sleep_quality"),
             observations=data.get("observations"),
         )
