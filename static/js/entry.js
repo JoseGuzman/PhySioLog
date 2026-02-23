@@ -117,6 +117,61 @@ async function createOrUpdateEntry(payload) {
     return { mode: "updated", payload: await updateRes.json() };
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+async function loadLatestObservations() {
+    const list = entry$("entriesList");
+    if (!list) return;
+
+    try {
+        const res = await fetch("/api/entries");
+        if (!res.ok) {
+            const text = await res.text().catch(() => "");
+            throw new Error(`/api/entries failed: ${res.status} ${res.statusText} ${text}`);
+        }
+
+        const entries = await res.json();
+        if (!Array.isArray(entries) || entries.length === 0) {
+            list.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">No entries yet</div>
+                    <div class="stat-value">--</div>
+                </div>
+            `;
+            return;
+        }
+
+        const html = entries.slice(0, 8).map((entry) => {
+            const notes = entry?.observations
+                ? escapeHtml(entry.observations)
+                : '<span style="color:#7a7a7a;">No observations</span>';
+            return `
+                <div class="stat-card">
+                    <div class="stat-label">${escapeHtml(entry.date || "--")}</div>
+                    <div style="color: #cfcfcf; line-height: 1.4;">${notes}</div>
+                </div>
+            `;
+        }).join("");
+
+        list.innerHTML = html;
+    } catch (err) {
+        console.error("Error loading entries list", err);
+        list.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-label">Error loading entries</div>
+                <div class="stat-value">--</div>
+            </div>
+        `;
+    }
+}
+
 function wireEntryPage() {
     const form = entry$("entryForm");
     const dateEl = entry$("date");
@@ -135,12 +190,16 @@ function wireEntryPage() {
     Promise.resolve(loadEntryForDate(dateEl.value)).catch((err) => {
         console.error("Error loading initial entry", err);
     });
+    Promise.resolve(loadLatestObservations()).catch((err) => {
+        console.error("Error loading latest observations", err);
+    });
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         try {
             const result = await createOrUpdateEntry(collectEntryPayload());
             alert(result.mode === "updated" ? "Entry updated!" : "Entry added!");
+            await loadLatestObservations();
         } catch (err) {
             console.error(err);
             alert("Error adding entry");

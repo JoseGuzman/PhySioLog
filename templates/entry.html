@@ -59,6 +59,16 @@
         <button type="submit">Add Entry</button>
     </form>
 </div>
+
+<div class="form-section" style="margin-top: 16px;">
+    <h2>Latest Observations</h2>
+    <div id="entriesList" style="display: grid; gap: 10px;">
+        <div class="stat-card">
+            <div class="stat-label">Loading entries...</div>
+            <div class="stat-value">--</div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
