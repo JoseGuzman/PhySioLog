@@ -10,6 +10,7 @@ integration in Physiolog
 ```bash
 curl -s http://localhost:5000/api/llm-smoke | python -m json.tool
 ```
+
 The python -m json.tool validates it's JSON and prints formatted version.
 
 ### Response Example
@@ -56,7 +57,7 @@ The `/api/llm-smoke` endpoint is a **lightweight health check** for the OpenAI A
 
 Here's how a GET request flows through the application:
 
-```
+```bash
 ┌─────────────────────────────────────────────────────────────────┐
 │ Client (Browser / curl)                                         │
 │                                                                 │

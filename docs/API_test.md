@@ -96,6 +96,42 @@ __Response (200 OK):__
 
 ---
 
+### 1.1 GET /api/entries?date=YYYY-MM-DD
+
+Retrieve a single entry for a specific date.
+
+__Command:__
+
+```bash
+curl "http://localhost:5000/api/entries?date=2026-02-15"
+```
+
+__Response (200 OK):__
+
+```json
+{
+  "success": true,
+  "entry": {
+    "id": 1,
+    "date": "2026-02-15",
+    "weight": 72.5,
+    "body_fat": 18.2,
+    "calories": 2200,
+    "steps": 8500,
+    "sleep_total": 7.5,
+    "sleep_quality": "good",
+    "observations": "felt energetic"
+  }
+}
+```
+
+__Error Cases:__
+
+- __400 Bad Request:__ Invalid date format (must be `YYYY-MM-DD`)
+- __404 Not Found:__ No entry for that date
+
+---
+
 ### 2. POST /api/entries
 
 Create a new health entry.
@@ -133,8 +169,47 @@ __Response (201 Created):__
 
 __Error Cases:__
 
-- __400 Bad Request:__ Missing date, invalid JSON, or invalid date format
+- __400 Bad Request:__ Missing date, invalid JSON, invalid date format, or invalid `sleep_total` format (`HH:MM`)
 - __409 Conflict:__ Entry for the provided date already exists
+
+---
+
+### 2.1 PUT /api/entries
+
+Update an existing health entry (matched by `date` in request body).
+
+__Command:__
+
+```bash
+curl -X PUT http://localhost:5000/api/entries \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2026-02-15",
+    "weight": 73.1,
+    "body_fat": 18.0,
+    "calories": 2250,
+    "training_volume": 4700,
+    "steps": 9100,
+    "sleep_total": "07:48",
+    "observations": "updated entry"
+  }'
+```
+
+__Response (200 OK):__
+
+```json
+{
+  "success": true,
+  "entry": {
+    "date": "2026-02-15"
+  }
+}
+```
+
+__Error Cases:__
+
+- __400 Bad Request:__ Invalid JSON or invalid date format
+- __404 Not Found:__ No entry exists for the provided date
 
 ---
 
