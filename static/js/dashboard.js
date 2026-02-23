@@ -43,6 +43,17 @@ function formatStatValue(v) {
     return String(v);
 }
 
+function decimalHoursToHHMM(value) {
+    if (typeof value !== "number" || !Number.isFinite(value)) return "--";
+    let hours = Math.floor(value);
+    let minutes = Math.round((value - hours) * 60);
+    if (minutes === 60) {
+        hours += 1;
+        minutes = 0;
+    }
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 function renderTrendsStats(payload) {
     // Expected payload: { window_days, start_date, end_date, stats: {...} }
     const stats = payload?.stats;
@@ -51,7 +62,9 @@ function renderTrendsStats(payload) {
     for (const key of TRENDS_STAT_FIELDS) {
         const el = $(`stat-${key}`);
         if (!el) continue;
-        el.textContent = formatStatValue(stats[key]);
+        el.textContent = key === "avg_sleep"
+            ? decimalHoursToHHMM(stats[key])
+            : formatStatValue(stats[key]);
     }
 
     const meta = $("windowMeta");
@@ -518,18 +531,29 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
             [
                 {
                     x: dates, y: sleepData, name: "Daily Sleep", type: "bar",
-                    marker: { color: MYCOLORS.sleep.bar, line: { width: 0 } }
+                    marker: { color: MYCOLORS.sleep.bar, line: { width: 0 } },
+                    customdata: sleepData.map(decimalHoursToHHMM),
+                    hovertemplate: "Date: %{x}<br>Sleep: %{customdata}<extra></extra>"
                 },
                 {
                     x: dates, y: sleepMA, name: "7-Day Average", type: "scatter", mode: "lines",
-                    line: { width: 2, color: MYCOLORS.sleep.line }
+                    line: { width: 2, color: MYCOLORS.sleep.line },
+                    customdata: sleepMA.map(decimalHoursToHHMM),
+                    hovertemplate: "Date: %{x}<br>7-Day Avg: %{customdata}<extra></extra>"
                 },
             ],
             {
                 ...BASE_LAYOUT,
                 hovermode: "closest",
                 bargap: 0.15,
-                yaxis: { ...BASE_LAYOUT.yaxis, title: "Sleep (hours)" },
+                yaxis: {
+                    ...BASE_LAYOUT.yaxis,
+                    title: "Sleep (HH:MM)",
+                    tickformat: ",.2f",
+                    tickmode: "array",
+                    tickvals: [0, 2, 4, 6, 8, 10, 12],
+                    ticktext: ["00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00"],
+                },
                 xaxis: {
                     ...BASE_LAYOUT.xaxis,
                     ...makeXAxis(-30),
@@ -609,53 +633,10 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
 }
 
 // -----------------------------
-// Form handling (only if form exists)
-// -----------------------------
-function wireEntryForm() {
-    const form = $("entryForm");
-    if (!form) return;
-
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const data = {
-            date: $("date")?.value,
-            weight: parseFloat($("weight")?.value) || null,
-            body_fat: parseFloat($("bodyFat")?.value) || null,
-            calories: parseInt($("calories")?.value) || null,
-            training_volume: parseFloat($("trainingVolume")?.value) || null,
-            steps: parseInt($("steps")?.value) || null,
-            sleep_total: parseFloat($("sleep")?.value) || null,
-            observations: $("observations")?.value?.trim() || null,
-        };
-
-        try {
-            await fetchJson("/api/entries", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            alert("Entry added!");
-            form.reset();
-
-            // Reload only what exists on the page
-            await refreshTrendsWindow();
-
-        } catch (err) {
-            console.error(err);
-            alert("Error adding entry");
-        }
-    });
-}
-
-// -----------------------------
 // Init: clear flow + no unnecessary work
 // -----------------------------
 async function init() {
     console.log("🚀 Init starting...");
-
-    wireEntryForm();
 
     // trends-specific controls
     wireWindowSelect(async () => {
