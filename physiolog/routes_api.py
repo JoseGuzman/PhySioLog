@@ -22,7 +22,14 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 # API Routes
 # =========================================================================
 @api_bp.route("/llm-smoke", methods=["GET"])
-def llm_smoke():
+def llm_smoke() -> Response | tuple[Response, int]:
+    """
+    OpenAI API smoke test route to verify connectivity and basic functionality.
+
+    Response:
+        200 OK
+        JSON object with test results or error message.
+    """
     try:
         result = run_smoke_test()
         return jsonify(result), 200
@@ -33,41 +40,55 @@ def llm_smoke():
 @api_bp.route("/entries", methods=["GET", "POST"])
 def entries() -> Response | tuple[Response, int]:
     """
-    Handle health entry retrieval and creation.
+        Handle health entry retrieval and creation.
 
-    GET
-    ---
-    Returns all health entries ordered by date (descending).
+    Retrieve health entries.
+
+    Query parameters:
+        - date (str, optional): Format YYYY-MM-DD
+            If provided, returns a single entry for that date.
+            If omitted, returns all entries ordered by date (descending).
 
     Response:
         200 OK
         JSON list[dict]: Serialized HealthEntry objects.
-
-    POST
-    ----
-    Creates a new health entry from JSON payload.
-
-    Expected JSON fields:
-        - date (str, required): Format YYYY-MM-DD
-        - weight (float, optional)
-        - body_fat (float, optional)
-        - calories (int, optional)
-        - steps (int, optional)
-        - sleep_total (float, optional)
-        - sleep_quality (str, optional)
-        - observations (str, optional)
-
-    Responses:
-        201 Created:
-            Entry successfully created.
+        200 OK:
+        - Without `date`: JSON list[dict] of serialized HealthEntry objects.
+        - With `date`: JSON object:
+        {
+            "success": true,
+            "entry": { ... serialized HealthEntry ... }
+        }
         400 Bad Request:
-            Invalid JSON, missing fields, or invalid date format.
-        409 Conflict:
-            Entry for the provided date already exists.
+            Invalid `date` format.
+        404 Not Found:
+            No entry exists for the requested date.
 
-    Returns:
-        flask.Response or (flask.Response, int):
-            JSON response containing success status and data or error message.
+        POST
+        ----
+        Creates a new health entry from JSON payload.
+
+        Expected JSON fields:
+            - date (str, required): Format YYYY-MM-DD
+            - weight (float, optional)
+            - body_fat (float, optional)
+            - calories (int, optional)
+            - steps (int, optional)
+            - sleep_total (float, optional)
+            - sleep_quality (str, optional)
+            - observations (str, optional)
+
+        Responses:
+            201 Created:
+                Entry successfully created.
+            400 Bad Request:
+                Invalid JSON, missing fields, or invalid date format.
+            409 Conflict:
+                Entry for the provided date already exists.
+
+        Returns:
+            flask.Response or (flask.Response, int):
+                JSON response containing success status and data or error message.
     """
     if request.method == "POST":
         if not request.is_json:
@@ -112,6 +133,25 @@ def entries() -> Response | tuple[Response, int]:
 
         return jsonify({"success": True, "entry": entry.to_dict()}), 201
 
+    # GET request:
+    date_str = request.args.get("date", type=str)
+    if date_str:
+        date_str = date_str.strip()
+        try:
+            query_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify(
+                {"success": False, "error": "Invalid date format, expected YYYY-MM-DD"}
+            ), 400
+        # If date is provided, return only that entry
+        entry = HealthEntry.query.filter_by(date=query_date).first()
+        if not entry:
+            return jsonify(
+                {"success": False, "error": "Entry not found for the given date"}
+            ), 404
+        return jsonify({"success": True, "entry": entry.to_dict()})
+
+    # If no argument, return all entries ordered by date descending
     all_entries = HealthEntry.query.order_by(HealthEntry.date.desc()).all()
     return jsonify([entry.to_dict() for entry in all_entries])
 
