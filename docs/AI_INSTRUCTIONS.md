@@ -253,14 +253,19 @@ When helping, use:
 [x] Local development
 [x] Stats + trends synchronization
 [x] Metabolism range value calculations based
-[ ] Basic database handling (e.g., GET/POST entries)
-[ ] Architecture stabilization
+[x] Basic database handling (e.g., GET/POST entries)
 
 ### Near-term (v 0.3)
 
 [ ] Unified window filtering
 [ ] Cleaner API contracts
 [ ] Improved JavaScript state flow
+[ ] Architecture stabilization:
+    [ ] Route/service boundary hardening (thin routes, move parsing/validation helpers)
+    [ ] API response shape consistency for `/api/entries`
+    [ ] API contract test coverage for entry lifecycle + sleep validation
+    [ ] Deduplicate create/update field mapping logic
+    [ ] Explicit sleep unit contract (`HH:MM` write, decimal read or dual-field policy)
 
 ### Medium-term (v 0.4)
 
