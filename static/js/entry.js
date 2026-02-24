@@ -71,8 +71,21 @@ async function loadEntryForDate(dateValue) {
     clearEntryFields();
 }
 
+function normalizeSleepTotal(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw || raw === "--") return null;
+
+    const match = raw.match(/^(\d{1,2}):([0-5]\d)$/);
+    if (!match) return raw;
+
+    const hours = Number.parseInt(match[1], 10);
+    if (hours < 0 || hours > 23) return raw;
+
+    return `${String(hours).padStart(2, "0")}:${match[2]}`;
+}
+
 function collectEntryPayload() {
-    const sleepValue = entry$("sleep")?.value?.trim() || "";
+    const sleepValue = normalizeSleepTotal(entry$("sleep")?.value);
     return {
         date: entry$("date")?.value,
         weight: parseFloat(entry$("weight")?.value) || null,
@@ -80,7 +93,7 @@ function collectEntryPayload() {
         calories: parseInt(entry$("calories")?.value, 10) || null,
         training_volume: parseFloat(entry$("trainingVolume")?.value) || null,
         steps: parseInt(entry$("steps")?.value, 10) || null,
-        sleep_total: sleepValue || null,
+        sleep_total: sleepValue,
         observations: entry$("observations")?.value?.trim() || null,
     };
 }
