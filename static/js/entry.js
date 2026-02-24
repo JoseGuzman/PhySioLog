@@ -1,4 +1,6 @@
+//-------------------------------------------------------------------------
 // static/js/entry.js
+//-------------------------------------------------------------------------
 
 function entry$(id) {
     return document.getElementById(id);
@@ -126,6 +128,16 @@ function escapeHtml(value) {
         .replaceAll("'", "&#39;");
 }
 
+/**
+ * Loads recent entries and renders their observations into `#entriesList`.
+ * - Fetches `/api/entries`.
+ * - Shows an empty state when there are no entries.
+ * - Renders up to 7 most recent observation cards.
+ * - Shows an error state card if the request fails.
+ *
+ * Safe-guard:
+ * - Returns early when `#entriesList` is missing (idempotent page script behavior).
+ */
 async function loadLatestObservations() {
     const list = entry$("entriesList");
     if (!list) return;
@@ -148,7 +160,7 @@ async function loadLatestObservations() {
             return;
         }
 
-        const html = entries.slice(0, 8).map((entry) => {
+        const html = entries.slice(0, 7).map((entry) => {
             const notes = entry?.observations
                 ? escapeHtml(entry.observations)
                 : '<span style="color:#7a7a7a;">No observations</span>';
@@ -172,6 +184,16 @@ async function loadLatestObservations() {
     }
 }
 
+/**
+ * Wires all Entry page interactions:
+ * - Initializes the date input with today's date when empty.
+ * - Loads an existing entry whenever the selected date changes.
+ * - Loads the initial date entry and latest observations on page load.
+ * - Handles form submission by creating/updating the entry and refreshing observations.
+ *
+ * Safe-guard:
+ * - Exits early when required DOM elements are not present (idempotent page script behavior).
+ */
 function wireEntryPage() {
     const form = entry$("entryForm");
     const dateEl = entry$("date");
@@ -197,8 +219,15 @@ function wireEntryPage() {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         try {
-            const result = await createOrUpdateEntry(collectEntryPayload());
-            alert(result.mode === "updated" ? "Entry updated!" : "Entry added!");
+            //const result = await createOrUpdateEntry(collectEntryPayload());
+            //alert(result.mode === "updated" ? "Entry updated!" : "Entry added!");
+            const payload = collectEntryPayload();
+            const result = await createOrUpdateEntry(payload);
+            alert(
+                result.mode == "updated"
+                    ? `Entry for ${payload.date} updated!`
+                    : `Entry for ${payload.date} added`
+            );
             await loadLatestObservations();
         } catch (err) {
             console.error(err);
