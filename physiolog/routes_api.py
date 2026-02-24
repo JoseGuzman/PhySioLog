@@ -7,17 +7,21 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 """
 
 from datetime import date, datetime, timedelta
-import re
 
 from flask import Blueprint, Response, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from .extensions import db
 from .models import HealthEntry
-from .services import compute_stats, run_smoke_test
+from .services import (
+    build_entry_fields,
+    compute_stats,
+    parse_entry_date_required,
+    parse_optional_sleep_total_hhmm,
+    run_smoke_test,
+)
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
-SLEEP_HHMM_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 
 
 # =========================================================================
@@ -99,33 +103,16 @@ def entries() -> Response | tuple[Response, int]:
             ), 400
 
         data = request.json
-        if data is None:
+        if data is None or not isinstance(data, dict):
             return jsonify({"success": False, "error": "Invalid JSON data"}), 400
 
-        date_str = (data.get("date") or "").strip()
-        if not date_str:
-            return jsonify({"success": False, "error": "Date is required"}), 400
-
         try:
-            parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-        except ValueError:
-            return jsonify({"success": False, "error": "Invalid date format"}), 400
+            parsed_date = parse_entry_date_required(data)
+            sleep_decimal = parse_optional_sleep_total_hhmm(data.get("sleep_total"))
+        except ValueError as exc:
+            return jsonify({"success": False, "error": str(exc)}), 400
 
-        sleep_raw = data.get("sleep_total")
-        sleep_decimal = None
-        if sleep_raw is not None and sleep_raw != "":
-            if not isinstance(sleep_raw, str):
-                return jsonify(
-                    {"success": False, "error": "sleep_total must be in HH:MM format"}
-                ), 400
-            sleep_match = SLEEP_HHMM_RE.match(sleep_raw.strip())
-            if not sleep_match:
-                return jsonify(
-                    {"success": False, "error": "sleep_total must be in HH:MM format"}
-                ), 400
-            hours = int(sleep_match.group(1))
-            minutes = int(sleep_match.group(2))
-            sleep_decimal = hours + (minutes / 60.0)
+        entry_fields = build_entry_fields(data, sleep_decimal)
 
         if request.method == "PUT":
             entry = HealthEntry.query.filter_by(date=parsed_date).first()
@@ -134,14 +121,8 @@ def entries() -> Response | tuple[Response, int]:
                     {"success": False, "error": "Entry not found for the given date"}
                 ), 404
 
-            entry.weight = data.get("weight")
-            entry.body_fat = data.get("body_fat")
-            entry.calories = data.get("calories")
-            entry.training_volume = data.get("training_volume")
-            entry.steps = data.get("steps")
-            entry.sleep_total = sleep_decimal
-            entry.sleep_quality = data.get("sleep_quality")
-            entry.observations = data.get("observations")
+            for field_name, field_value in entry_fields.items():
+                setattr(entry, field_name, field_value)
 
             try:
                 db.session.commit()
@@ -153,14 +134,7 @@ def entries() -> Response | tuple[Response, int]:
 
         entry = HealthEntry(
             date=parsed_date,
-            weight=data.get("weight"),
-            body_fat=data.get("body_fat"),
-            calories=data.get("calories"),
-            training_volume=data.get("training_volume"),
-            steps=data.get("steps"),
-            sleep_total=sleep_decimal,
-            sleep_quality=data.get("sleep_quality"),
-            observations=data.get("observations"),
+            **entry_fields,
         )
 
         db.session.add(entry)
