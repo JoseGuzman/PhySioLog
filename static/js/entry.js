@@ -28,7 +28,10 @@ function fillEntryFields(entry) {
     setFieldValue("calories", entry.calories);
     setFieldValue("trainingVolume", entry.training_volume);
     setFieldValue("steps", entry.steps);
-    setFieldValue("sleep", decimalHoursToHHMM(entry.sleep_total));
+    setFieldValue(
+        "sleep",
+        entry.sleep_total || decimalHoursToHHMM(entry.sleep_total_decimal)
+    );
     setFieldValue("observations", entry.observations);
 }
 
@@ -162,7 +165,8 @@ async function loadLatestObservations() {
             throw new Error(`/api/entries failed: ${res.status} ${res.statusText} ${text}`);
         }
 
-        const entries = await res.json();
+        const payload = await res.json();
+        const entries = Array.isArray(payload) ? payload : payload?.entries;
         if (!Array.isArray(entries) || entries.length === 0) {
             list.innerHTML = `
                 <div class="stat-card">

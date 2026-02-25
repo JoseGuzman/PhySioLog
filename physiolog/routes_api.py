@@ -169,7 +169,8 @@ def entries() -> Response | tuple[Response, int]:
 
     # If no argument, return all entries ordered by date descending
     all_entries = HealthEntry.query.order_by(HealthEntry.date.desc()).all()
-    return jsonify([entry.to_dict() for entry in all_entries])
+    serialized_entries = [entry.to_dict() for entry in all_entries]
+    return jsonify({"success": True, "entries": serialized_entries})
 
 
 @api_bp.route("/stats")  # GET only (default when no methods specified)

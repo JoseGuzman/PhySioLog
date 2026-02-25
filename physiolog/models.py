@@ -31,6 +31,19 @@ from sqlalchemy.orm import Mapped, mapped_column
 from .extensions import db
 
 
+def _decimal_hours_to_hhmm(value: float | None) -> str | None:
+    """Convert decimal hours to HH:MM format."""
+    if value is None:
+        return None
+
+    hours = int(value)
+    minutes = round((value - hours) * 60)
+    if minutes == 60:
+        hours += 1
+        minutes = 0
+    return f"{hours:02d}:{minutes:02d}"
+
+
 class HealthEntry(db.Model):
     """Database model for daily health tracking entries."""
 
@@ -59,7 +72,8 @@ class HealthEntry(db.Model):
             "calories": self.calories,
             "training_volume": self.training_volume,
             "steps": self.steps,
-            "sleep_total": self.sleep_total,
+            "sleep_total": _decimal_hours_to_hhmm(self.sleep_total),
+            "sleep_total_decimal": self.sleep_total,
             "sleep_quality": self.sleep_quality,
             "observations": self.observations,
         }

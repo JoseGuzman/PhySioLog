@@ -409,7 +409,9 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
 
     let entries;
     try {
-        entries = await fetchJson("/api/entries");
+        const payload = await fetchJson("/api/entries");
+        entries = Array.isArray(payload) ? payload : payload?.entries;
+        if (!Array.isArray(entries)) return;
     } catch (err) {
         console.error(err);
         return;
@@ -523,7 +525,11 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
 
     // Sleep
     if ($("sleepChart")) {
-        const sleepData = entries.map((e) => e.sleep_total);
+        const sleepData = entries.map((e) =>
+            typeof e.sleep_total_decimal === "number"
+                ? e.sleep_total_decimal
+                : e.sleep_total
+        );
         const sleepMA = calculateMovingAverage(sleepData, 7);
 
         Plotly.react(

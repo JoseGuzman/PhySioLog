@@ -112,20 +112,22 @@ curl http://localhost:5000/api/entries
 __Response (200 OK):__
 
 ```json
-[
-  {
-    "id": 1,
-    "date": "2026-02-15",
-    "weight": 72.5,
-    "body_fat": 18.2,
-    "calories": 2200,
-    "steps": 8500,
-    "sleep_total": 7.5,
-    "sleep_quality": "good",
-    "observations": "felt energetic"
-  },
-  ...
-]
+{
+  "success": true,
+  "entries": [
+    {
+      "id": 1,
+      "date": "2026-02-15",
+      "weight": 72.5,
+      "body_fat": 18.2,
+      "calories": 2200,
+      "steps": 8500,
+      "sleep_total": 7.5,
+      "sleep_quality": "good",
+      "observations": "felt energetic"
+    }
+  ]
+}
 ```
 
 ---
@@ -181,7 +183,7 @@ curl -X POST http://localhost:5000/api/entries \
     "body_fat": 18.2,
     "calories": 2200,
     "steps": 8500,
-    "sleep_total": 7.5,
+    "sleep_total": "07:30",
     "sleep_quality": "good",
     "observations": "felt energetic"
   }'
