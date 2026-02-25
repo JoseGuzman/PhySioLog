@@ -262,10 +262,10 @@ When helping, use:
 [ ] Improved JavaScript state flow
 [ ] Architecture stabilization:
     [x] Route/service boundary hardening (thin routes, move parsing/validation helpers)
-    [ ] API response shape consistency for `/api/entries`
+    [x] API response shape consistency for `/api/entries`
     [ ] API contract test coverage for entry lifecycle + sleep validation
     [ ] Deduplicate create/update field mapping logic
-    [ ] Explicit sleep unit contract (`HH:MM` write, decimal read or dual-field policy)
+    [x] Explicit sleep unit contract (`HH:MM` write, decimal read or dual-field policy)
 
 ### Medium-term (v 0.4)
 

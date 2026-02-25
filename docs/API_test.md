@@ -122,7 +122,8 @@ __Response (200 OK):__
       "body_fat": 18.2,
       "calories": 2200,
       "steps": 8500,
-      "sleep_total": 7.5,
+      "sleep_total": "07:30",
+      "sleep_total_decimal": 7.5,
       "sleep_quality": "good",
       "observations": "felt energetic"
     }
@@ -154,7 +155,8 @@ __Response (200 OK):__
     "body_fat": 18.2,
     "calories": 2200,
     "steps": 8500,
-    "sleep_total": 7.5,
+    "sleep_total": "07:30",
+    "sleep_total_decimal": 7.5,
     "sleep_quality": "good",
     "observations": "felt energetic"
   }
@@ -171,6 +173,11 @@ __Error Cases:__
 ### 2. POST /api/entries
 
 Create a new health entry.
+
+Sleep unit contract:
+
+- Request (`POST`/`PUT`): `sleep_total` must be `HH:MM` (string)
+- Response (`GET`/`POST`/`PUT`): `sleep_total` is `HH:MM`, `sleep_total_decimal` is decimal hours
 
 __Command:__
 
