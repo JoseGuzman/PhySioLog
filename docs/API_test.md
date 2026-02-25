@@ -16,7 +16,7 @@ A brief description of the current data flow is described below:
    └─> calls ```fetchStatsPayload(windowValue)```
    └─> FETCH → /api/stats?window=7d  ← GET request
    └─> calls ```loadCharts(windowValue)```
-   └─> FETCH → /api/entries (frontend then filters by selected window for plots)
+   └─> FETCH → /api/entries?window=7d
 
 4. Backend Route (routes_api.py)
    └─> ```@api_bp.route("/stats")``` catches GET request
@@ -89,6 +89,10 @@ uv run --with pytest pytest tests/test_entry_parsing_helpers.py
   - Validates required date parsing (`YYYY-MM-DD`)
   - Validates `sleep_total` parsing contract (`HH:MM` -> decimal hours)
   - Validates rejection of invalid payload values/formats
+- `tests/test_api_entries_contract.py`
+  - Validates entry lifecycle contract (`POST`, `GET`, `PUT`, list `GET`)
+  - Validates `/api/entries` window filtering (`window`, `days`, invalid params)
+  - Validates API sleep validation contract for invalid payload values
 
 ### Notes
 
@@ -167,6 +171,48 @@ __Error Cases:__
 
 - __400 Bad Request:__ Invalid date format (must be `YYYY-MM-DD`)
 - __404 Not Found:__ No entry for that date
+
+---
+
+### 1.2 GET /api/entries?window=7d
+
+Retrieve entries for the selected time window.
+
+__Command:__
+
+```bash
+curl "http://localhost:5000/api/entries?window=7d"
+```
+
+__Response (200 OK):__
+
+```json
+{
+  "success": true,
+  "entries": [
+    {
+      "date": "2026-02-15",
+      "sleep_total": "07:30",
+      "sleep_total_decimal": 7.5
+    }
+  ]
+}
+```
+
+### 1.3 GET /api/entries?days=7
+
+Alternative window filter using explicit day count.
+
+__Command:__
+
+```bash
+curl "http://localhost:5000/api/entries?days=7"
+```
+
+__Error Cases for window filtering:__
+
+- __400 Bad Request:__ Invalid `window` format (`format is 7d,30d,3m,1y`)
+- __400 Bad Request:__ Non-positive `days` (`days must be a positive integer`)
 
 ---
 

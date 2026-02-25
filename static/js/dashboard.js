@@ -409,7 +409,11 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
 
     let entries;
     try {
-        const payload = await fetchJson("/api/entries");
+        const hasWindow = windowValue !== null && windowValue !== undefined && windowValue !== "";
+        const entriesUrl = hasWindow
+            ? `/api/entries?window=${encodeURIComponent(windowValue)}`
+            : "/api/entries";
+        const payload = await fetchJson(entriesUrl);
         entries = Array.isArray(payload) ? payload : payload?.entries;
         if (!Array.isArray(entries)) return;
     } catch (err) {
@@ -417,7 +421,6 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
         return;
     }
 
-    entries = filterEntriesByWindow(entries, windowValue);
     CURRENT_WINDOW_ENTRIES = entries;
     const xAxisRange = getWindowXAxisRange(windowValue);
 

@@ -24,6 +24,20 @@ from .services import (
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 
+def window_to_days(window_str: str) -> int | None:
+    """Convert window strings like 7d/3m/1y to day counts."""
+    s = window_str.strip().lower()
+    if not s:
+        return None
+    if s.endswith("d"):
+        return int(s[:-1])
+    if s.endswith("m"):
+        return int(s[:-1]) * 30
+    if s.endswith("y"):
+        return int(s[:-1]) * 365
+    raise ValueError("Invalid window format")
+
+
 # =========================================================================
 # API Routes
 # =========================================================================
@@ -167,8 +181,26 @@ def entries() -> Response | tuple[Response, int]:
             ), 404
         return jsonify({"success": True, "entry": entry.to_dict()})
 
-    # If no argument, return all entries ordered by date descending
-    all_entries = HealthEntry.query.order_by(HealthEntry.date.desc()).all()
+    window = request.args.get("window", default="", type=str).lower().strip()
+    days_param = request.args.get("days", type=int)
+
+    query = HealthEntry.query.order_by(HealthEntry.date.desc())
+    days = None
+    if days_param is not None:
+        if days_param <= 0:
+            return jsonify({"success": False, "error": "days must be a positive integer"}), 400
+        days = days_param
+    elif window:
+        try:
+            days = window_to_days(window)
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "error": "format is 7d,30d,3m,1y"}), 400
+
+    if days is not None:
+        start_date = date.today() - timedelta(days=days - 1)
+        query = query.filter(HealthEntry.date >= start_date)
+
+    all_entries = query.all()
     serialized_entries = [entry.to_dict() for entry in all_entries]
     return jsonify({"success": True, "entries": serialized_entries})
 
@@ -203,18 +235,6 @@ def stats() -> Response | tuple[Response, int]:
     days_param = request.args.get("days", type=int)
     # window can be: "", "7d", "30d", "3m", "1y", or omitted
     window = request.args.get("window", default="", type=str).lower().strip()
-
-    def window_to_days(window_str: str) -> int | None:
-        s = window_str.strip().lower()
-        if not s:
-            return None
-        if s.endswith("d"):
-            return int(s[:-1])
-        if s.endswith("m"):
-            return int(s[:-1]) * 30
-        if s.endswith("y"):
-            return int(s[:-1]) * 365
-        raise ValueError("Invalid window format")
 
     # Decide days
     days = None

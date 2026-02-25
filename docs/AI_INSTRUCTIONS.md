@@ -257,10 +257,10 @@ When helping, use:
 
 ### Near-term (v 0.3)
 
-[ ] Unified window filtering
+[x] Unified window filtering
 [ ] Cleaner API contracts
 [ ] Improved JavaScript state flow
-[ ] Architecture stabilization:
+[x] Architecture stabilization:
     [x] Route/service boundary hardening (thin routes, move parsing/validation helpers)
     [x] API response shape consistency for `/api/entries`
     [x] API contract test coverage for entry lifecycle + sleep validation

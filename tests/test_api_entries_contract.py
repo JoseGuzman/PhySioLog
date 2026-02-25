@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 import pytest
 
 from physiolog import create_app
@@ -101,3 +103,42 @@ def test_entries_sleep_validation_rejects_invalid_values(client, bad_sleep: obje
     body = res.get_json()
     assert body["success"] is False
     assert body["error"] == "sleep_total must be in HH:MM format"
+
+
+def test_entries_window_filtering_returns_only_window_entries(client) -> None:
+    in_window_date = date.today() - timedelta(days=1)
+    out_window_date = date.today() - timedelta(days=10)
+
+    in_payload = {"date": in_window_date.isoformat(), "sleep_total": "07:00"}
+    out_payload = {"date": out_window_date.isoformat(), "sleep_total": "06:30"}
+
+    assert client.post("/api/entries", json=in_payload).status_code == 201
+    assert client.post("/api/entries", json=out_payload).status_code == 201
+
+    res = client.get("/api/entries?window=7d")
+    assert res.status_code == 200
+    body = res.get_json()
+    assert body["success"] is True
+
+    returned_dates = [entry["date"] for entry in body["entries"]]
+    assert in_window_date.isoformat() in returned_dates
+    assert out_window_date.isoformat() not in returned_dates
+
+
+def test_entries_window_filtering_rejects_invalid_window_format(client) -> None:
+    res = client.get("/api/entries?window=bad")
+    assert res.status_code == 400
+    body = res.get_json()
+    assert body["success"] is False
+    assert body["error"] == "format is 7d,30d,3m,1y"
+
+
+@pytest.mark.parametrize("days_value", [0, -3])
+def test_entries_window_filtering_rejects_non_positive_days(
+    client, days_value: int
+) -> None:
+    res = client.get(f"/api/entries?days={days_value}")
+    assert res.status_code == 400
+    body = res.get_json()
+    assert body["success"] is False
+    assert body["error"] == "days must be a positive integer"
