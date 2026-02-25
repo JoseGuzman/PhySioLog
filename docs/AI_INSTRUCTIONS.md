@@ -263,7 +263,7 @@ When helping, use:
 [ ] Architecture stabilization:
     [x] Route/service boundary hardening (thin routes, move parsing/validation helpers)
     [x] API response shape consistency for `/api/entries`
-    [ ] API contract test coverage for entry lifecycle + sleep validation
+    [x] API contract test coverage for entry lifecycle + sleep validation
     [ ] Deduplicate create/update field mapping logic
     [x] Explicit sleep unit contract (`HH:MM` write, decimal read or dual-field policy)
 

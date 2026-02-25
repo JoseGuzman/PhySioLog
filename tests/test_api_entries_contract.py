@@ -45,24 +45,17 @@ def test_entries_lifecycle_contract(client) -> None:
     post_res = client.post("/api/entries", json=create_payload)
     assert post_res.status_code == 201
     post_body = post_res.get_json()
-    assert post_body == pytest.approx(  # type: ignore[arg-type]
-        {
-            "success": True,
-            "entry": {
-                "id": post_body["entry"]["id"],
-                "date": "2026-02-20",
-                "weight": 72.5,
-                "body_fat": 18.2,
-                "calories": 2200,
-                "training_volume": None,
-                "steps": 8500,
-                "sleep_total": "06:55",
-                "sleep_total_decimal": 6 + (55 / 60),
-                "sleep_quality": "good",
-                "observations": "felt energetic",
-            },
-        }
-    )
+    assert post_body["success"] is True
+    assert post_body["entry"]["date"] == "2026-02-20"
+    assert post_body["entry"]["weight"] == 72.5
+    assert post_body["entry"]["body_fat"] == 18.2
+    assert post_body["entry"]["calories"] == 2200
+    assert post_body["entry"]["training_volume"] is None
+    assert post_body["entry"]["steps"] == 8500
+    assert post_body["entry"]["sleep_total"] == "06:55"
+    assert post_body["entry"]["sleep_total_decimal"] == pytest.approx(6 + (55 / 60))
+    assert post_body["entry"]["sleep_quality"] == "good"
+    assert post_body["entry"]["observations"] == "felt energetic"
 
     get_one_res = client.get("/api/entries?date=2026-02-20")
     assert get_one_res.status_code == 200
