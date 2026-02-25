@@ -258,7 +258,7 @@ When helping, use:
 ### Near-term (v 0.3)
 
 [x] Unified window filtering
-[ ] Cleaner API contracts
+[x] Cleaner API contracts
 [ ] Improved JavaScript state flow
 [x] Architecture stabilization:
     [x] Route/service boundary hardening (thin routes, move parsing/validation helpers)

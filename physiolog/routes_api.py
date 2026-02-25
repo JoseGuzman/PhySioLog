@@ -240,13 +240,13 @@ def stats() -> Response | tuple[Response, int]:
     days = None
     if days_param is not None:
         if days_param <= 0:
-            return jsonify({"error": "days must be a positive integer"}), 400
+            return jsonify({"success": False, "error": "days must be a positive integer"}), 400
         days = days_param
     elif window:  # window provided and not empty
         try:
             days = window_to_days(window)
         except (ValueError, TypeError):
-            return jsonify({"error": "format is 7d,30d,3m,1y"}), 400
+            return jsonify({"success": False, "error": "format is 7d,30d,3m,1y"}), 400
     else:
         days = None  # all time
 
@@ -261,7 +261,7 @@ def stats() -> Response | tuple[Response, int]:
 
     entries = query.all()
     if not entries:
-        return jsonify({"error": "No data available"}), 404
+        return jsonify({"success": False, "error": "No data available"}), 404
 
     # For all-time, expose an actual date span so the UI can show day count.
     if days is None:
@@ -275,6 +275,7 @@ def stats() -> Response | tuple[Response, int]:
 
     return jsonify(
         {
+            "success": True,
             "window": window or "all",
             "window_days": window_days,
             "start_date": start_date.isoformat() if start_date else None,

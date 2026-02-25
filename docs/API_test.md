@@ -347,6 +347,7 @@ __Response (200 OK):__
 
 ```json
 {
+  "success": true,
   "window": "7d",
   "window_days": 7,
   "start_date": "2026-02-09",
@@ -374,6 +375,15 @@ __Error Cases:__
 
 - __400 Bad Request:__ Invalid window format or non-positive `days` parameter
 - __404 Not Found:__ No data available for the requested window
+
+Error payload shape:
+
+```json
+{
+  "success": false,
+  "error": "human-readable error message"
+}
+```
 
 ---
 
