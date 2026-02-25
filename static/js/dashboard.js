@@ -115,7 +115,10 @@ async function fetchStatsPayload(windowValue) {
     return fetchJson(url);
 }
 
-async function loadTrendsStats(windowValue = getSelectedWindowValue()) {
+async function loadTrendsStats(
+    windowValue = getSelectedWindowValue(),
+    requestId = ACTIVE_TRENDS_REQUEST_ID
+) {
     // Only run on trends-like pages
     const statsGrid = $("statsGrid");
     const hasTrendsPanel = !!statsGrid || TRENDS_STAT_FIELDS.some((k) => $(`stat-${k}`));
@@ -123,8 +126,10 @@ async function loadTrendsStats(windowValue = getSelectedWindowValue()) {
 
     try {
         const payload = await fetchStatsPayload(windowValue);
+        if (requestId !== ACTIVE_TRENDS_REQUEST_ID) return;
         renderTrendsStats(payload);
     } catch (err) {
+        if (requestId !== ACTIVE_TRENDS_REQUEST_ID) return;
         // If backend returns 404 "No data available", don't explode the UI
         console.error(err);
 
@@ -193,6 +198,7 @@ let LATEST_DATE_ISO = null;
 let CURRENT_WINDOW_ENTRIES = [];
 let ACTIVE_X_RANGE = null;
 let IS_SYNCING_ZOOM = false;
+let ACTIVE_TRENDS_REQUEST_ID = 0;
 
 // -----------------------------
 // Chart utilities
@@ -390,21 +396,26 @@ function getWindowXAxisRange(windowValue) {
 
 async function refreshTrendsWindow() {
     const windowValue = getSelectedWindowValue();
+    const requestId = ++ACTIVE_TRENDS_REQUEST_ID;
     ACTIVE_X_RANGE = null;
     try {
-        await loadCharts(windowValue);
+        await loadCharts(windowValue, requestId);
     } catch (err) {
+        if (requestId !== ACTIVE_TRENDS_REQUEST_ID) return;
         console.error(err);
     }
 
-    await loadTrendsStats(windowValue);
+    await loadTrendsStats(windowValue, requestId);
 }
 
 
 // -----------------------------
 // Loading Charts with custom windows
 // -----------------------------
-async function loadCharts(windowValue = getSelectedWindowValue()) {
+async function loadCharts(
+    windowValue = getSelectedWindowValue(),
+    requestId = ACTIVE_TRENDS_REQUEST_ID
+) {
     if (!hasAnyElement(CHART_IDS)) return;
 
     let entries;
@@ -414,13 +425,16 @@ async function loadCharts(windowValue = getSelectedWindowValue()) {
             ? `/api/entries?window=${encodeURIComponent(windowValue)}`
             : "/api/entries";
         const payload = await fetchJson(entriesUrl);
+        if (requestId !== ACTIVE_TRENDS_REQUEST_ID) return;
         entries = Array.isArray(payload) ? payload : payload?.entries;
         if (!Array.isArray(entries)) return;
     } catch (err) {
+        if (requestId !== ACTIVE_TRENDS_REQUEST_ID) return;
         console.error(err);
         return;
     }
 
+    if (requestId !== ACTIVE_TRENDS_REQUEST_ID) return;
     CURRENT_WINDOW_ENTRIES = entries;
     const xAxisRange = getWindowXAxisRange(windowValue);
 

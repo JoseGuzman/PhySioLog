@@ -259,7 +259,7 @@ When helping, use:
 
 [x] Unified window filtering
 [x] Cleaner API contracts
-[ ] Improved JavaScript state flow
+[x] Improved JavaScript state flow
 [x] Architecture stabilization:
     [x] Route/service boundary hardening (thin routes, move parsing/validation helpers)
     [x] API response shape consistency for `/api/entries`
