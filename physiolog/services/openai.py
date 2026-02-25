@@ -44,6 +44,7 @@ def run_smoke_test() -> dict:
     }```
 
     """
+    # first check for API key in environment variables
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not set")

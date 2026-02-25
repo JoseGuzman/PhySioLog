@@ -261,7 +261,7 @@ When helping, use:
 [ ] Cleaner API contracts
 [ ] Improved JavaScript state flow
 [ ] Architecture stabilization:
-    [ ] Route/service boundary hardening (thin routes, move parsing/validation helpers)
+    [x] Route/service boundary hardening (thin routes, move parsing/validation helpers)
     [ ] API response shape consistency for `/api/entries`
     [ ] API contract test coverage for entry lifecycle + sleep validation
     [ ] Deduplicate create/update field mapping logic

@@ -63,6 +63,40 @@ The app runs on `http://localhost:5000` by default.
 
 ---
 
+## Automated Test Suite
+
+The repository includes a small `pytest` suite for service-layer and parsing helpers.
+
+### Run all tests
+
+```bash
+uv run --with pytest pytest
+```
+
+### Run a single file
+
+```bash
+uv run --with pytest pytest tests/test_services.py
+uv run --with pytest pytest tests/test_entry_parsing_helpers.py
+```
+
+### What is currently covered
+
+- `tests/test_services.py`
+  - Validates `compute_stats(...)` average calculations
+  - Validates behavior when all metric values are `None`
+- `tests/test_entry_parsing_helpers.py`
+  - Validates required date parsing (`YYYY-MM-DD`)
+  - Validates `sleep_total` parsing contract (`HH:MM` -> decimal hours)
+  - Validates rejection of invalid payload values/formats
+
+### Notes
+
+- Tests are fast unit tests; they do not require starting Flask server.
+- If `uv` is installed outside your shell `PATH`, use the absolute binary path.
+
+---
+
 ## API Endpoints
 
 ### 1. GET /api/entries
