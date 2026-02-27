@@ -2,6 +2,168 @@
 
 {% block title %}AI Coach - Physiolog{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .coach-container {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        display: flex;
+        flex-direction: column;
+        min-height: 68vh;
+        max-height: calc(100vh - 190px);
+        overflow: hidden;
+    }
+
+    .coach-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+    }
+
+    .session-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border-radius: 11px;
+        border: 1px solid var(--border-2);
+        background: var(--field-bg);
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .coach-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .coach-actions .divider {
+        width: 1px;
+        height: 24px;
+        background: var(--border);
+        margin: 0 4px;
+    }
+
+    .icon-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1px solid var(--border-2);
+        background: var(--field-bg);
+        color: var(--muted);
+        display: grid;
+        place-items: center;
+        padding: 0;
+    }
+
+    .chat-window {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        background: var(--bg);
+        scrollbar-color: #3a3a3a #101214;
+    }
+
+    .chat-window::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .chat-window::-webkit-scrollbar-track {
+        background: #101214;
+    }
+
+    .chat-window::-webkit-scrollbar-thumb {
+        background: #3a3a3a;
+        border-radius: 8px;
+    }
+
+    .chat-message {
+        display: flex;
+        max-width: min(860px, 78%);
+    }
+
+    .chat-message.user {
+        align-self: flex-end;
+    }
+
+    .chat-message.bot {
+        align-self: flex-start;
+    }
+
+    .bubble {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        font-size: 0.95em;
+        line-height: 1.45;
+        white-space: pre-line;
+        background: var(--panel);
+        color: var(--text);
+    }
+
+    .chat-message.user .bubble {
+        background: color-mix(in srgb, var(--accent) 16%, var(--panel) 84%);
+        border-color: color-mix(in srgb, var(--accent) 35%, var(--border) 65%);
+    }
+
+    .chat-input-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 14px;
+        border-top: 1px solid var(--border);
+        background: var(--panel);
+    }
+
+    .chat-input-bar input {
+        flex: 1;
+    }
+
+    [data-theme="light"] .chat-window {
+        background: #f8fafc;
+        scrollbar-color: #c8d3dc #eef3f7;
+    }
+
+    [data-theme="light"] .chat-window::-webkit-scrollbar-track {
+        background: #eef3f7;
+    }
+
+    [data-theme="light"] .chat-window::-webkit-scrollbar-thumb {
+        background: #c8d3dc;
+    }
+
+    [data-theme="light"] .bubble {
+        background: #ffffff;
+        border-color: #dfe3e9;
+    }
+
+    [data-theme="light"] .chat-message.user .bubble {
+        background: #eef7f3;
+        border-color: #cfe4d9;
+    }
+
+    @media (max-width: 900px) {
+        .coach-container {
+            min-height: 72vh;
+            max-height: calc(100vh - 160px);
+        }
+
+        .chat-message {
+            max-width: 88%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>AI Coach</h1>
@@ -9,6 +171,15 @@
 </div>
 
 <div class="coach-container">
+    <div class="coach-toolbar">
+        <span class="session-chip">Main Session</span>
+        <div class="coach-actions" aria-hidden="true">
+            <button type="button" class="icon-btn" tabindex="-1"><i data-lucide="rotate-cw" class="icon"></i></button>
+            <span class="divider"></span>
+            <button type="button" class="icon-btn" tabindex="-1"><i data-lucide="brain-circuit" class="icon"></i></button>
+            <button type="button" class="icon-btn" tabindex="-1"><i data-lucide="maximize-2" class="icon"></i></button>
+        </div>
+    </div>
 
     <!-- Chat window -->
     <div id="chatWindow" class="chat-window">
