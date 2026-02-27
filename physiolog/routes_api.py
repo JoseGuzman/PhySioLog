@@ -9,6 +9,7 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 from datetime import date, datetime, timedelta
 
 from flask import Blueprint, Response, jsonify, request
+from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 
 from .extensions import db
@@ -38,9 +39,6 @@ def window_to_days(window_str: str) -> int | None:
     raise ValueError("Invalid window format")
 
 
-# =========================================================================
-# API Routes
-# =========================================================================
 @api_bp.route("/llm-smoke", methods=["GET"])
 def llm_smoke() -> Response | tuple[Response, int]:
     """
@@ -57,7 +55,11 @@ def llm_smoke() -> Response | tuple[Response, int]:
         return jsonify({"ok": False, "error": str(exc)}), 500
 
 
+# =========================================================================
+# Protected routes (require login)
+# =========================================================================
 @api_bp.route("/entries", methods=["GET", "POST", "PUT"])
+@login_required
 def entries() -> Response | tuple[Response, int]:
     """
         Handle health entry retrieval and creation.
@@ -129,7 +131,9 @@ def entries() -> Response | tuple[Response, int]:
         entry_fields = build_entry_fields(data, sleep_decimal)
 
         if request.method == "PUT":
-            entry = HealthEntry.query.filter_by(date=parsed_date).first()
+            entry = HealthEntry.query.filter_by(
+                user_id=current_user.id, date=parsed_date
+            ).first()
             if not entry:
                 return jsonify(
                     {"success": False, "error": "Entry not found for the given date"}
@@ -147,6 +151,7 @@ def entries() -> Response | tuple[Response, int]:
             return jsonify({"success": True, "entry": entry.to_dict()}), 200
 
         entry = HealthEntry(
+            user_id=current_user.id,
             date=parsed_date,
             **entry_fields,
         )
@@ -174,7 +179,9 @@ def entries() -> Response | tuple[Response, int]:
                 {"success": False, "error": "Invalid date format, expected YYYY-MM-DD"}
             ), 400
         # If date is provided, return only that entry
-        entry = HealthEntry.query.filter_by(date=query_date).first()
+        entry = HealthEntry.query.filter_by(
+            user_id=current_user.id, date=query_date
+        ).first()
         if not entry:
             return jsonify(
                 {"success": False, "error": "Entry not found for the given date"}
@@ -184,11 +191,17 @@ def entries() -> Response | tuple[Response, int]:
     window = request.args.get("window", default="", type=str).lower().strip()
     days_param = request.args.get("days", type=int)
 
-    query = HealthEntry.query.order_by(HealthEntry.date.desc())
+    # query = HealthEntry.query.order_by(HealthEntry.date.desc())
+    # prevent auth user accessing other users' entries
+    query = HealthEntry.query.filter_by(user_id=current_user.id).order_by(
+        HealthEntry.date.desc()
+    )
     days = None
     if days_param is not None:
         if days_param <= 0:
-            return jsonify({"success": False, "error": "days must be a positive integer"}), 400
+            return jsonify(
+                {"success": False, "error": "days must be a positive integer"}
+            ), 400
         days = days_param
     elif window:
         try:
@@ -206,6 +219,7 @@ def entries() -> Response | tuple[Response, int]:
 
 
 @api_bp.route("/stats")  # GET only (default when no methods specified)
+@login_required
 def stats() -> Response | tuple[Response, int]:
     """
     Return aggregated statitistics for health entries.
@@ -240,7 +254,9 @@ def stats() -> Response | tuple[Response, int]:
     days = None
     if days_param is not None:
         if days_param <= 0:
-            return jsonify({"success": False, "error": "days must be a positive integer"}), 400
+            return jsonify(
+                {"success": False, "error": "days must be a positive integer"}
+            ), 400
         days = days_param
     elif window:  # window provided and not empty
         try:
@@ -250,7 +266,10 @@ def stats() -> Response | tuple[Response, int]:
     else:
         days = None  # all time
 
-    query = HealthEntry.query.order_by(HealthEntry.date.desc())
+    # query = HealthEntry.query.order_by(HealthEntry.date.desc())
+    query = HealthEntry.query.filter_by(user_id=current_user.id).order_by(
+        HealthEntry.date.desc()
+    )
 
     start_date = None
     end_date = date.today()

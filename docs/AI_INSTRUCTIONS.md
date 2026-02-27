@@ -282,6 +282,12 @@ When helping, use:
 [ ] Logging and monitoring setup
 [ ] Mobile-responsive improvements
 
+### Long-term (v 1.1+)
+
+[ ] AI coach integration
+[ ] Advanced analytics and insights
+[ ] User‑defined goals and tracking
+[ ] Community features (sharing, challenges)
 ---
 
 ## 16) Forbidden behaviors

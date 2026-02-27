@@ -26,7 +26,10 @@ from __future__ import annotations  # python 3.12 uses [type|type]
 
 from datetime import date as Date
 
-from sqlalchemy.orm import Mapped, mapped_column
+from flask_login import UserMixin
+from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from .extensions import db
 
@@ -44,13 +47,48 @@ def _decimal_hours_to_hhmm(value: float | None) -> str | None:
     return f"{hours:02d}:{minutes:02d}"
 
 
+class User(UserMixin, db.Model):
+    """Database model for users."""
+
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str | None] = mapped_column(db.String(100), nullable=True, index=True)
+    email: Mapped[str] = mapped_column(db.String(120), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(db.String(255), nullable=False)
+    is_active_user: Mapped[bool] = mapped_column(default=True, nullable=False)
+
+    entries: Mapped[list[HealthEntry]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+    def set_password(self, password: str) -> None:
+        """Hash and set the user's password."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """Check if the provided password matches the stored hash."""
+        return check_password_hash(self.password_hash, password)
+
+    @property
+    def is_active(self) -> bool:
+        """Return whether the user is active."""
+        return self.is_active_user
+
+
 class HealthEntry(db.Model):
     """Database model for daily health tracking entries."""
 
     __tablename__ = "health_entries"
+    __table_args__ = (UniqueConstraint("user_id", "date", name="uix_user_date"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[Date] = mapped_column(unique=True, nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(
+        db.ForeignKey("users.id"), nullable=False, index=True
+    )
+    # The date of the entry is not unique, allowing for multiple users
+    date: Mapped[Date] = mapped_column(unique=False, nullable=False, index=True)
+    user: Mapped[User] = relationship(back_populates="entries")
 
     weight: Mapped[float | None] = mapped_column(nullable=True)
     body_fat: Mapped[float | None] = mapped_column(nullable=True)

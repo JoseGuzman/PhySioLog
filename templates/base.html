@@ -62,7 +62,6 @@
                         <i data-lucide="sparkles" class="icon"></i>
                         <span>AI Coach</span>
                     </a>
-
                 </li>
 
             </ul>
@@ -71,6 +70,42 @@
 
     <!-- Main Content: Global Content Container -->
     <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-profile">
+                <button id="profileMenuBtn" class="profile-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                    <span class="profile-avatar">{{ (current_user.name or current_user.email or "U")[:1] | upper }}</span>
+                </button>
+
+                <div id="profileMenu" class="profile-menu" hidden>
+                    <div class="profile-menu-head">
+                        <div class="profile-name">{{ current_user.name or "User" }}</div>
+                        <div class="profile-email">{{ current_user.email }}</div>
+                    </div>
+
+                    <div class="theme-switcher" role="group" aria-label="Theme switcher">
+                        <button type="button" class="theme-btn" data-theme-choice="light" aria-label="Light mode">
+                            <i data-lucide="sun" class="icon"></i>
+                        </button>
+                        <button type="button" class="theme-btn" data-theme-choice="dark" aria-label="Dark mode">
+                            <i data-lucide="moon" class="icon"></i>
+                        </button>
+                        <button type="button" class="theme-btn" data-theme-choice="system" aria-label="System mode">
+                            <i data-lucide="monitor" class="icon"></i>
+                        </button>
+                    </div>
+
+                    <div class="profile-links">
+                        <a href="#" class="profile-link">Manage cookies</a>
+                        <a href="#" class="profile-link">Terms & policies</a>
+                        <a href="#" class="profile-link">Help</a>
+                    </div>
+
+                    <form method="post" action="{{ url_for('web.logout') }}" class="profile-logout-form">
+                        <button type="submit" class="profile-link logout-link">Log out</button>
+                    </form>
+                </div>
+            </div>
+        </header>
         <div class="content-wrapper">
             {% block content %}{% endblock %}
         </div>
@@ -84,6 +119,59 @@
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     <script>
         lucide.createIcons();
+
+        (function () {
+            const root = document.documentElement;
+            const btn = document.getElementById("profileMenuBtn");
+            const menu = document.getElementById("profileMenu");
+            const themeBtns = document.querySelectorAll(".theme-btn");
+            const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+            function resolveTheme(choice) {
+                if (choice === "light" || choice === "dark") return choice;
+                return media.matches ? "dark" : "light";
+            }
+
+            function applyTheme(choice) {
+                const resolved = resolveTheme(choice);
+                root.setAttribute("data-theme", resolved);
+                localStorage.setItem("theme-choice", choice);
+                themeBtns.forEach((el) => {
+                    el.classList.toggle("active", el.dataset.themeChoice === choice);
+                });
+            }
+
+            const saved = localStorage.getItem("theme-choice") || "system";
+            applyTheme(saved);
+            media.addEventListener("change", () => {
+                const current = localStorage.getItem("theme-choice") || "system";
+                if (current === "system") applyTheme("system");
+            });
+
+            themeBtns.forEach((el) => {
+                el.addEventListener("click", () => applyTheme(el.dataset.themeChoice || "system"));
+            });
+
+            if (!btn || !menu) return;
+            btn.addEventListener("click", () => {
+                const open = menu.hasAttribute("hidden");
+                if (open) {
+                    menu.removeAttribute("hidden");
+                    btn.setAttribute("aria-expanded", "true");
+                } else {
+                    menu.setAttribute("hidden", "");
+                    btn.setAttribute("aria-expanded", "false");
+                }
+            });
+
+            document.addEventListener("click", (ev) => {
+                if (menu.hasAttribute("hidden")) return;
+                if (!menu.contains(ev.target) && !btn.contains(ev.target)) {
+                    menu.setAttribute("hidden", "");
+                    btn.setAttribute("aria-expanded", "false");
+                }
+            });
+        })();
     </script>
 
 </body>

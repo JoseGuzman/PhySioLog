@@ -38,7 +38,11 @@ class Config:
         "SQLALCHEMY_DATABASE_URI", f"sqlite:///{default_db_path}"
     )
 
+    # User authentication settings
     AUTO_CREATE_DB = environ.get("AUTO_CREATE_DB", "True").lower() == "true"
+    AUTH_BOOTSTRAP_USER = environ.get("AUTH_BOOTSTRAP_USER", "").strip().lower()
+    AUTH_BOOTSTRAP_PASSWORD = environ.get("AUTH_BOOTSTRAP_PASSWORD", "")
+    AUTH_BOOTSTRAP_USER_ENABLED = environ.get("AUTH_BOOTSTRAP_USER_ENABLED", "False").lower() == "true"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # Convert string to boolean safely

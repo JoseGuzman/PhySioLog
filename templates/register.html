@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Physiolog</title>
+    <title>Register - Physiolog</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -41,22 +40,6 @@
             margin-bottom: 16px;
             font-size: 0.95rem;
             text-align: center;
-        }
-
-        .register-note {
-            margin-top: 10px;
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.85rem;
-        }
-
-        .register-note a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .register-note a:hover {
-            text-decoration: underline;
         }
 
         .auth-form {
@@ -109,42 +92,64 @@
             margin-bottom: 12px;
             font-size: 0.9rem;
         }
+
+        .login-note {
+            margin-top: 10px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .login-note a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .login-note a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
-
 <body>
     <main class="auth-card">
         <h1 class="auth-title">PHYSIOLOG</h1>
-        <p class="auth-subtitle">AI-based health tracker.</p>
+        <p class="auth-subtitle">Create your account.</p>
 
         {% with messages = get_flashed_messages(category_filter=['error']) %}
         {% if messages %}
-        {% for msg in messages %}
-        <div class="flash-error">{{ msg }}</div>
-        {% endfor %}
+            {% for msg in messages %}
+            <div class="flash-error">{{ msg }}</div>
+            {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <form class="auth-form" method="post" action="{{ url_for('web.login') }}">
+        <form class="auth-form" method="post" action="{{ url_for('web.register') }}">
+            <label>
+                Name
+                <input type="text" name="name" autocomplete="name" required>
+            </label>
             <label>
                 Email
                 <input type="email" name="email" autocomplete="email" required>
             </label>
             <label>
                 Password
-                <input type="password" name="password" autocomplete="current-password" required>
+                <input type="password" name="password" autocomplete="new-password" required>
             </label>
-            <button class="auth-btn" type="submit">Sign in</button>
+            <label>
+                Confirm password
+                <input type="password" name="confirm_password" autocomplete="new-password" required>
+            </label>
+            <button class="auth-btn" type="submit">Create account</button>
         </form>
 
-        <p class="register-note">
-            Don’t have an account?
-            <a href="{{ url_for('web.register') }}">Register</a>
+        <p class="login-note">
+            Already have an account?
+            <a href="{{ url_for('web.login') }}">Sign in</a>
         </p>
     </main>
 </body>
 <script>
     document.documentElement.setAttribute("data-theme", "light");
 </script>
-
 </html>

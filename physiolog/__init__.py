@@ -18,7 +18,7 @@ Shell context (only available in development):
 (see here: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database)
 Typing flask shell will permit access to the app and database. Note that
 we need a .flaskenv file with FLASK_ENV=physiology:create_app:
-python -m flask guarantees Flask runs with the same interpreter uv selected 
+python -m flask guarantees Flask runs with the same interpreter uv selected
 >>> uv run python -m flask shell
 Python 3.12.12 (main, Jan 27 2026, 23:31:45) [Clang 21.1.4 ] on darwin
 App: physiolog
@@ -26,7 +26,7 @@ Instance: /path/to/repo/instance
 >>> app
 >>> <Flask 'physiolog'>
 >>> db
->>> <SQLAlchemy sqlite:////path/to/repo/instance/physiolog_users.db>
+>>> <SQLAlchemy sqlite:////path/to/repo/instance/physiolog.db>
 >>> User
 >>> User <class 'physiolog.models.User'>
 >>> myuser = User.query.filter_by(username='jose').first()
@@ -40,7 +40,7 @@ from flask import Flask
 
 from physiolog.config import Config
 
-from .extensions import db
+from .extensions import db, login_manager
 
 # physiolog/ is a subfolder, target templates and static folders in the parent directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,7 +67,26 @@ def create_app(config_class=None) -> Flask:
     app.config.from_object(config_class)  # check config.py
 
     db.init_app(app)
-    from . import models  # import models to create tables with db.create_all()
+    login_manager.init_app(app)
+
+    # models to create databases
+    from . import models
+    from .models import User
+
+    @login_manager.user_loader
+    def load_user(user_id: str) -> User | None:
+        """Flask-Login user loader callback
+
+        Args:
+
+            user_id (str): The user ID stored in the session (as a string)
+
+        Returns:
+            User | None: The User object corresponding to the given user_id, or None if not found
+        """
+        if not user_id.isdigit():
+            return None  # Invalid user_id format()
+        return User.query.get(int(user_id))
 
     # provide shell context for development
     @app.shell_context_processor
@@ -75,9 +94,10 @@ def create_app(config_class=None) -> Flask:
         """Shell context for flask shell command in development
 
         Returns:
-            dict: A dictionary of app and db objects for flask shell
+            dict: A dictionary of app and db and User models
+            for flask shell
         """
-        return {"app": app, "db": db}
+        return {"app": app, "db": db, "User": User}
 
     # Import and register modular blueprints
     from .routes_api import api_bp  # API routes
@@ -94,5 +114,18 @@ def create_app(config_class=None) -> Flask:
         debug = app.config.get("DEBUG", False)
         if create_db or debug:
             db.create_all()
+            if app.config.get("AUTH_BOOTSTRAP_USER_ENABLED", False):
+                email = app.config.get("AUTH_BOOTSTRAP_USER", "").strip().lower()
+                password = app.config.get("AUTH_BOOTSTRAP_PASSWORD", "")
+                if email and password and not User.query.filter_by(email=email).first():
+                    u = User(email=email)
+                    u.set_password(password=password)
+                    db.session.add(u)
+                    db.session.commit()
+                    print(f"Bootstrap user created with email: {email}")
+                else:
+                    print(
+                        "Bootstrap user email or password not set. Skipping bootstrap user creation."
+                    )
 
     return app
