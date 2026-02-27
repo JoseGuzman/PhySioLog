@@ -269,9 +269,9 @@ When helping, use:
 
 ### Medium-term (v 0.4)
 
-[ ] Authentication (Flask‑Login)
-[ ] Multi‑user data
-[ ] Migrations
+[x] Authentication (Flask‑Login)
+[x] Multi‑user data
+[ ] Database Migrations
 
 ### Deployment (v 1.0)
 
