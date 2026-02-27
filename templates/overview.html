@@ -56,6 +56,13 @@
         padding: 14px;
     }
 
+    .result-block h2 {
+        font-size: 1.05em;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--text);
+    }
+
     .result-block.blue {
         background: rgba(56, 189, 248, 0.10);
         border-color: rgba(56, 189, 248, 0.25);
@@ -71,12 +78,18 @@
         border-color: rgba(251, 146, 60, 0.25);
     }
 
+    [data-theme="light"] .panel,
+    [data-theme="light"] .result-block {
+        background: #ffffff;
+        border-color: #dfe3e9;
+    }
+
     .result-row {
         display: grid;
         grid-template-columns: 1fr auto;
         gap: 10px;
         padding: 10px 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-top: 1px solid var(--border);
     }
 
     .result-row:first-of-type {
@@ -85,23 +98,27 @@
 
     .result-label {
         color: var(--muted);
-        font-weight: 650;
+        font-weight: 600;
+        font-size: 0.86rem;
+        line-height: 1.35;
     }
 
     .result-value {
-        font-weight: 800;
-        letter-spacing: -0.01em;
+        color: var(--text);
+        font-weight: 700;
+        letter-spacing: 0;
     }
 
     .result-big {
-        font-size: 1.4em;
+        font-size: 1.2rem;
     }
 
     .minmax {
         display: flex;
         gap: 12px;
         color: var(--muted);
-        font-size: 0.9em;
+        font-size: 0.84rem;
+        margin-top: 4px;
     }
 </style>
 {% endblock %}
@@ -167,7 +184,7 @@
 
         <!-- BMR / TDEE -->
         <div class="result-block blue">
-            <h2 style="margin-bottom: 6px;">Metabolism</h2>
+            <h2>Metabolism</h2>
 
             <div class="result-row">
                 <div class="result-label">Basal Metabolic Rate (BMR)</div>
@@ -189,7 +206,7 @@
 
         <!-- Weight loss -->
         <div class="result-block green">
-            <h2 style="margin-bottom: 6px;">Weight Loss</h2>
+            <h2>Weight Loss</h2>
 
             <div class="result-row">
                 <div class="result-label">
@@ -218,7 +235,7 @@
 
         <!-- Lean bulk -->
         <div class="result-block orange">
-            <h2 style="margin-bottom: 6px;">Lean Bulk</h2>
+            <h2>Lean Bulk</h2>
 
             <div class="result-row">
                 <div class="result-label">

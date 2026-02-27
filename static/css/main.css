@@ -35,7 +35,7 @@ ChatGPT-ish dark UI: clean sidebar, subtle borders, soft hover, calm typography
 
 [data-theme="light"] {
     --bg: #f6f6f8;
-    --panel: #ffffff;
+    --panel: #f1f9f4;
     --panel-2: #f2f3f5;
     --border: #e1e3e8;
     --border-2: #d5d9e0;
@@ -48,6 +48,16 @@ ChatGPT-ish dark UI: clean sidebar, subtle borders, soft hover, calm typography
     --sidebar-link: #3a4150;
     --sidebar-link-icon: #7a8290;
     --field-bg: #eef7f3;
+}
+
+/* Light mode: primary app surfaces use white cards */
+[data-theme="light"] .main-content .page-header,
+[data-theme="light"] .main-content .stat-card,
+[data-theme="light"] .main-content .chart,
+[data-theme="light"] .main-content .form-section,
+[data-theme="light"] .main-content .panel {
+    background: #ffffff;
+    border-color: #dfe3e9;
 }
 
 * {

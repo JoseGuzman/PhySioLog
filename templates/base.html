@@ -139,6 +139,10 @@
                 themeBtns.forEach((el) => {
                     el.classList.toggle("active", el.dataset.themeChoice === choice);
                 });
+
+                if (typeof window.loadTrends === "function") {
+                    window.loadTrends();
+                }
             }
 
             const saved = localStorage.getItem("theme-choice") || "system";

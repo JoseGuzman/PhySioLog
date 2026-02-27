@@ -164,15 +164,92 @@ function cssVar(name, fallback) {
 
 const CARD_BG = cssVar("--panel", "#252525");
 
+function getPlotBgColor() {
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    return isLight ? "#ffffff" : CARD_BG;
+}
+
+function getAxisTheme() {
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    return isLight
+        ? {
+            grid: "#e5e7eb",
+            tick: "#9ca3af",
+            line: "#cbd5e1",
+            zero: "#e5e7eb",
+            font: "#4b5563",
+        }
+        : {
+            grid: "#333",
+            tick: "#888",
+            line: "#888",
+            zero: "#2e2e2e",
+            font: "#e0e0e0",
+        };
+}
+
 const BASE_LAYOUT = {
-    paper_bgcolor: CARD_BG,
-    plot_bgcolor: CARD_BG,
-    font: { color: "#e0e0e0" },
+    paper_bgcolor: getPlotBgColor(),
+    plot_bgcolor: getPlotBgColor(),
+    font: {
+        color:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#4b5563"
+                : "#e0e0e0",
+    },
     hovermode: "x unified",
     showlegend: false,
     margin: { t: 20, r: 20, b: 60, l: 60 },
-    xaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e", layer: "below traces" },
-    yaxis: { gridcolor: "#333", tickcolor: "#888", linecolor: "#888", zerolinecolor: "#2e2e2e", layer: "below traces" },
+    xaxis: {
+        gridcolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#e5e7eb"
+                : "#333",
+        tickcolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#9ca3af"
+                : "#888",
+        tickfont: {
+            color:
+                document.documentElement.getAttribute("data-theme") === "light"
+                    ? "#4b5563"
+                    : "#e0e0e0",
+        },
+        linecolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#cbd5e1"
+                : "#888",
+        zerolinecolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#e5e7eb"
+                : "#2e2e2e",
+        layer: "below traces",
+    },
+    yaxis: {
+        gridcolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#e5e7eb"
+                : "#333",
+        tickcolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#9ca3af"
+                : "#888",
+        tickfont: {
+            color:
+                document.documentElement.getAttribute("data-theme") === "light"
+                    ? "#4b5563"
+                    : "#e0e0e0",
+        },
+        linecolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#cbd5e1"
+                : "#888",
+        zerolinecolor:
+            document.documentElement.getAttribute("data-theme") === "light"
+                ? "#e5e7eb"
+                : "#2e2e2e",
+        layer: "below traces",
+    },
 };
 
 const MYCOLORS = {
@@ -437,6 +514,28 @@ async function loadCharts(
     if (requestId !== ACTIVE_TRENDS_REQUEST_ID) return;
     CURRENT_WINDOW_ENTRIES = entries;
     const xAxisRange = getWindowXAxisRange(windowValue);
+    const plotBg = getPlotBgColor();
+    const axisTheme = getAxisTheme();
+    const baseLayout = {
+        ...BASE_LAYOUT,
+        font: { color: axisTheme.font },
+        xaxis: {
+            ...BASE_LAYOUT.xaxis,
+            gridcolor: axisTheme.grid,
+            tickcolor: axisTheme.tick,
+            tickfont: { color: axisTheme.font },
+            linecolor: axisTheme.line,
+            zerolinecolor: axisTheme.zero,
+        },
+        yaxis: {
+            ...BASE_LAYOUT.yaxis,
+            gridcolor: axisTheme.grid,
+            tickcolor: axisTheme.tick,
+            tickfont: { color: axisTheme.font },
+            linecolor: axisTheme.line,
+            zerolinecolor: axisTheme.zero,
+        },
+    };
 
     // Sort ascending by date (oldest -> newest)
     entries.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -462,10 +561,12 @@ async function loadCharts(
                 },
             ],
             {
-                ...BASE_LAYOUT,
-                yaxis: { ...BASE_LAYOUT.yaxis, title: "Weight (kg)" },
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
+                yaxis: { ...baseLayout.yaxis, title: "Weight (kg)" },
                 xaxis: {
-                    ...BASE_LAYOUT.xaxis,
+                    ...baseLayout.xaxis,
                     ...makeXAxis(-30),
                     ...(xAxisRange ? { range: xAxisRange } : {}),
                 },
@@ -493,10 +594,12 @@ async function loadCharts(
                 },
             ],
             {
-                ...BASE_LAYOUT,
-                yaxis: { ...BASE_LAYOUT.yaxis, title: "Body Fat (%)" },
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
+                yaxis: { ...baseLayout.yaxis, title: "Body Fat (%)" },
                 xaxis: {
-                    ...BASE_LAYOUT.xaxis,
+                    ...baseLayout.xaxis,
                     ...makeXAxis(-30),
                     ...(xAxisRange ? { range: xAxisRange } : {}),
                 },
@@ -524,12 +627,14 @@ async function loadCharts(
                 },
             ],
             {
-                ...BASE_LAYOUT,
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
                 hovermode: "closest",
                 bargap: 0.15,
-                yaxis: { ...BASE_LAYOUT.yaxis, title: "Steps" },
+                yaxis: { ...baseLayout.yaxis, title: "Steps" },
                 xaxis: {
-                    ...BASE_LAYOUT.xaxis,
+                    ...baseLayout.xaxis,
                     ...makeXAxis(-30),
                     ...(xAxisRange ? { range: xAxisRange } : {}),
                     showspikes: false
@@ -566,11 +671,13 @@ async function loadCharts(
                 },
             ],
             {
-                ...BASE_LAYOUT,
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
                 hovermode: "closest",
                 bargap: 0.15,
                 yaxis: {
-                    ...BASE_LAYOUT.yaxis,
+                    ...baseLayout.yaxis,
                     title: "Sleep (HH:MM)",
                     tickformat: ",.2f",
                     tickmode: "array",
@@ -578,7 +685,7 @@ async function loadCharts(
                     ticktext: ["00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00"],
                 },
                 xaxis: {
-                    ...BASE_LAYOUT.xaxis,
+                    ...baseLayout.xaxis,
                     ...makeXAxis(-30),
                     ...(xAxisRange ? { range: xAxisRange } : {}),
                     showspikes: false
@@ -606,12 +713,14 @@ async function loadCharts(
                 },
             ],
             {
-                ...BASE_LAYOUT,
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
                 hovermode: "closest",
                 bargap: 0.15,
-                yaxis: { ...BASE_LAYOUT.yaxis, title: "Calories (kcal)" },
+                yaxis: { ...baseLayout.yaxis, title: "Calories (kcal)" },
                 xaxis: {
-                    ...BASE_LAYOUT.xaxis,
+                    ...baseLayout.xaxis,
                     ...makeXAxis(-30),
                     ...(xAxisRange ? { range: xAxisRange } : {}),
                     showspikes: false
@@ -639,11 +748,13 @@ async function loadCharts(
                 },
             ],
             {
-                ...BASE_LAYOUT,
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
                 hovermode: "x closest",
-                yaxis: { ...BASE_LAYOUT.yaxis, title: "Training Volume (kg)" },
+                yaxis: { ...baseLayout.yaxis, title: "Training Volume (kg)" },
                 xaxis: {
-                    ...BASE_LAYOUT.xaxis,
+                    ...baseLayout.xaxis,
                     ...makeXAxis(-30),
                     ...(xAxisRange ? { range: xAxisRange } : {}),
                 },
@@ -671,6 +782,8 @@ async function init() {
     await refreshTrendsWindow();
 
 }
+
+window.loadTrends = refreshTrendsWindow;
 
 document.addEventListener("DOMContentLoaded", () => {
     Promise.resolve(init()).catch((err) => console.error(err));
