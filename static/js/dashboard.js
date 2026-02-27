@@ -620,6 +620,7 @@ async function loadCharts(
                 {
                     x: dates, y: stepsData, name: "Daily Steps", type: "bar",
                     marker: { color: MYCOLORS.steps.bar, line: { width: 0 } },
+                    opacity: 0.6,
                 },
                 {
                     x: dates, y: stepsMA, name: "7-Day Average", type: "scatter", mode: "lines",
@@ -660,6 +661,7 @@ async function loadCharts(
                 {
                     x: dates, y: sleepData, name: "Daily Sleep", type: "bar",
                     marker: { color: MYCOLORS.sleep.bar, line: { width: 0 } },
+                    opacity: 0.6,
                     customdata: sleepData.map(decimalHoursToHHMM),
                     hovertemplate: "Date: %{x}<br>Sleep: %{customdata}<extra></extra>"
                 },
@@ -705,7 +707,8 @@ async function loadCharts(
             [
                 {
                     x: dates, y: caloriesData, name: "Daily Calories", type: "bar",
-                    marker: { color: MYCOLORS.calories.bar, line: { width: 0 } }
+                    marker: { color: MYCOLORS.calories.bar, line: { width: 0 } },
+                    opacity: 0.6,
                 },
                 {
                     x: dates, y: caloriesMA, name: "7-Day Average", type: "scatter", mode: "lines",
