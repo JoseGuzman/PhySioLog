@@ -54,6 +54,9 @@ class User(UserMixin, db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str | None] = mapped_column(db.String(100), nullable=True, index=True)
+    age: Mapped[int | None] = mapped_column(nullable=True)
+    height_cm: Mapped[float | None] = mapped_column(nullable=True)
+    weight_kg: Mapped[float | None] = mapped_column(nullable=True)
     email: Mapped[str] = mapped_column(db.String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(db.String(255), nullable=False)
     is_active_user: Mapped[bool] = mapped_column(default=True, nullable=False)

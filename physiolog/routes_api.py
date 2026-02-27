@@ -218,6 +218,79 @@ def entries() -> Response | tuple[Response, int]:
     return jsonify({"success": True, "entries": serialized_entries})
 
 
+@api_bp.route("/user-profile", methods=["GET", "PUT"])
+@login_required
+def user_profile() -> Response | tuple[Response, int]:
+    """Read/update authenticated user's profile inputs used by overview calculations."""
+    if request.method == "GET":
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "profile": {
+                        "age": current_user.age,
+                        "height_cm": current_user.height_cm,
+                        "weight_kg": current_user.weight_kg,
+                    },
+                }
+            ),
+            200,
+        )
+
+    if not request.is_json:
+        return jsonify(
+            {"success": False, "error": "Content-Type must be application/json"}
+        ), 400
+
+    data = request.json
+    if data is None or not isinstance(data, dict):
+        return jsonify({"success": False, "error": "Invalid JSON data"}), 400
+
+    def parse_num(value):
+        if value in (None, "", "--"):
+            return None
+        try:
+            n = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "age, height_cm and weight_kg must be numeric or empty"
+            ) from exc
+        if n <= 0:
+            raise ValueError("age, height_cm and weight_kg must be greater than 0")
+        return n
+
+    try:
+        age_val = parse_num(data.get("age"))
+        height_val = parse_num(data.get("height_cm"))
+        weight_val = parse_num(data.get("weight_kg"))
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)}), 400
+
+    current_user.age = int(age_val) if age_val is not None else None
+    current_user.height_cm = height_val
+    current_user.weight_kg = weight_val
+
+    try:
+        db.session.commit()
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(exc)}), 400
+
+    return (
+        jsonify(
+            {
+                "success": True,
+                "profile": {
+                    "age": current_user.age,
+                    "height_cm": current_user.height_cm,
+                    "weight_kg": current_user.weight_kg,
+                },
+            }
+        ),
+        200,
+    )
+
+
 @api_bp.route("/stats")  # GET only (default when no methods specified)
 @login_required
 def stats() -> Response | tuple[Response, int]:

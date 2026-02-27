@@ -116,24 +116,24 @@
 
     <!-- LEFT: Inputs -->
     <div class="panel">
-        <h2>Inputs</h2>
-        <small>Update values to refresh the recommendations.</small>
+        <h2>User Metrics</h2>
+        <small>Your profile will be updated when you press Calculate.</small>
 
         <form id="tdeeForm" style="margin-top: 14px;">
             <div class="inputs-grid">
                 <div>
                     <label>Age (years)</label>
-                    <input type="number" id="age" min="0" step="1" value="49">
+                    <input type="number" id="age" min="0" step="1" placeholder="--">
                 </div>
 
                 <div>
                     <label>Height (cm)</label>
-                    <input type="number" id="height" min="0" step="1" value="169">
+                    <input type="number" id="height" min="0" step="1" placeholder="--">
                 </div>
 
                 <div>
                     <label>Weight (kg)</label>
-                    <input type="number" id="tdeeWeight" min="0" step="0.1" value="70">
+                    <input type="number" id="tdeeWeight" min="0" step="0.1" placeholder="--">
                 </div>
 
                 <div>
@@ -156,7 +156,7 @@
                 </div>
 
                 <div class="full">
-                    <button type="button" id="recalcBtn">Recalculate</button>
+                    <button type="button" id="recalcBtn">Calculate</button>
                 </div>
             </div>
         </form>
@@ -254,6 +254,42 @@
         if (el) el.textContent = val;
     }
 
+    function clearCalcOutputs() {
+        const ids = [
+            "bmrOut", "tdeeOut", "tdeeMinOut", "tdeeMaxOut",
+            "cutCaloriesOut", "cutMinOut", "cutMaxOut",
+            "cutProteinOut", "cutProteinMinOut", "cutProteinMaxOut",
+            "bulkCaloriesOut", "bulkMinOut", "bulkMaxOut",
+            "bulkProteinOut", "bulkProteinMinOut", "bulkProteinMaxOut",
+        ];
+        ids.forEach((id) => setText(id, "--"));
+    }
+
+    function parseMaybeNumber(raw) {
+        const value = String(raw ?? "").trim();
+        if (!value || value === "--") return null;
+        const n = parseFloat(value);
+        return Number.isFinite(n) && n > 0 ? n : null;
+    }
+
+    async function loadUserProfile() {
+        const res = await fetch("/api/user-profile");
+        if (!res.ok) return;
+        const body = await res.json();
+        const p = body?.profile || {};
+        document.getElementById("age").value = p.age ?? "";
+        document.getElementById("height").value = p.height_cm ?? "";
+        document.getElementById("tdeeWeight").value = p.weight_kg ?? "";
+    }
+
+    async function persistUserProfile(age, height, weight) {
+        await fetch("/api/user-profile", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ age, height_cm: height, weight_kg: weight }),
+        });
+    }
+
     /* Basal Metabolic Rate (BMR) 
     Harris-Benedict Equation
     */
@@ -272,14 +308,20 @@
     function recalc() {
 
         // for MBR calculation 
-        const age = parseFloat(document.getElementById('age').value);
-        const height = parseFloat(document.getElementById('height').value);
-        const weight = parseFloat(document.getElementById('tdeeWeight').value);
+        const age = parseMaybeNumber(document.getElementById('age').value);
+        const height = parseMaybeNumber(document.getElementById('height').value);
+        const weight = parseMaybeNumber(document.getElementById('tdeeWeight').value);
         const gender = document.getElementById('gender').value;
         // for TDEE calculation 
         const activity = parseFloat(document.getElementById('activity').value);
 
-        if (!age || !height || !weight) return;
+        if (age === null || height === null || weight === null) {
+            clearCalcOutputs();
+            alert("Please enter valid Age, Height, and Weight before recalculating.");
+            return;
+        }
+
+        persistUserProfile(age, height, weight).catch(() => { });
 
         // ---- BMR ----
         const bmr = calculateBMR(weight, height, age, gender);
@@ -323,7 +365,11 @@
 
     // listeners
     document.getElementById('recalcBtn')?.addEventListener('click', recalc);
-    document.addEventListener('DOMContentLoaded', recalc);
+    document.addEventListener('DOMContentLoaded', async () => {
+        clearCalcOutputs();
+        await loadUserProfile();
+        recalc();
+    });
 
 </script>
 {% endblock %}
