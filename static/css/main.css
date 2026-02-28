@@ -586,6 +586,23 @@ Scrollbar
     background: #3a3a3a;
 }
 
+/* Light-mode global scrollbars */
+[data-theme="light"] {
+    scrollbar-color: #c8d3dc #eef3f7;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+    background: #eef3f7;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: #c8d3dc;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: #b7c5d0;
+}
+
 /* =========================
 Responsive: icon-only sidebar
 ========================= */
