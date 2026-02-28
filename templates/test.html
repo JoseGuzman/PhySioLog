@@ -4,14 +4,65 @@
 
 {% block content %}
 <div class="page-header">
-    <h1>️Overview</h1>
-    <p>Basic fitness stats</p>
+    <h1>Test Page</h1>
+    <p>Quick API checks for entry creation and observations rendering</p>
 </div>
 
 <div class="stats" id="stats">
     <div class="stat-card">
         <div class="stat-label">Loading...</div>
         <div class="stat-value">--</div>
+    </div>
+</div>
+
+<div class="form-section" style="margin-top: 16px;">
+    <h2>Create Test Entry</h2>
+    <form id="entryForm">
+        <div class="form-grid">
+            <div>
+                <label for="date">Date</label>
+                <input type="date" id="date" required>
+            </div>
+            <div>
+                <label for="weight">Weight (kg)</label>
+                <input type="number" step="0.1" id="weight" inputmode="decimal">
+            </div>
+            <div>
+                <label for="bodyFat">Body Fat (%)</label>
+                <input type="number" step="0.1" id="bodyFat" inputmode="decimal">
+            </div>
+            <div>
+                <label for="calories">Calories</label>
+                <input type="number" id="calories" inputmode="numeric">
+            </div>
+            <div>
+                <label for="steps">Steps</label>
+                <input type="number" id="steps" inputmode="numeric">
+            </div>
+            <div>
+                <label for="sleep">Sleep (hours)</label>
+                <input type="number" step="0.1" id="sleep" inputmode="decimal">
+            </div>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="observations-block">
+            <label for="observations">Comments / Observations</label>
+            <textarea id="observations" rows="3" placeholder="Write a short note to verify DB persistence"></textarea>
+        </div>
+
+        <button type="submit">Create Test Entry</button>
+    </form>
+</div>
+
+<div class="form-section" style="margin-top: 16px;">
+    <h2>Latest Observations</h2>
+    <div id="entriesList" style="display: grid; gap: 10px;">
+        <div class="stat-card">
+            <div class="stat-label">Loading entries...</div>
+            <div class="stat-value">--</div>
+        </div>
     </div>
 </div>
 
@@ -23,7 +74,8 @@
     async function loadStats() {
         try {
             const res = await fetch('/api/stats');
-            const stats = await res.json();
+            const payload = await res.json();
+            const stats = payload.stats || {};
 
             document.getElementById('stats').innerHTML = `
                 <div class="stat-card">
@@ -44,15 +96,46 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Avg Sleep</div>
-                    <div class="stat-value">${Math.round(stats.avg_steps || 0).toLocaleString()}</div>
+                    <div class="stat-value">${stats.avg_sleep || '--'}<span style="font-size: 0.5em; color: #888;"> h</span></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Total Entries</div>
-                    <div class="stat-value">${stats.total_entries}</div>
+                    <div class="stat-value">${stats.total_entries || 0}</div>
                 </div>
             `;
         } catch (error) {
             console.error('Error loading stats:', error);
+        }
+    }
+
+    async function loadEntries() {
+        try {
+            const res = await fetch('/api/entries');
+            const entries = await res.json();
+            const list = document.getElementById('entriesList');
+
+            if (!Array.isArray(entries) || entries.length === 0) {
+                list.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-label">No entries yet</div>
+                        <div class="stat-value">Add one above</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = entries.slice(0, 8).map((entry) => `
+                <div class="stat-card">
+                    <div class="stat-label">${entry.date}</div>
+                    <div style="color: #cfcfcf; line-height: 1.4;">
+                        ${entry.observations ? entry.observations : '<span style="color:#7a7a7a;">No observations</span>'}
+                    </div>
+                </div>
+            `).join('');
+
+            list.innerHTML = html;
+        } catch (error) {
+            console.error('Error loading entries:', error);
         }
     }
 
@@ -66,6 +149,7 @@
             calories: parseInt(document.getElementById('calories').value) || null,
             steps: parseInt(document.getElementById('steps').value) || null,
             sleep_total: parseFloat(document.getElementById('sleep').value) || null,
+            observations: document.getElementById('observations').value.trim() || null,
         };
 
         try {
@@ -79,6 +163,7 @@
                 alert('Entry added!');
                 e.target.reset();
                 loadStats();
+                loadEntries();
             } else {
                 alert('Error adding entry');
             }
@@ -88,7 +173,14 @@
         }
     });
 
+    // Set default date = today
+    const dateEl = document.getElementById('date');
+    if (dateEl && !dateEl.value) {
+        dateEl.value = new Date().toISOString().slice(0, 10);
+    }
+
     // Load data on page load
     loadStats();
+    loadEntries();
 </script>
 {% endblock %}
