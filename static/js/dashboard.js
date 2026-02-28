@@ -463,11 +463,15 @@ function getWindowXAxisRange(windowValue) {
     const end = new Date();
     end.setHours(0, 0, 0, 0);
     const start = new Date(end);
-    start.setDate(start.getDate() - days + 1);
+    /* padding half a day left and right to the plots */
+    /* MS in 12 hours to adjust the around plots */
+    const HALF_DAY_MS = 12 * 60 * 60 * 1000;
+    start.setDate(start.getDate() - HALF_DAY_MS);
+    const endDisplay = new Date(end.getTime() + HALF_DAY_MS);
 
     return [
-        start.toISOString().slice(0, 10),
-        end.toISOString().slice(0, 10),
+        start.toISOString(),
+        endDisplay.toISOString(),
     ];
 }
 
