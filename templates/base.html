@@ -8,6 +8,15 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+        (function () {
+            const choice = localStorage.getItem("theme-choice") || "light";
+            const resolved = choice === "system"
+                ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+                : choice;
+            document.documentElement.setAttribute("data-theme", resolved);
+        })();
+    </script>
 
     <!-- CSS style -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -145,10 +154,10 @@
                 }
             }
 
-            const saved = localStorage.getItem("theme-choice") || "system";
+            const saved = localStorage.getItem("theme-choice") || "light";
             applyTheme(saved);
             media.addEventListener("change", () => {
-                const current = localStorage.getItem("theme-choice") || "system";
+                const current = localStorage.getItem("theme-choice") || "light";
                 if (current === "system") applyTheme("system");
             });
 
