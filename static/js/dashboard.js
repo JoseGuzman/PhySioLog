@@ -162,11 +162,9 @@ function cssVar(name, fallback) {
     return v || fallback;
 }
 
-const CARD_BG = cssVar("--panel", "#252525");
-
 function getPlotBgColor() {
     const isLight = document.documentElement.getAttribute("data-theme") === "light";
-    return isLight ? "#ffffff" : CARD_BG;
+    return isLight ? "#ffffff" : cssVar("--panel", "#252525");
 }
 
 function getAxisTheme() {
