@@ -6,6 +6,7 @@ import pytest
 
 from physiolog import create_app
 from physiolog.extensions import db
+from physiolog.models import User
 
 
 class TestConfig:
@@ -29,7 +30,20 @@ def app():
 
 @pytest.fixture
 def client(app):
-    return app.test_client()
+    myclient = app.test_client()
+    with app.app_context():
+        user = User(email="test@example.com")
+        user.set_password("testpassword")
+        db.session.add(user)
+        db.session.commit()
+
+    login_res = myclient.post(
+        "/login",
+        data={"email": "test@example.com", "password": "testpassword"},
+        follow_redirects=False,
+    )
+    assert login_res.status_code in (302, 303)
+    return myclient
 
 
 def test_entries_lifecycle_contract(client) -> None:
