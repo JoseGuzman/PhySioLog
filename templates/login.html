@@ -36,6 +36,13 @@
             text-align: center;
         }
 
+        .auth-logo {
+            width: 36px;
+            height: 36px;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
         .auth-subtitle {
             color: var(--muted);
             margin-bottom: 16px;
@@ -114,7 +121,11 @@
 
 <body>
     <main class="auth-card">
-        <h1 class="auth-title">PHYSIOLOG</h1>
+                <h1 class="auth-title">PHYSIOLOG</h1>
+        <img
+            src="{{ url_for('static', filename='img/physiolog-mark.svg') }}"
+            alt="PhysioLog"
+            class="auth-logo">
         <p class="auth-subtitle">AI-based health tracker.</p>
 
         {% with messages = get_flashed_messages(category_filter=['error']) %}

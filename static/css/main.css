@@ -128,9 +128,11 @@ Sidebar
     line-height: 1;
 }
 
-/* this is the green color of the App */
-.sidebar-header .brand .icon {
-    color: var(--accent);
+.sidebar-header .brand .brand-logo {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex: 0 0 20px;
 }
 
 /* =========================
