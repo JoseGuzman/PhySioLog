@@ -100,50 +100,51 @@
     <h1>Trends</h1>
     <p>Daily trends together with a weekly average (continuous line)</p>
 </div>
+
 <!-- Data controls-->
-<div class="controls" style="margin: 12px 0 18px 0; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-    <label for="windowSelect"><strong>Temporal window:</strong></label>
-    <select id="windowSelect">
-        <option value="7d">Last 7 days</option>
-        <option value="30d">Last 30 days</option>
-        <option value="3m">Last 3 months</option>
-        <option value="6m">Last 6 months</option>
-        <option value="1y">Last 12 months</option>
-        <option value="" selected>All time</option>
-    </select>
+<div class="page-header">
+    <div class="controls" style="margin: 12px 0 18px 0; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <label for="windowSelect"><strong>Temporal window:</strong></label>
+        <select id="windowSelect">
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="3m">Last 3 months</option>
+            <option value="6m">Last 6 months</option>
+            <option value="1y">Last 12 months</option>
+            <option value="" selected>All time</option>
+        </select>
 
-    <span id="windowMeta" style="opacity:.8;"></span>
+        <span id="windowMeta" style="opacity:.8;"></span>
+    </div>
+
+    <!-- Cards with average statistics-->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <span class="label">Avg Weight (kg)</span>
+            <span class="value" id="stat-avg_weight">--</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="label">Avg Body Fat (%)</span>
+            <span class="value" id="stat-avg_body_fat">--</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="label">Avg Steps</span>
+            <span class="value" id="stat-avg_steps">--</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="label">Avg Sleep (HH:MM)</span>
+            <span class="value" id="stat-avg_sleep">--</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="label">Avg Calories (kcal) </span>
+            <span class="value" id="stat-avg_calories">--</span>
+        </div>
+    </div>
 </div>
-
-<!-- Cards with average statistics-->
-<div class="stats-grid" id="statsGrid">
-    <div class="stat-card">
-        <span class="label">Avg Weight (kg)</span>
-        <span class="value" id="stat-avg_weight">--</span>
-    </div>
-
-    <div class="stat-card">
-        <span class="label">Avg Body Fat (%)</span>
-        <span class="value" id="stat-avg_body_fat">--</span>
-    </div>
-
-    <div class="stat-card">
-        <span class="label">Avg Steps</span>
-        <span class="value" id="stat-avg_steps">--</span>
-    </div>
-
-    <div class="stat-card">
-        <span class="label">Avg Sleep (HH:MM)</span>
-        <span class="value" id="stat-avg_sleep">--</span>
-    </div>
-
-    <div class="stat-card">
-        <span class="label">Avg Calories (kcal) </span>
-        <span class="value" id="stat-avg_calories">--</span>
-    </div>
-</div>
-
-
 
 <!-- Cards with Plotty graphs-->
 <div class="charts-grid">

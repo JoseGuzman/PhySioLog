@@ -81,8 +81,10 @@
     <main class="main-content">
         <header class="topbar">
             <div class="topbar-profile">
-                <button id="profileMenuBtn" class="profile-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                    <span class="profile-avatar">{{ (current_user.name or current_user.email or "U")[:1] | upper }}</span>
+                <button id="profileMenuBtn" class="profile-btn" type="button" aria-haspopup="true"
+                    aria-expanded="false">
+                    <span class="profile-avatar">{{ (current_user.name or current_user.email or "U")[:1] | upper
+                        }}</span>
                 </button>
 
                 <div id="profileMenu" class="profile-menu" hidden>
@@ -103,6 +105,9 @@
                         </button>
                     </div>
 
+                    <div>
+                        <a href="#" class="profile-link">User settings</a>
+                    </div>
                     <div class="profile-links">
                         <a href="#" class="profile-link">Manage cookies</a>
                         <a href="#" class="profile-link">Terms & policies</a>
