@@ -312,7 +312,6 @@ function calculateAverages(entries) {
         ["body_fat", "avg_body_fat"],
         ["calories", "avg_calories"],
         ["steps", "avg_steps"],
-        ["sleep_total", "avg_sleep"],
     ];
 
     const stats = {};
@@ -324,6 +323,15 @@ function calculateAverages(entries) {
             ? values.reduce((a, b) => a + b, 0) / values.length
             : null;
     }
+
+    const sleepValues = entries
+        .map((e) => {
+            if (typeof e?.sleep_total_decimal === "number" && Number.isFinite(e.sleep_total_decimal)) return e.sleep_total_decimal;
+            if (typeof e?.sleep_total === "number" && Number.isFinite(e.sleep_total)) return e.sleep_total;
+            return null;
+        })
+        .filter((v) => v !== null);
+    stats.avg_sleep = sleepValues.length ? sleepValues.reduce((a, b) => a + b, 0) / sleepValues.length : null;
     return stats;
 }
 
