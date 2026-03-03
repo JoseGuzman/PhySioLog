@@ -9,9 +9,12 @@ Usage:
 >>>  uv run python scripts/import_data.py data/health_data.csv
 """
 
+import argparse
+import os
 import sys
 from datetime import date as Date
 from datetime import datetime
+from getpass import getpass
 from pathlib import Path
 
 import pandas as pd
@@ -22,7 +25,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from physiolog import create_app
 from physiolog.extensions import db
-from physiolog.models import HealthEntry
+from physiolog.models import HealthEntry, User
 
 
 def parse_time(time_str: str) -> float | None:
@@ -109,7 +112,7 @@ def parse_date(date_str) -> Date | None:
     return None
 
 
-def import_data(app, filepath: str) -> None:
+def import_data(app, filepath: str, demo_password: str | None = None) -> None:
     """
     Imports health data from a CSV or TSV file into the database.
     """
@@ -163,6 +166,33 @@ def import_data(app, filepath: str) -> None:
     with app.app_context():
         db.create_all()
 
+        demo_email = "demo@physiolog.com"
+        demo_user = User.query.filter_by(email=demo_email).first()
+        if not demo_user:
+            demo_user = User(
+                name="Demo User",
+                email=demo_email,
+                age=49,
+                height_cm=168,
+                weight_kg=70,
+            )
+            if demo_password is None:
+                demo_password = os.environ.get("DEMO_USER_PASSWORD")
+                print(
+                    f"Using DEMO_USER_PASSWORD from environment: {demo_password is not None}"
+                )
+            if demo_password is None:
+                demo_password = getpass(
+                    "Enter password for demo@physiolog.com: "
+                ).strip()
+            if not demo_password:
+                print("Error: Password cannot be empty")
+                sys.exit(1)
+            demo_user.set_password(demo_password)
+            db.session.add(demo_user)
+            db.session.commit()
+            print(f"✓ Demo user created: {demo_email}")
+
         for idx, row in df.iterrows():
             try:
                 entry_date = parse_date(row[column_map["date"]])
@@ -176,7 +206,9 @@ def import_data(app, filepath: str) -> None:
                     else None
                 )
 
-                existing = HealthEntry.query.filter_by(date=entry_date).first()
+                existing = HealthEntry.query.filter_by(
+                    user_id=demo_user.id, date=entry_date
+                ).first()
                 if existing:
                     if (
                         training_volume_val is not None
@@ -200,6 +232,7 @@ def import_data(app, filepath: str) -> None:
                 )
 
                 entry = HealthEntry(
+                    user_id=demo_user.id,
                     date=entry_date,
                     weight=parse_number(row.get(column_map.get("weight")))
                     if "weight" in column_map
@@ -244,15 +277,25 @@ def import_data(app, filepath: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: uv run python scripts/import_data.py <path_to_file>")
-        print("Example: uv run python scripts/import_data.py data/health_data.csv")
-        sys.exit(1)
-
-    myfilepath = sys.argv[1]
+    parser = argparse.ArgumentParser(description="Import health data from CSV/TSV")
+    parser.add_argument(
+        "filepath",
+        nargs="?",
+        default="data/health_data.csv",
+        help="Path to CSV/TSV file (default: data/health_data.csv)",
+    )
+    parser.add_argument(
+        "--password",
+        dest="demo_password",
+        help="Demo user password (if omitted, prompt interactively)",
+    )
+    args = parser.parse_args()
+    myfilepath = args.filepath
+    if args.filepath == "data/health_data.csv" and len(sys.argv) == 1:
+        print("No file argument provided. Using default: data/health_data.csv")
     if not Path(myfilepath).exists():
         print(f"Error: File '{myfilepath}' not found")
         sys.exit(1)
 
     app = create_app()
-    import_data(app=app, filepath=myfilepath)
+    import_data(app=app, filepath=myfilepath, demo_password=args.demo_password)
