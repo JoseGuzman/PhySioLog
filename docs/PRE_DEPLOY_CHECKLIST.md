@@ -24,7 +24,7 @@ Use this checklist before first cloud deployment.
 
 ## 1) Release Readiness
 
-- [ ] Decide target stack: `AWS EC2` or `AWS ECS/Fargate`.
+- [x] Decide target stack: `AWS EC2` or `AWS ECS/Fargate`.
 - [ ] Create `staging` environment (same config shape as production).
 - [ ] Freeze dependency versions (`uv.lock` committed and used in build).
 - [ ] Run full test suite in clean environment.

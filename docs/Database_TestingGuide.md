@@ -4,6 +4,11 @@ Temporaly, the database in instance/physiolog.db, you can see the table for the 
 >>> sqlite3 instance/physiolog.db "PRAGMA table_info(health_entries);"
 >>> sqlite3 instance/physiolog.db "PRAGMA table_info(users);"
 
+Import script demo user password (.env)
+>>> DEMO_USER_PASSWORD="your-password"
+The import script reads DEMO_USER_PASSWORD from .env (or environment) when
+creating demo@physiolog.com. CLI --password overrides it; otherwise it will prompt.
+
 To test in flask shell
 >>> uv run python -m flask shell
 Python 3.12.12 (main, Jan 27 2026, 23:31:45) [Clang 21.1.4 ] on darwin
