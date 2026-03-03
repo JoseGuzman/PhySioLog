@@ -272,7 +272,7 @@ When helping, use:
 [x] Authentication (Flask‑Login)
 [x] Multi‑user data
 [x] Database Migrations
-[ ] Rebuild test cases with authentication context
+[x] Rebuild test cases with authentication context
 
 ### Deployment (v 1.0)
 

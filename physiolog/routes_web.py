@@ -20,7 +20,7 @@ web_bp = Blueprint("web", __name__)
 def index():
     """Redirect to overview if logged in, otherwise to login page"""
     if current_user.is_authenticated:
-        return redirect(url_for("web.overview"))
+        return redirect(url_for("web.metabolism"))
     return redirect(url_for("web.login"))
 
 
@@ -28,7 +28,7 @@ def index():
 def login():
     """Login page"""
     if current_user.is_authenticated:
-        return redirect(url_for("web.overview"))
+        return redirect(url_for("web.metabolism"))
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -41,7 +41,7 @@ def login():
                 parsed_url = urlparse(nxt)
                 if parsed_url.scheme or parsed_url.netloc:
                     nxt = None
-            return redirect(nxt or url_for("web.overview"))
+            return redirect(nxt or url_for("web.metabolism"))
         flash("Invalid email or password", "error")
     return render_template("login.html")
 
@@ -50,7 +50,7 @@ def login():
 def register():
     """Register page"""
     if current_user.is_authenticated:
-        return redirect(url_for("web.overview"))
+        return redirect(url_for("web.metabolism"))
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
@@ -94,11 +94,18 @@ def logout():
     return redirect(url_for("web.login"))
 
 
+@web_bp.route("/metabolism")
+@login_required
+def metabolism():
+    """Metabolism page with metabolism stats and input entry form"""
+    return render_template("overview.html")
+
+
 @web_bp.route("/overview")
 @login_required
 def overview():
-    """Overview page with metabolism stats and input entry form"""
-    return render_template("overview.html")
+    """Backward-compatible redirect from overview to metabolism."""
+    return redirect(url_for("web.metabolism"))
 
 
 @web_bp.route("/trends")
@@ -113,6 +120,13 @@ def trends():
 def entry():
     """Data entry page with form to add new health metrics"""
     return render_template("entry.html")
+
+
+@web_bp.route("/user")
+@login_required
+def user_settings():
+    """User settings page."""
+    return render_template("user.html")
 
 
 @web_bp.route("/coach")

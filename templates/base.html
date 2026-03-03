@@ -39,10 +39,10 @@
             <div class="sidebar-section-title">TRACK</div>
             <ul class="sidebar-menu">
                 <li>
-                    <a href="{{ url_for('web.overview') }}"
-                        class="{% if request.endpoint == 'web.overview' %}active{% endif %}">
+                    <a href="{{ url_for('web.metabolism') }}"
+                        class="{% if request.endpoint in ['web.metabolism', 'web.overview'] %}active{% endif %}">
                         <i data-lucide="bar-chart-3" class="icon"></i>
-                        <span>Overview</span>
+                        <span>Metabolism</span>
                     </a>
                 </li>
                 <li>
@@ -106,7 +106,7 @@
                     </div>
 
                     <div>
-                        <a href="#" class="profile-link">User settings</a>
+                        <a href="{{ url_for('web.user_settings') }}" class="profile-link">User settings</a>
                     </div>
                     <div class="profile-links">
                         <a href="#" class="profile-link">Manage cookies</a>

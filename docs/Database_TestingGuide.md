@@ -15,12 +15,13 @@ Instance: /path/to/repo/instance
 >>> <SQLAlchemy sqlite:////path/to/repo/instance/physiolog.db>
 >>> User
 >>> User <class 'physiolog.models.User'>
-
 >>> users = User.query.all()
+
 # check columns
 >>> [(u.id, u.name, u.email, u.is_active_user) for u in users]
 >>> users # returns a list of users
 [<User 1>, <User 2>, <User 3>]
+
 # check entries of User 1
 >>> first_user = User.query.order_by(User.id.asc()).first()
 >>> (first_user.id, first_user.name, first_user.email)

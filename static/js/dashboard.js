@@ -67,6 +67,14 @@ const TREND_CHANGE_METRICS = [
     { dataKey: "calories", deltaId: "stat-avg_calories_change" },
 ];
 
+const TREND_STAT_METRICS = [
+    { dataKey: "weight", statKey: "avg_weight" },
+    { dataKey: "body_fat", statKey: "avg_body_fat" },
+    { dataKey: "calories", statKey: "avg_calories" },
+    { dataKey: "steps", statKey: "avg_steps" },
+    { dataKey: "sleep_total_decimal", statKey: "avg_sleep" },
+];
+
 function clearMetricChangeDeltas() {
     for (const { deltaId } of TREND_CHANGE_METRICS) {
         const el = $(deltaId);
@@ -87,11 +95,15 @@ function getMetricValue(entry, dataKey) {
     return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
-function renderMetricChangeDeltas() {
+function getEntriesInActiveRange() {
     const sourceEntries = Array.isArray(CURRENT_WINDOW_ENTRIES) ? CURRENT_WINDOW_ENTRIES : [];
-    const visibleEntries = ACTIVE_X_RANGE
+    return ACTIVE_X_RANGE
         ? filterEntriesByDateRange(sourceEntries, ACTIVE_X_RANGE)
         : sourceEntries;
+}
+
+function renderMetricChangeDeltas() {
+    const visibleEntries = getEntriesInActiveRange();
 
     for (const { dataKey, deltaId } of TREND_CHANGE_METRICS) {
         const deltaEl = $(deltaId);
@@ -101,16 +113,18 @@ function renderMetricChangeDeltas() {
             .map((e) => ({ date: e?.date, value: getMetricValue(e, dataKey) }))
             .filter((p) => p.value !== null && p.date)
             .sort((a, b) => new Date(a.date) - new Date(b.date));
+        const maSeries = calculateMovingAverage(series.map((p) => p.value), 7)
+            .filter((v) => typeof v === "number" && Number.isFinite(v));
 
-        if (series.length < 2) {
+        if (maSeries.length < 2) {
             deltaEl.textContent = "--";
             deltaEl.classList.remove("is-positive", "is-negative");
             deltaEl.classList.add("is-neutral");
             continue;
         }
 
-        const start = series[0].value;
-        const end = series[series.length - 1].value;
+        const start = maSeries[0];
+        const end = maSeries[maSeries.length - 1];
         if (!Number.isFinite(start) || start === 0 || !Number.isFinite(end)) {
             deltaEl.textContent = "--";
             deltaEl.classList.remove("is-positive", "is-negative");
@@ -130,7 +144,8 @@ function renderMetricChangeDeltas() {
 
 function renderTrendsStats(payload) {
     // Expected payload: { window_days, start_date, end_date, stats: {...} }
-    const stats = payload?.stats;
+    const visibleEntries = getEntriesInActiveRange();
+    const stats = visibleEntries.length ? calculateAverages(visibleEntries) : payload?.stats;
     if (!stats) return;
 
     for (const key of TRENDS_STAT_FIELDS) {
@@ -415,31 +430,21 @@ function makeXAxis(angle = -45) {
 }
 
 function calculateAverages(entries) {
-    const fields = [
-        ["weight", "avg_weight"],
-        ["body_fat", "avg_body_fat"],
-        ["calories", "avg_calories"],
-        ["steps", "avg_steps"],
-    ];
-
     const stats = {};
-    for (const [sourceKey, targetKey] of fields) {
+    for (const { dataKey, statKey } of TREND_STAT_METRICS) {
         const values = entries
-            .map((e) => e?.[sourceKey])
+            .map((e) => getMetricValue(e, dataKey))
             .filter((v) => typeof v === "number" && Number.isFinite(v));
-        stats[targetKey] = values.length
-            ? values.reduce((a, b) => a + b, 0) / values.length
+        if (!values.length) {
+            stats[statKey] = null;
+            continue;
+        }
+        const maValues = calculateMovingAverage(values, 7)
+            .filter((v) => typeof v === "number" && Number.isFinite(v));
+        stats[statKey] = maValues.length
+            ? maValues.reduce((a, b) => a + b, 0) / maValues.length
             : null;
     }
-
-    const sleepValues = entries
-        .map((e) => {
-            if (typeof e?.sleep_total_decimal === "number" && Number.isFinite(e.sleep_total_decimal)) return e.sleep_total_decimal;
-            if (typeof e?.sleep_total === "number" && Number.isFinite(e.sleep_total)) return e.sleep_total;
-            return null;
-        })
-        .filter((v) => v !== null);
-    stats.avg_sleep = sleepValues.length ? sleepValues.reduce((a, b) => a + b, 0) / sleepValues.length : null;
     return stats;
 }
 

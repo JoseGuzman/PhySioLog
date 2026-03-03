@@ -291,6 +291,77 @@ def user_profile() -> Response | tuple[Response, int]:
     )
 
 
+@api_bp.route("/user-settings", methods=["GET", "PUT"])
+@login_required
+def user_settings() -> Response | tuple[Response, int]:
+    """Read/update authenticated user's account settings and profile metrics."""
+    if request.method == "GET":
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "settings": {
+                        "name": current_user.name,
+                        "email": current_user.email,
+                        "age": current_user.age,
+                        "height_cm": current_user.height_cm,
+                        "weight_kg": current_user.weight_kg,
+                    },
+                }
+            ),
+            200,
+        )
+
+    if not request.is_json:
+        return jsonify({"success": False, "error": "Content-Type must be application/json"}), 400
+
+    data = request.json
+    if data is None or not isinstance(data, dict):
+        return jsonify({"success": False, "error": "Invalid JSON data"}), 400
+
+    def parse_num(value):
+        if value in (None, "", "--"):
+            return None
+        try:
+            n = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("age, height_cm and weight_kg must be numeric or empty") from exc
+        if n <= 0:
+            raise ValueError("age, height_cm and weight_kg must be greater than 0")
+        return n
+
+    try:
+        name = str(data.get("name", current_user.name or "")).strip()
+        if not name:
+            return jsonify({"success": False, "error": "name cannot be empty"}), 400
+
+        password = str(data.get("password", "") or "")
+        password_confirm = str(data.get("password_confirm", "") or "")
+        if password and password_confirm:
+            if password != password_confirm:
+                return jsonify({"success": False, "error": "passwords do not match"}), 400
+            current_user.set_password(password)
+
+        age_val = parse_num(data.get("age"))
+        height_val = parse_num(data.get("height_cm"))
+        weight_val = parse_num(data.get("weight_kg"))
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)}), 400
+
+    current_user.name = name
+    current_user.age = int(age_val) if age_val is not None else None
+    current_user.height_cm = height_val
+    current_user.weight_kg = weight_val
+
+    try:
+        db.session.commit()
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(exc)}), 400
+
+    return jsonify({"success": True}), 200
+
+
 @api_bp.route("/stats")  # GET only (default when no methods specified)
 @login_required
 def stats() -> Response | tuple[Response, int]:
