@@ -37,9 +37,14 @@ function getSelectedWindowValue() {
     return sel.value ?? "";
 }
 
-function formatStatValue(v) {
+function formatStatValue(v, key = "") {
     if (v === null || v === undefined) return "--";
-    if (typeof v === "number" && Number.isFinite(v)) return v.toFixed(2);
+    if (typeof v === "number" && Number.isFinite(v)) {
+        if (key === "avg_steps" || key === "avg_calories") {
+            return String(Math.round(v));
+        }
+        return v.toFixed(2);
+    }
     return String(v);
 }
 
@@ -54,6 +59,75 @@ function decimalHoursToHHMM(value) {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
+const TREND_CHANGE_METRICS = [
+    { dataKey: "weight", deltaId: "stat-avg_weight_change" },
+    { dataKey: "body_fat", deltaId: "stat-avg_body_fat_change" },
+    { dataKey: "steps", deltaId: "stat-avg_steps_change" },
+    { dataKey: "sleep_total_decimal", deltaId: "stat-avg_sleep_change" },
+    { dataKey: "calories", deltaId: "stat-avg_calories_change" },
+];
+
+function clearMetricChangeDeltas() {
+    for (const { deltaId } of TREND_CHANGE_METRICS) {
+        const el = $(deltaId);
+        if (!el) continue;
+        el.textContent = "--";
+        el.classList.remove("is-positive", "is-negative");
+        el.classList.add("is-neutral");
+    }
+}
+
+function getMetricValue(entry, dataKey) {
+    if (dataKey === "sleep_total_decimal") {
+        if (typeof entry?.sleep_total_decimal === "number" && Number.isFinite(entry.sleep_total_decimal)) return entry.sleep_total_decimal;
+        if (typeof entry?.sleep_total === "number" && Number.isFinite(entry.sleep_total)) return entry.sleep_total;
+        return null;
+    }
+    const v = entry?.[dataKey];
+    return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+function renderMetricChangeDeltas() {
+    const sourceEntries = Array.isArray(CURRENT_WINDOW_ENTRIES) ? CURRENT_WINDOW_ENTRIES : [];
+    const visibleEntries = ACTIVE_X_RANGE
+        ? filterEntriesByDateRange(sourceEntries, ACTIVE_X_RANGE)
+        : sourceEntries;
+
+    for (const { dataKey, deltaId } of TREND_CHANGE_METRICS) {
+        const deltaEl = $(deltaId);
+        if (!deltaEl) continue;
+
+        const series = visibleEntries
+            .map((e) => ({ date: e?.date, value: getMetricValue(e, dataKey) }))
+            .filter((p) => p.value !== null && p.date)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (series.length < 2) {
+            deltaEl.textContent = "--";
+            deltaEl.classList.remove("is-positive", "is-negative");
+            deltaEl.classList.add("is-neutral");
+            continue;
+        }
+
+        const start = series[0].value;
+        const end = series[series.length - 1].value;
+        if (!Number.isFinite(start) || start === 0 || !Number.isFinite(end)) {
+            deltaEl.textContent = "--";
+            deltaEl.classList.remove("is-positive", "is-negative");
+            deltaEl.classList.add("is-neutral");
+            continue;
+        }
+
+        const pct = ((end / start) - 1) * 100;
+        const sign = pct > 0 ? "+" : "";
+        deltaEl.textContent = `${sign}${pct.toFixed(2)}%`;
+        deltaEl.classList.remove("is-positive", "is-negative", "is-neutral");
+        if (pct > 0) deltaEl.classList.add("is-positive");
+        else if (pct < 0) deltaEl.classList.add("is-negative");
+        else deltaEl.classList.add("is-neutral");
+    }
+}
+
 function renderTrendsStats(payload) {
     // Expected payload: { window_days, start_date, end_date, stats: {...} }
     const stats = payload?.stats;
@@ -64,8 +138,10 @@ function renderTrendsStats(payload) {
         if (!el) continue;
         el.textContent = key === "avg_sleep"
             ? decimalHoursToHHMM(stats[key])
-            : formatStatValue(stats[key]);
+            : formatStatValue(stats[key], key);
     }
+
+    renderMetricChangeDeltas();
 
     const meta = $("windowMeta");
     if (meta) {
@@ -138,6 +214,7 @@ async function loadTrendsStats(
             const el = $(`stat-${key}`);
             if (el) el.textContent = "--";
         }
+        clearMetricChangeDeltas();
         const meta = $("windowMeta");
         if (meta) meta.textContent = "—";
     }
@@ -146,12 +223,43 @@ async function loadTrendsStats(
 /* detects change in windowsSelect in trends.html */
 function wireWindowSelect(onChange) {
     const sel = $("windowSelect");
-    if (!sel) return;
+    const buttons = Array.from(document.querySelectorAll(".window-btn[data-window-value]"));
 
-    sel.addEventListener("change", () => {
-        // keep handler tiny + safe
+    const renderActiveButton = (selectedValue) => {
+        for (const btn of buttons) {
+            const active = (btn.dataset.windowValue ?? "") === (selectedValue ?? "");
+            btn.classList.toggle("is-active", active);
+            btn.setAttribute("aria-pressed", active ? "true" : "false");
+        }
+    };
+
+    const triggerChange = () => {
         Promise.resolve(onChange?.()).catch((err) => console.error(err));
-    });
+    };
+
+    if (sel) {
+        sel.addEventListener("change", () => {
+            renderActiveButton(sel.value ?? "");
+            triggerChange();
+        });
+    }
+
+    if (!buttons.length) return;
+
+    const currentValue = sel?.value ?? "";
+    renderActiveButton(currentValue);
+
+    for (const btn of buttons) {
+        btn.addEventListener("click", () => {
+            const nextValue = btn.dataset.windowValue ?? "";
+            if (sel && (sel.value ?? "") === nextValue) return;
+            if (sel) {
+                sel.value = nextValue;
+            }
+            renderActiveButton(nextValue);
+            triggerChange();
+        });
+    }
 }
 
 // -----------------------------
@@ -375,6 +483,7 @@ async function refreshStatsForCurrentView() {
             const el = $(`stat-${key}`);
             if (el) el.textContent = "--";
         }
+        clearMetricChangeDeltas();
         const meta = $("windowMeta");
         if (meta) meta.textContent = "No data in selected zoom range";
         return;

@@ -58,8 +58,86 @@
         font-weight: 600;
     }
 
+    .stat-card .delta {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .stat-card .delta.is-positive {
+        color: #22c55e;
+    }
+
+    .stat-card .delta.is-negative {
+        color: #ef4444;
+    }
+
+    .stat-card .delta.is-neutral {
+        color: var(--muted);
+    }
+
     .controls {
         margin: 8px 0 16px 0;
+    }
+
+    .window-label {
+        margin: 0;
+        color: inherit;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .window-meta-inline {
+        opacity: 0.8;
+        font: inherit;
+    }
+
+    .window-buttons-wrap {
+        width: 100%;
+    }
+
+    .window-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .window-btn {
+        background: var(--field-bg);
+        color: var(--text);
+        border: 1px solid var(--border-2);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .window-btn:hover {
+        transform: none;
+        filter: none;
+        border-color: var(--focus);
+    }
+
+    .window-btn.is-active {
+        background: var(--accent);
+        color: #12322b;
+        border-color: transparent;
+    }
+
+    .window-select-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
     }
 
     /* Trends page scrollbar (theme-aware) */
@@ -104,44 +182,59 @@
 <!-- Data controls-->
 <div class="page-header">
     <div class="controls" style="margin: 12px 0 18px 0; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <label for="windowSelect"><strong>Temporal window:</strong></label>
-        <select id="windowSelect">
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="3m">Last 3 months</option>
-            <option value="6m">Last 6 months</option>
-            <option value="1y">Last 12 months</option>
-            <option value="" selected>All time</option>
-        </select>
+        <span class="window-label">
+            <strong>Selected range:</strong>
+            <span id="windowMeta" class="window-meta-inline"></span>
+        </span>
 
-        <span id="windowMeta" style="opacity:.8;"></span>
+        <div class="window-buttons-wrap">
+            <input type="hidden" id="windowSelect" class="window-select-hidden" value="">
+            <div class="window-buttons" role="group" aria-label="Temporal window">
+                <button type="button" class="window-btn" data-window-value="7d">Last 7 days</button>
+                <button type="button" class="window-btn" data-window-value="30d">Last 30 days</button>
+                <button type="button" class="window-btn" data-window-value="3m">Last 3 months</button>
+                <button type="button" class="window-btn" data-window-value="6m">Last 6 months</button>
+                <button type="button" class="window-btn" data-window-value="1y">Last 12 months</button>
+                <button type="button" class="window-btn is-active" data-window-value="" aria-pressed="true">All
+                    time</button>
+            </div>
+        </div>
     </div>
+    <div class="form-divider"></div>
 
     <!-- Cards with average statistics-->
+    <span class="window-label">
+        <strong>Averages & change:</strong>
+    </span>
     <div class="stats-grid" id="statsGrid">
         <div class="stat-card">
             <span class="label">Avg Weight (kg)</span>
             <span class="value" id="stat-avg_weight">--</span>
+            <span class="delta is-neutral" id="stat-avg_weight_change">--</span>
         </div>
 
         <div class="stat-card">
             <span class="label">Avg Body Fat (%)</span>
             <span class="value" id="stat-avg_body_fat">--</span>
+            <span class="delta is-neutral" id="stat-avg_body_fat_change">--</span>
         </div>
 
         <div class="stat-card">
             <span class="label">Avg Steps</span>
             <span class="value" id="stat-avg_steps">--</span>
+            <span class="delta is-neutral" id="stat-avg_steps_change">--</span>
         </div>
 
         <div class="stat-card">
             <span class="label">Avg Sleep (HH:MM)</span>
             <span class="value" id="stat-avg_sleep">--</span>
+            <span class="delta is-neutral" id="stat-avg_sleep_change">--</span>
         </div>
 
         <div class="stat-card">
             <span class="label">Avg Calories (kcal) </span>
             <span class="value" id="stat-avg_calories">--</span>
+            <span class="delta is-neutral" id="stat-avg_calories_change">--</span>
         </div>
     </div>
 </div>
