@@ -9,9 +9,10 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 from urllib.parse import urlparse
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from sqlalchemy import func
 
 from .extensions import db
-from .models import User
+from .models import HealthEntry, User
 
 web_bp = Blueprint("web", __name__)
 
@@ -144,8 +145,17 @@ def users():
     if not current_user.is_admin:
         abort(403)
 
-    users = User.query.order_by(User.name.asc(), User.email.asc()).all()
-    return render_template("users_list.html", users=users)
+    users_with_last_entry = (
+        db.session.query(
+            User,
+            func.max(HealthEntry.date).label("last_entry_date"),
+        )
+        .outerjoin(HealthEntry, HealthEntry.user_id == User.id)
+        .group_by(User.id)
+        .order_by(User.name.asc(), User.email.asc())
+        .all()
+    )
+    return render_template("users_list.html", users_with_last_entry=users_with_last_entry)
 
 
 # test route

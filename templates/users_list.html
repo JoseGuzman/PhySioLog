@@ -107,6 +107,10 @@
             min-width: 140px;
         }
 
+        .users-table th:nth-child(4) {
+            min-width: 130px;
+        }
+
         .mobile-label {
             display: inline;
         }
@@ -128,10 +132,11 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th>Subscription</th>
+                    <th>Last Entry</th>
                 </tr>
             </thead>
             <tbody>
-                {% for user in users %}
+                {% for user, last_entry_date in users_with_last_entry %}
                 <tr>
                     <td><span class="mobile-label">Name</span>{{ user.name or "-" }}</td>
                     <td><span class="mobile-label">Email</span>{{ user.email }}</td>
@@ -142,6 +147,10 @@
                         {% else %}
                         <span class="status-pill inactive">Inactive</span>
                         {% endif %}
+                    </td>
+                    <td>
+                        <span class="mobile-label">Last Entry</span>
+                        {{ last_entry_date.strftime("%Y-%m-%d") if last_entry_date else "-" }}
                     </td>
                 </tr>
                 {% endfor %}
