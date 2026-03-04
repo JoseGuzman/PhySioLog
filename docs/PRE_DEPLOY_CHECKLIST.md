@@ -26,7 +26,7 @@ Use this checklist before first cloud deployment.
 
 - [x] Decide target stack: `AWS EC2` or `AWS ECS/Fargate`.
 - [x] Create `staging` environment (same config shape as production).
-- [ ] Freeze dependency versions (`uv.lock` committed and used in build).
+- [x] Freeze dependency versions (`uv.lock` committed and used in build).
 - [ ] Run full test suite in clean environment.
 
 ## 2) Runtime and Container
@@ -90,7 +90,7 @@ Use this checklist before first cloud deployment.
 ## 9) Deployment Gate (Go / No-Go)
 
 - [ ] Staging sign-off completed.
-- [ ] Rollback plan documented.
+- [x] Rollback plan documented.
 - [ ] Initial production admin account created.
 - [ ] Domain + TLS ready.
 - [ ] Deployment runbook available.

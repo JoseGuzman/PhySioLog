@@ -86,3 +86,145 @@ We can update a user to be an admin with the following commands:
 >>> db.session.commit()
 >>> exit()
 ```
+
+## Migration guide from sqlite to PostgreSQL
+
+1. Backup first (mandatory)
+
+```bash
+cd /Users/joseguzman/git/physiolog
+cp instance/physiolog.db "instance/physiolog.backup.$(date +%Y%m%d_%H%M%S).db"
+```
+
+and export to SQLite tables to CSV:
+
+```bash
+mkdir -p /tmp/physiolog_migration
+
+sqlite3 -header -csv instance/physiolog.db \
+"SELECT id,name,age,height_cm,weight_kg,email,password_hash,is_active_user,is_admin,has_subscription FROM users;" \
+> /tmp/physiolog_migration/users.csv
+
+sqlite3 -header -csv instance/physiolog.db \
+"SELECT id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations FROM health_entries;" \
+> /tmp/physiolog_migration/health_entries.csv
+```
+
+1. Verify source counts in SQLite
+
+```bash
+sqlite3 instance/physiolog.db "SELECT COUNT(*) FROM users;"
+sqlite3 instance/physiolog.db "SELECT COUNT(*) FROM health_entries;"
+```
+
+1. Prepare staging PostgreSQL database
+
+We create a new PostgreSQL database for staging:
+
+```bash
+createdb physiolog_staging
+psql -d physiolog_staging -c "SELECT current_database();"
+```
+
+The App connection string for stagin should be set to:
+
+```bash
+export APP_ENV=staging
+export SQLALCHEMY_DATABASE_URI="postgresql+psycopg://$(whoami)@localhost:5432/physiolog_staging"
+export AUTO_CREATE_DB=True
+uv run python -c "from physiolog import create_app; create_app()"
+export AUTO_CREATE_DB=False
+```
+
+Import the CSV files into PostgreSQL:
+
+```bash
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "\copy users(id,name,age,height_cm,weight_kg,email,password_hash,is_active_user,is_admin,has_subscription) FROM '/tmp/physiolog_migration/users.csv' CSV HEADER"
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "\copy health_entries(id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations) FROM '/tmp/physiolog_migration/health_entries.csv' CSV HEADER"
+```
+
+Verify counts in PostgreSQL:
+
+```bash
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT setval(pg_get_serial_sequence('users','id'), COALESCE((SELECT MAX(id) FROM users),1), true);"
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT setval(pg_get_serial_sequence('health_entries','id'), COALESCE((SELECT MAX(id) FROM health_entries),1), true);"
+
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM users;"
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries;"
+```
+
+## Rollback and Restore Procedure
+
+Use this section if migration/import fails or staging behavior is incorrect.
+
+### Rollback triggers (Go/No-Go)
+
+Rollback immediately if any of these are true:
+
+- Source and target row counts do not match.
+- Orphan records exist in `health_entries` (`user_id` not found in `users`).
+- Login or core API smoke tests fail after migration.
+
+### A) SQLite restore (local dev source)
+
+1. Stop the app if it is running.
+2. Restore the latest SQLite backup file:
+
+```bash
+cp instance/physiolog.backup.YYYYMMDD_HHMMSS.db instance/physiolog.db
+```
+
+3. Verify counts:
+
+```bash
+sqlite3 instance/physiolog.db "SELECT COUNT(*) FROM users;"
+sqlite3 instance/physiolog.db "SELECT COUNT(*) FROM health_entries;"
+```
+
+### B) PostgreSQL backup (before risky changes)
+
+Create a dump before re-importing or applying schema changes:
+
+```bash
+pg_dump "postgresql://$(whoami)@localhost:5432/physiolog_staging" > /tmp/physiolog_staging_prechange.sql
+```
+
+### C) PostgreSQL restore (staging)
+
+1. Drop and recreate staging DB:
+
+```bash
+dropdb physiolog_staging
+createdb physiolog_staging
+```
+
+2. Restore from SQL dump:
+
+```bash
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" < /tmp/physiolog_staging_prechange.sql
+```
+
+3. Validate restore:
+
+```bash
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM users;"
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries;"
+psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries h LEFT JOIN users u ON u.id=h.user_id WHERE u.id IS NULL;"
+```
+
+Expected:
+
+- Users count matches source.
+- Health entries count matches source.
+- Orphan count is `0`.
+
+### D) Re-run migration safely (if needed)
+
+If import failed due to partial data, reset staging first:
+
+```bash
+dropdb physiolog_staging
+createdb physiolog_staging
+```
+
+Then re-run the migration steps from this guide (schema creation, `\copy`, sequence reset, validation).

@@ -9,7 +9,11 @@ Usage:
 >>>  uv run python scripts/import_data.py data/health_data.cs
 
 
-Creates Demo User ()
+Creates Demo User with demo@example.com 
+and password from DEMO_USER_PASSWORD env var or prompt.
+It has age=49, height_cm=168, weight_kg=70 (can be edited in app). 
+All imported entries from data/health_data.csv are linked to this user.
+
 """
 
 import argparse
