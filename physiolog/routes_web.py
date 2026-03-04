@@ -7,7 +7,7 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 """
 
 from urllib.parse import urlparse
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from .extensions import db
@@ -134,6 +134,18 @@ def user_settings():
 def coach():
     """Connection to the coach page with personalized recommendations based on user data"""
     return render_template("coach.html")
+
+
+@web_bp.route("/admin")
+@web_bp.route("/users")
+@login_required
+def users():
+    """Admin users page with list of users and subscription status."""
+    if not current_user.is_admin:
+        abort(403)
+
+    users = User.query.order_by(User.name.asc(), User.email.asc()).all()
+    return render_template("admin.html", users=users)
 
 
 # test route

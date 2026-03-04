@@ -60,6 +60,8 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(db.String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(db.String(255), nullable=False)
     is_active_user: Mapped[bool] = mapped_column(default=True, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(default=False, nullable=False)
+    has_subscription: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     entries: Mapped[list[HealthEntry]] = relationship(
         back_populates="user", cascade="all, delete-orphan"

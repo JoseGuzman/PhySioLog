@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Physiolog{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Admin</h1>
+    <p class="muted">Users list</p>
+
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Has Subscription</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.name or "—" }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ "Yes" if user.has_subscription else "No" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

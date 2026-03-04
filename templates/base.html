@@ -78,6 +78,20 @@
 
             </ul>
         </div>
+        {% if current_user.is_admin %}
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">ADMIN</div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="{{ url_for('web.users') }}"
+                        class="{% if request.endpoint == 'web.users' %}active{% endif %}">
+                        <i data-lucide="users" class="icon"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
     </aside>
 
     <!-- Main Content: Global Content Container -->
