@@ -38,7 +38,7 @@ from pathlib import Path
 
 from flask import Flask
 
-from physiolog.config import Config
+from physiolog.config import get_config_class
 
 from .extensions import db, login_manager
 
@@ -63,7 +63,7 @@ def create_app(config_class=None) -> Flask:
         static_url_path="/static",
     )
     if config_class is None:
-        config_class = Config  # default to Config class in config.py if not provided
+        config_class = get_config_class()  # default is DevConfig
     app.config.from_object(config_class)  # check config.py
 
     db.init_app(app)

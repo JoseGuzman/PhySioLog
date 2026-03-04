@@ -25,7 +25,7 @@ Use this checklist before first cloud deployment.
 ## 1) Release Readiness
 
 - [x] Decide target stack: `AWS EC2` or `AWS ECS/Fargate`.
-- [ ] Create `staging` environment (same config shape as production).
+- [x] Create `staging` environment (same config shape as production).
 - [ ] Freeze dependency versions (`uv.lock` committed and used in build).
 - [ ] Run full test suite in clean environment.
 
@@ -67,7 +67,7 @@ Use this checklist before first cloud deployment.
 
 ## 6) Admin Strategy (recommended before deploy)
 
-- [ ] Add `is_admin` role (or confirm single-user deployment scope).
+- [x] Add `is_admin` role (or confirm single-user deployment scope).
 - [ ] Add first-admin bootstrap flow (CLI/env-driven).
 - [ ] Add admin recovery procedure (lost admin credentials).
 - [ ] Confirm `AUTH_BOOTSTRAP_USER*` behavior is safe for production.

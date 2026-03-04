@@ -6,7 +6,10 @@ Author: Jose Guzman
 Created: Thu Feb  5 09:29:27 CET 2026
 
 Usage:
->>>  uv run python scripts/import_data.py data/health_data.csv
+>>>  uv run python scripts/import_data.py data/health_data.cs
+
+
+Creates Demo User ()
 """
 
 import argparse
@@ -166,7 +169,7 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
     with app.app_context():
         db.create_all()
 
-        demo_email = "demo@physiolog.com"
+        demo_email = "demo@example.com"
         demo_user = User.query.filter_by(email=demo_email).first()
         if not demo_user:
             demo_user = User(
@@ -183,7 +186,7 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                 )
             if demo_password is None:
                 demo_password = getpass(
-                    "Enter password for demo@physiolog.com: "
+                    "Enter password for demo@example.com: "
                 ).strip()
             if not demo_password:
                 print("Error: Password cannot be empty")
