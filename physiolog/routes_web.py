@@ -145,7 +145,7 @@ def users():
         abort(403)
 
     users = User.query.order_by(User.name.asc(), User.email.asc()).all()
-    return render_template("admin.html", users=users)
+    return render_template("users_list.html", users=users)
 
 
 # test route

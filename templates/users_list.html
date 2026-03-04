@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Physiolog{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .users-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .users-head {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+    }
+
+    .users-head h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        letter-spacing: -0.01em;
+    }
+
+    .users-head p {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.9rem;
+    }
+
+    .users-table-wrap {
+        overflow-x: auto;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .users-table th,
+    .users-table td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+    }
+
+    .users-table th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: var(--panel-2);
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .users-table tbody tr:nth-child(even) {
+        background: color-mix(in srgb, var(--panel) 88%, var(--panel-2) 12%);
+    }
+
+    .users-table tbody tr:hover {
+        background: var(--hover);
+    }
+
+    .status-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        border: 1px solid var(--border-2);
+    }
+
+    .status-pill.active {
+        color: #103227;
+        background: color-mix(in srgb, var(--accent) 72%, white 28%);
+        border-color: color-mix(in srgb, var(--accent) 80%, black 20%);
+    }
+
+    .status-pill.inactive {
+        color: var(--muted);
+        background: var(--panel-2);
+    }
+
+    .mobile-label {
+        display: none;
+        color: var(--muted);
+        font-size: 0.75rem;
+        margin-right: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    @media (max-width: 720px) {
+        .users-table th:nth-child(1) {
+            min-width: 130px;
+        }
+
+        .users-table th:nth-child(2) {
+            min-width: 210px;
+        }
+
+        .users-table th:nth-child(3) {
+            min-width: 140px;
+        }
+
+        .mobile-label {
+            display: inline;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="users-card">
+    <header class="users-head">
+        <h1>Users</h1>
+        <p>Admin view of registered users and subscription status.</p>
+    </header>
+
+    <div class="users-table-wrap">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subscription</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><span class="mobile-label">Name</span>{{ user.name or "-" }}</td>
+                    <td><span class="mobile-label">Email</span>{{ user.email }}</td>
+                    <td>
+                        <span class="mobile-label">Subscription</span>
+                        {% if user.has_subscription %}
+                        <span class="status-pill active">Active</span>
+                        {% else %}
+                        <span class="status-pill inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
