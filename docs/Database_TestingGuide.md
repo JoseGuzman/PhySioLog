@@ -93,21 +93,21 @@ We can update a user to be an admin with the following commands:
 
 ```bash
 cd /Users/joseguzman/git/physiolog
-cp instance/physiolog.db "instance/physiolog.backup.$(date +%Y%m%d_%H%M%S).db"
+cp instance/physiolog.db "instance/physiolog.backup.$(date +%Y-%m-%d_%H:%M:%S).db"
 ```
 
 and export to SQLite tables to CSV:
 
 ```bash
-mkdir -p /tmp/physiolog_migration
+mkdir -p ./tmp/physiolog_migration
 
 sqlite3 -header -csv instance/physiolog.db \
 "SELECT id,name,age,height_cm,weight_kg,email,password_hash,is_active_user,is_admin,has_subscription FROM users;" \
-> /tmp/physiolog_migration/users.csv
+> ./tmp/physiolog_migration/users.csv
 
 sqlite3 -header -csv instance/physiolog.db \
 "SELECT id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations FROM health_entries;" \
-> /tmp/physiolog_migration/health_entries.csv
+> ./tmp/physiolog_migration/health_entries.csv
 ```
 
 1. Verify source counts in SQLite
