@@ -53,6 +53,7 @@ def test_stats_success_contract_shape(client) -> None:
         "weight": 72.0,
         "body_fat": 18.0,
         "calories": 2100,
+        "protein": 175.0,
         "steps": 8000,
         "sleep_total": "07:30",
     }
@@ -68,6 +69,7 @@ def test_stats_success_contract_shape(client) -> None:
     assert isinstance(body["end_date"], str)
     assert isinstance(body["stats"], dict)
     assert "avg_sleep" in body["stats"]
+    assert "avg_protein" in body["stats"]
     assert "total_entries" in body["stats"]
 
 

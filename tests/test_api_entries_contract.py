@@ -52,6 +52,7 @@ def test_entries_lifecycle_contract(client) -> None:
         "weight": 72.5,
         "body_fat": 18.2,
         "calories": 2200,
+        "protein": 180.5,
         "steps": 8500,
         "sleep_total": "06:55",
         "sleep_quality": "good",
@@ -66,6 +67,7 @@ def test_entries_lifecycle_contract(client) -> None:
     assert post_body["entry"]["weight"] == 72.5
     assert post_body["entry"]["body_fat"] == 18.2
     assert post_body["entry"]["calories"] == 2200
+    assert post_body["entry"]["protein"] == 180.5
     assert post_body["entry"]["training_volume"] is None
     assert post_body["entry"]["steps"] == 8500
     assert post_body["entry"]["sleep_total"] == "06:55"
@@ -80,10 +82,12 @@ def test_entries_lifecycle_contract(client) -> None:
     assert get_one_body["entry"]["date"] == "2026-02-20"
     assert get_one_body["entry"]["sleep_total"] == "06:55"
     assert get_one_body["entry"]["sleep_total_decimal"] == pytest.approx(6 + (55 / 60))
+    assert get_one_body["entry"]["protein"] == 180.5
 
     update_payload = {
         "date": "2026-02-20",
         "weight": 73.1,
+        "protein": 190.0,
         "sleep_total": "07:30",
         "observations": "updated entry",
     }
@@ -92,6 +96,7 @@ def test_entries_lifecycle_contract(client) -> None:
     put_body = put_res.get_json()
     assert put_body["success"] is True
     assert put_body["entry"]["weight"] == 73.1
+    assert put_body["entry"]["protein"] == 190.0
     assert put_body["entry"]["sleep_total"] == "07:30"
     assert put_body["entry"]["sleep_total_decimal"] == pytest.approx(7.5)
     assert put_body["entry"]["observations"] == "updated entry"
@@ -105,6 +110,7 @@ def test_entries_lifecycle_contract(client) -> None:
     assert get_all_body["entries"][0]["date"] == "2026-02-20"
     assert get_all_body["entries"][0]["sleep_total"] == "07:30"
     assert get_all_body["entries"][0]["sleep_total_decimal"] == pytest.approx(7.5)
+    assert get_all_body["entries"][0]["protein"] == 190.0
 
 
 @pytest.mark.parametrize("bad_sleep", [7.5, "24:00", "7:3", "abc"])

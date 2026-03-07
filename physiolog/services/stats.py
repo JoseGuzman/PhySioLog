@@ -43,6 +43,7 @@ METRICS: dict[str, str] = {
     "avg_weight": "weight",
     "avg_body_fat": "body_fat",
     "avg_calories": "calories",
+    "avg_protein": "protein",
     "avg_steps": "steps",
     "avg_sleep": "sleep_total",
 }
@@ -71,6 +72,8 @@ class HasHealthMetrics(Protocol):
             Body fat percentage.
         calories (int | None):
             Daily caloric intake.
+        protein (float | None):
+            Daily protein intake in grams.
         steps (int | None):
             Number of steps recorded.
         sleep_total (float | None):
@@ -80,6 +83,7 @@ class HasHealthMetrics(Protocol):
     weight: float | None
     body_fat: float | None
     calories: int | None
+    protein: float | None
     steps: int | None
     sleep_total: float | None
 

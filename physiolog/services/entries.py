@@ -47,6 +47,7 @@ def build_entry_fields(
         "weight": data.get("weight"),
         "body_fat": data.get("body_fat"),
         "calories": data.get("calories"),
+        "protein": data.get("protein"),
         "training_volume": data.get("training_volume"),
         "steps": data.get("steps"),
         "sleep_total": sleep_decimal,

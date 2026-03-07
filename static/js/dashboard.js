@@ -28,7 +28,7 @@ async function fetchJson(url, options) {
 // -----------------------------
 // Trends stats panel (trends.html)
 // -----------------------------
-const TRENDS_STAT_FIELDS = ["avg_weight", "avg_body_fat", "avg_calories", "avg_steps", "avg_sleep"];
+const TRENDS_STAT_FIELDS = ["avg_weight", "avg_body_fat", "avg_calories", "avg_protein", "avg_steps", "avg_sleep"];
 
 function getSelectedWindowValue() {
     const sel = $("windowSelect");
@@ -40,7 +40,7 @@ function getSelectedWindowValue() {
 function formatStatValue(v, key = "") {
     if (v === null || v === undefined) return "--";
     if (typeof v === "number" && Number.isFinite(v)) {
-        if (key === "avg_steps" || key === "avg_calories") {
+        if (key === "avg_steps" || key === "avg_calories" || key === "avg_protein") {
             return String(Math.round(v));
         }
         return v.toFixed(2);
@@ -65,12 +65,14 @@ const TREND_CHANGE_METRICS = [
     { dataKey: "steps", deltaId: "stat-avg_steps_change" },
     { dataKey: "sleep_total_decimal", deltaId: "stat-avg_sleep_change" },
     { dataKey: "calories", deltaId: "stat-avg_calories_change" },
+    { dataKey: "protein", deltaId: "stat-avg_protein_change" },
 ];
 
 const TREND_STAT_METRICS = [
     { dataKey: "weight", statKey: "avg_weight" },
     { dataKey: "body_fat", statKey: "avg_body_fat" },
     { dataKey: "calories", statKey: "avg_calories" },
+    { dataKey: "protein", statKey: "avg_protein" },
     { dataKey: "steps", statKey: "avg_steps" },
     { dataKey: "sleep_total_decimal", statKey: "avg_sleep" },
 ];
@@ -380,10 +382,11 @@ const MYCOLORS = {
     steps: { bar: "#245d39", line: "#fb7185" },
     sleep: { bar: "#534970", line: "#fb923c" },
     calories: { bar: "#475569", line: "#f59e0b" },
+    protein: { bar: "#7c3aed", line: "#22d3ee" },
     training: { line: "#38bdf8", dots: "#f97316" },
 };
 
-const CHART_IDS = ["weightChart", "bodyFatChart", "stepsChart", "sleepChart", "caloriesChart", "trainingVolumeChart"];
+const CHART_IDS = ["weightChart", "bodyFatChart", "stepsChart", "sleepChart", "caloriesChart", "proteinChart", "trainingVolumeChart"];
 
 const PLOTLY_CONFIG = {
     responsive: true,
@@ -846,6 +849,42 @@ async function loadCharts(
                 hovermode: "closest",
                 bargap: 0.15,
                 yaxis: { ...baseLayout.yaxis, title: "Calories (kcal)" },
+                xaxis: {
+                    ...baseLayout.xaxis,
+                    ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
+                    showspikes: false
+                },
+            },
+            PLOTLY_CONFIG
+        );
+    }
+
+    // Protein
+    if ($("proteinChart")) {
+        const proteinData = entries.map((e) => e.protein);
+        const proteinMA = calculateMovingAverage(proteinData, 7);
+
+        Plotly.react(
+            "proteinChart",
+            [
+                {
+                    x: dates, y: proteinData, name: "Daily Protein", type: "bar",
+                    marker: { color: MYCOLORS.protein.bar, line: { width: 0 } },
+                    opacity: 0.6,
+                },
+                {
+                    x: dates, y: proteinMA, name: "7-Day Average", type: "scatter", mode: "lines",
+                    line: { width: 2, color: MYCOLORS.protein.line }
+                },
+            ],
+            {
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
+                hovermode: "closest",
+                bargap: 0.15,
+                yaxis: { ...baseLayout.yaxis, title: "Protein (g)" },
                 xaxis: {
                     ...baseLayout.xaxis,
                     ...makeXAxis(-30),

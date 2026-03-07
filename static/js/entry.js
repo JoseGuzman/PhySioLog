@@ -16,6 +16,7 @@ function clearEntryFields() {
     setFieldValue("weight", "");
     setFieldValue("bodyFat", "");
     setFieldValue("calories", "");
+    setFieldValue("protein", "");
     setFieldValue("trainingVolume", "");
     setFieldValue("steps", "");
     setFieldValue("sleep", "");
@@ -26,6 +27,7 @@ function fillEntryFields(entry) {
     setFieldValue("weight", entry.weight);
     setFieldValue("bodyFat", entry.body_fat);
     setFieldValue("calories", entry.calories);
+    setFieldValue("protein", entry.protein);
     setFieldValue("trainingVolume", entry.training_volume);
     setFieldValue("steps", entry.steps);
     setFieldValue(
@@ -94,6 +96,7 @@ function collectEntryPayload() {
         weight: parseFloat(entry$("weight")?.value) || null,
         body_fat: parseFloat(entry$("bodyFat")?.value) || null,
         calories: parseInt(entry$("calories")?.value, 10) || null,
+        protein: parseFloat(entry$("protein")?.value) || null,
         training_volume: parseFloat(entry$("trainingVolume")?.value) || null,
         steps: parseInt(entry$("steps")?.value, 10) || null,
         sleep_total: sleepValue,

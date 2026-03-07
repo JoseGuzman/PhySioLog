@@ -28,6 +28,7 @@
     #stepsChart,
     #sleepChart,
     #caloriesChart,
+    #proteinChart,
     #trainingVolumeChart {
         height: 340px;
     }
@@ -236,6 +237,12 @@
             <span class="value" id="stat-avg_calories">--</span>
             <span class="delta is-neutral" id="stat-avg_calories_change">--</span>
         </div>
+
+        <div class="stat-card">
+            <span class="label">Avg Protein (g)</span>
+            <span class="value" id="stat-avg_protein">--</span>
+            <span class="delta is-neutral" id="stat-avg_protein_change">--</span>
+        </div>
     </div>
 </div>
 
@@ -269,6 +276,14 @@
         <h2>Daily Calories</h2>
         <div id="caloriesChart"></div>
     </div>
+
+    <div class="chart">
+        <h2>Daily Protein</h2>
+        <div id="proteinChart"></div>
+    </div>
+</div>
+
+<div class="charts-grid">
     <div class="chart">
         <h2>Training Volume</h2>
         <div id="trainingVolumeChart"></div>
