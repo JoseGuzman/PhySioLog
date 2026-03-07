@@ -130,7 +130,7 @@ The App connection string for stagin should be set to:
 
 ```bash
 export APP_ENV=staging
-export SQLALCHEMY_DATABASE_URI="postgresql+psycopg://$(whoami)@localhost:5432/physiolog_staging"
+export SQLALCHEMY_DATABASE_URI="postgresql+psycopg://${USER}@localhost:5432/physiolog_staging"
 export AUTO_CREATE_DB=True
 uv run python -c "from physiolog import create_app; create_app()"
 export AUTO_CREATE_DB=False
@@ -139,18 +139,18 @@ export AUTO_CREATE_DB=False
 Import the CSV files into PostgreSQL:
 
 ```bash
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "\copy users(id,name,age,height_cm,weight_kg,email,password_hash,is_active_user,is_admin,has_subscription) FROM '/tmp/physiolog_migration/users.csv' CSV HEADER"
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "\copy health_entries(id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations) FROM '/tmp/physiolog_migration/health_entries.csv' CSV HEADER"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "\copy users(id,name,age,height_cm,weight_kg,email,password_hash,is_active_user,is_admin,has_subscription) FROM '/tmp/physiolog_migration/users.csv' CSV HEADER"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "\copy health_entries(id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations) FROM '/tmp/physiolog_migration/health_entries.csv' CSV HEADER"
 ```
 
 Verify counts in PostgreSQL:
 
 ```bash
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT setval(pg_get_serial_sequence('users','id'), COALESCE((SELECT MAX(id) FROM users),1), true);"
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT setval(pg_get_serial_sequence('health_entries','id'), COALESCE((SELECT MAX(id) FROM health_entries),1), true);"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT setval(pg_get_serial_sequence('users','id'), COALESCE((SELECT MAX(id) FROM users),1), true);"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT setval(pg_get_serial_sequence('health_entries','id'), COALESCE((SELECT MAX(id) FROM health_entries),1), true);"
 
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM users;"
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries;"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM users;"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries;"
 ```
 
 ## Rollback and Restore Procedure
@@ -186,7 +186,7 @@ sqlite3 instance/physiolog.db "SELECT COUNT(*) FROM health_entries;"
 Create a dump before re-importing or applying schema changes:
 
 ```bash
-pg_dump "postgresql://$(whoami)@localhost:5432/physiolog_staging" > /tmp/physiolog_staging_prechange.sql
+pg_dump "postgresql://${USER}@localhost:5432/physiolog_staging" > /tmp/physiolog_staging_prechange.sql
 ```
 
 ### C) PostgreSQL restore (staging)
@@ -201,15 +201,15 @@ createdb physiolog_staging
 2. Restore from SQL dump:
 
 ```bash
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" < /tmp/physiolog_staging_prechange.sql
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" < /tmp/physiolog_staging_prechange.sql
 ```
 
 3. Validate restore:
 
 ```bash
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM users;"
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries;"
-psql "postgresql://$(whoami)@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries h LEFT JOIN users u ON u.id=h.user_id WHERE u.id IS NULL;"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM users;"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries;"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM health_entries h LEFT JOIN users u ON u.id=h.user_id WHERE u.id IS NULL;"
 ```
 
 Expected:

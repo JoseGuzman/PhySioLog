@@ -35,7 +35,7 @@ Use this checklist before first cloud deployment.
 - [ ] Add `.dockerignore`.
 - [ ] Run app with Gunicorn in container (`gunicorn app:app ...`).
 - [ ] Set container healthcheck endpoint (`GET /health`).
-- [ ] Verify app starts with `FLASK_DEBUG=False`.
+- [x] Verify app starts with `FLASK_DEBUG=False`.
 
 ## 3) Configuration and Secrets
 
@@ -68,7 +68,7 @@ Use this checklist before first cloud deployment.
 ## 6) Admin Strategy (recommended before deploy)
 
 - [x] Add `is_admin` role (or confirm single-user deployment scope).
-- [ ] Add first-admin bootstrap flow (CLI/env-driven).
+- [x] Add first-admin bootstrap flow (CLI/env-driven).
 - [ ] Add admin recovery procedure (lost admin credentials).
 - [ ] Confirm `AUTH_BOOTSTRAP_USER*` behavior is safe for production.
 

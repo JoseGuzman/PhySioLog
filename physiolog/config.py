@@ -59,7 +59,7 @@ class DevConfig(BaseConfig):
     """Development config (default)."""
 
     FLASK_ENV = "development"
-    DEBUG = True
+    FLASK_DEBUG = True
     # if not present, use a default
     SECRET_KEY = environ.get("SECRET_KEY", "dev-fallback-key")
     # AUTO_CREATE_DB=False
@@ -73,7 +73,7 @@ class StagingConfig(BaseConfig):
     """
 
     FLASK_ENV = "staging"
-    DEBUG = False
+    FLASK_DEBUG = False
     # AUTO_CREATE_DB=False
     AUTO_CREATE_DB = environ.get("AUTO_CREATE_DB", "False").lower() == "true"
 
@@ -88,7 +88,7 @@ class ProdConfig(BaseConfig):
     """
 
     FLASK_ENV = "production"
-    DEBUG = False
+    FLASK_DEBUG = False
     # AUTO_CREATE_DB=False
     AUTO_CREATE_DB = environ.get("AUTO_CREATE_DB", "False").lower() == "true"
     SECRET_KEY = environ.get("SECRET_KEY")  # must be set in environment for production
