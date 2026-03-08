@@ -45,6 +45,7 @@
 {% endblock %}
 
 {% block content %}
+{% set is_demo_user = ((current_user.email or "")|lower == "demo@example.com") %}
 <div class="page-header">
     <h1>User Settings</h1>
     <p>Update account credentials and profile metrics for "{{ current_user.email }}".</p>
@@ -54,18 +55,23 @@
     <div class="user-grid">
         <section class="panel">
             <h2>Account</h2>
+            {% if is_demo_user %}
+            <p class="settings-status">Demo user: name and password cannot be changed.</p>
+            {% endif %}
             <div class="inputs-grid">
                 <div>
                     <label for="userName">Name</label>
-                    <input type="text" id="userName" placeholder="Your name">
+                    <input type="text" id="userName" placeholder="Your name" {% if is_demo_user %}readonly{% endif %}>
                 </div>
                 <div>
                     <label for="newPassword">Password</label>
-                    <input type="password" id="newPassword" placeholder="Leave blank to keep current password">
+                    <input type="password" id="newPassword" placeholder="Leave blank to keep current password" {% if
+                        is_demo_user %}disabled{% endif %}>
                 </div>
                 <div>
                     <label for="confirmPassword">Re-enter password</label>
-                    <input type="password" id="confirmPassword" placeholder="Repeat new password">
+                    <input type="password" id="confirmPassword" placeholder="Repeat new password" {% if is_demo_user
+                        %}disabled{% endif %}>
                 </div>
             </div>
         </section>
@@ -98,6 +104,8 @@
 
 {% block scripts %}
 <script>
+    const IS_DEMO_USER = "{{ (current_user.email or '')|lower }}" === "demo@example.com";
+
     function parseMaybeNumber(raw) {
         const value = String(raw ?? "").trim();
         if (!value || value === "--") return null;
@@ -128,6 +136,10 @@
             height_cm: parseMaybeNumber(document.getElementById("height").value),
             weight_kg: parseMaybeNumber(document.getElementById("weight").value),
         };
+        if (IS_DEMO_USER) {
+            payload.password = "";
+            payload.password_confirm = "";
+        }
         const res = await fetch("/api/user-settings", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

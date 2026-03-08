@@ -1,4 +1,4 @@
-Date,Weight (kg),Body Fat (%),Calories,Carbs (g),Fat (g),Protein (g),H2O (mL),Steps,Sleep total (h),Deep Sleep (h),Sleep Quality,Gym ,Bachata,Training (h),Training Volume (Kg),Observations
+date,weight_kg,body_fat_percent,calories_kcal,carbs_g,fat_g,protein_g,water_ml,steps_count,sleep_hours,deep_sleep_hours,sleep_quality,gym_activity,bachata_count,training_hours,training_volume_kg,observations
 01/09/2025,74.40,22.30,--,--,--,--,--,13506,6:38,1:06,OK :|,None,0,--,--,
 02/09/2025,75.20,21.40,--,--,--,--,--,8257,6:16,1:20,OK :|,None,0,--,--,
 03/09/2025,74.90,22.80,--,--,--,--,--,17679,8:20,1:52,Good :),None,0,--,--,

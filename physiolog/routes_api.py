@@ -337,6 +337,12 @@ def user_settings() -> Response | tuple[Response, int]:
 
         password = str(data.get("password", "") or "")
         password_confirm = str(data.get("password_confirm", "") or "")
+        is_demo_user = (current_user.email or "").strip().lower() == "demo@example.com"
+        if is_demo_user:
+            if name != (current_user.name or ""):
+                return jsonify({"success": False, "error": "Demo user cannot change name"}), 403
+            if password or password_confirm:
+                return jsonify({"success": False, "error": "Demo user cannot change password"}), 403
         if password and password_confirm:
             if password != password_confirm:
                 return jsonify({"success": False, "error": "passwords do not match"}), 400

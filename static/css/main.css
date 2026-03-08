@@ -254,8 +254,9 @@ Main content
 
 .topbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
+    gap: 10px;
     min-height: 42px;
     margin-bottom: 12px;
     position: sticky;
@@ -263,6 +264,34 @@ Main content
     z-index: 40;
     background: var(--bg);
     padding: 6px 0;
+}
+
+.topbar-metrics {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.topbar-metric {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+}
+
+.topbar-metric-label {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.topbar-metric-unit {
+    color: var(--muted);
+    font-size: 0.78rem;
 }
 
 .topbar-profile {

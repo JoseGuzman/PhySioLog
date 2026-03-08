@@ -97,6 +97,18 @@
     <!-- Main Content: Global Content Container -->
     <main class="main-content">
         <header class="topbar">
+            <div class="topbar-metrics" aria-live="polite">
+                <span class="topbar-metric">
+                    <span class="topbar-metric-label">BMR</span>
+                    <strong id="globalBmrOut">—</strong>
+                    <span class="topbar-metric-unit">kcal</span>
+                </span>
+                <span class="topbar-metric">
+                    <span class="topbar-metric-label">TDEE</span>
+                    <strong id="globalTdeeOut">—</strong>
+                    <span class="topbar-metric-unit">kcal</span>
+                </span>
+            </div>
             <div class="topbar-profile">
                 <button id="profileMenuBtn" class="profile-btn" type="button" aria-haspopup="true"
                     aria-expanded="false">
@@ -157,6 +169,66 @@
             const menu = document.getElementById("profileMenu");
             const themeBtns = document.querySelectorAll(".theme-btn");
             const media = window.matchMedia("(prefers-color-scheme: dark)");
+            const globalBmrOut = document.getElementById("globalBmrOut");
+            const globalTdeeOut = document.getElementById("globalTdeeOut");
+
+            function setGlobalMetabolism(bmr, tdee) {
+                if (globalBmrOut) {
+                    globalBmrOut.textContent = Number.isFinite(bmr) ? String(Math.round(bmr)) : "—";
+                }
+                if (globalTdeeOut) {
+                    globalTdeeOut.textContent = Number.isFinite(tdee) ? String(Math.round(tdee)) : "—";
+                }
+            }
+
+            function calculateBMR(weight, height, age, gender) {
+                if (gender === "male") return (10 * weight) + (6.25 * height) - (5 * age) + 5;
+                return (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            }
+
+            async function loadGlobalMetabolism() {
+                if (!globalBmrOut && !globalTdeeOut) return;
+
+                try {
+                    const res = await fetch("/api/user-profile");
+                    if (!res.ok) {
+                        setGlobalMetabolism(null, null);
+                        return;
+                    }
+
+                    const body = await res.json();
+                    const p = body?.profile || {};
+                    const age = Number(p.age);
+                    const height = Number(p.height_cm);
+                    const weight = Number(p.weight_kg);
+
+                    if (
+                        !Number.isFinite(age) || age <= 0 ||
+                        !Number.isFinite(height) || height <= 0 ||
+                        !Number.isFinite(weight) || weight <= 0
+                    ) {
+                        setGlobalMetabolism(null, null);
+                        return;
+                    }
+
+                    const rawGender = (localStorage.getItem("metabolism-gender") || "").toLowerCase();
+                    const rawActivity = localStorage.getItem("metabolism-activity");
+                    const parsedActivity = rawActivity === null ? NaN : parseFloat(rawActivity);
+
+                    const hasGender = rawGender === "male" || rawGender === "female";
+                    const hasActivity = Number.isFinite(parsedActivity) && parsedActivity > 0;
+                    if (!hasGender || !hasActivity) {
+                        setGlobalMetabolism(null, null);
+                        return;
+                    }
+
+                    const bmr = calculateBMR(weight, height, age, rawGender);
+                    const tdee = bmr * parsedActivity;
+                    setGlobalMetabolism(bmr, tdee);
+                } catch (_) {
+                    setGlobalMetabolism(null, null);
+                }
+            }
 
             function resolveTheme(choice) {
                 if (choice === "light" || choice === "dark") return choice;
@@ -178,6 +250,10 @@
 
             const saved = localStorage.getItem("theme-choice") || "light";
             applyTheme(saved);
+            loadGlobalMetabolism();
+            document.addEventListener("metabolism:updated", () => {
+                loadGlobalMetabolism();
+            });
             media.addEventListener("change", () => {
                 const current = localStorage.getItem("theme-choice") || "light";
                 if (current === "system") applyTheme("system");

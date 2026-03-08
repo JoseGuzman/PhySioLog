@@ -9,7 +9,7 @@ Usage:
 >>>  uv run python scripts/import_data.py data/health_data.cs
 
 
-Creates Demo User with demo@example.com 
+Creates Demo User with Email = demo@example.com 
 and password from DEMO_USER_PASSWORD env var or prompt.
 It has age=49, height_cm=168, weight_kg=70 (can be edited in app). 
 All imported entries from data/health_data.csv are linked to this user.
@@ -141,13 +141,15 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
             column_map["body_fat"] = col
         elif "calorie" in col_lower:
             column_map["calories"] = col
+        elif "protein" in col_lower:
+            column_map["protein"] = col
         elif (
             "training" in col_lower and "volume" in col_lower
         ) or "volumen" in col_lower:
             column_map["training_volume"] = col
         elif "step" in col_lower:
             column_map["steps"] = col
-        elif "sleep total" in col_lower or (
+        elif "sleep total" in col_lower or "sleep_hours" in col_lower or (
             ("sleep" in col_lower) and ("total" in col_lower)
         ):
             column_map["sleep_total"] = col
@@ -212,16 +214,27 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                     if "training_volume" in column_map
                     else None
                 )
+                protein_val = (
+                    parse_number(row.get(column_map.get("protein")))
+                    if "protein" in column_map
+                    else None
+                )
 
                 existing = HealthEntry.query.filter_by(
                     user_id=demo_user.id, date=entry_date
                 ).first()
                 if existing:
+                    changed = False
                     if (
                         training_volume_val is not None
                         and existing.training_volume != training_volume_val
                     ):
                         existing.training_volume = training_volume_val
+                        changed = True
+                    if protein_val is not None and existing.protein != protein_val:
+                        existing.protein = protein_val
+                        changed = True
+                    if changed:
                         updated += 1
                     else:
                         skipped += 1
@@ -248,6 +261,7 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                     if "body_fat" in column_map
                     else None,
                     calories=int(calories_val) if calories_val is not None else None,
+                    protein=protein_val,
                     training_volume=training_volume_val,
                     steps=int(steps_val) if steps_val is not None else None,
                     sleep_total=parse_time(row.get(column_map.get("sleep_total")))

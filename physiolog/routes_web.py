@@ -99,7 +99,7 @@ def logout():
 @login_required
 def metabolism():
     """Metabolism page with metabolism stats and input entry form"""
-    return render_template("overview.html")
+    return render_template("metabolism.html")
 
 
 @web_bp.route("/overview")

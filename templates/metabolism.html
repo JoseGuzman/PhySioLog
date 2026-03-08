@@ -134,7 +134,7 @@
     <!-- LEFT: Inputs -->
     <div class="panel">
         <h2>User Metrics</h2>
-        <small>Your profile will be updated when you press Calculate.</small>
+        <small>Your profile will be updated when you press Update.</small>
 
         <form id="tdeeForm" style="margin-top: 14px;">
             <div class="inputs-grid">
@@ -173,7 +173,7 @@
                 </div>
 
                 <div class="full">
-                    <button type="button" id="recalcBtn">Calculate</button>
+                    <button type="button" id="recalcBtn">Update</button>
                 </div>
             </div>
         </form>
@@ -381,8 +381,27 @@
     }
 
     // listeners
-    document.getElementById('recalcBtn')?.addEventListener('click', recalc);
+    document.getElementById('recalcBtn')?.addEventListener('click', () => {
+        const gender = document.getElementById('gender').value;
+        const activity = parseFloat(document.getElementById('activity').value);
+        if (gender === "male" || gender === "female") {
+            localStorage.setItem("metabolism-gender", gender);
+        }
+        if (Number.isFinite(activity) && activity > 0) {
+            localStorage.setItem("metabolism-activity", String(activity));
+        }
+        recalc();
+        document.dispatchEvent(new CustomEvent("metabolism:updated"));
+    });
     document.addEventListener('DOMContentLoaded', async () => {
+        const savedGender = (localStorage.getItem("metabolism-gender") || "").toLowerCase();
+        if (savedGender === "male" || savedGender === "female") {
+            document.getElementById("gender").value = savedGender;
+        }
+        const savedActivity = localStorage.getItem("metabolism-activity");
+        if (savedActivity && document.querySelector(`#activity option[value="${savedActivity}"]`)) {
+            document.getElementById("activity").value = savedActivity;
+        }
         clearCalcOutputs();
         await loadUserProfile();
         recalc();
