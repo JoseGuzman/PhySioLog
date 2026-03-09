@@ -53,7 +53,7 @@ def test_stats_success_contract_shape(client) -> None:
         "weight_kg": 72.0,
         "body_fat_percent": 18.0,
         "calories_kcal": 2100,
-        "protein_g": 175.0,
+        "protein_g": 175,
         "steps_count": 8000,
         "sleep_hours": "07:30",
     }

@@ -1,15 +1,29 @@
 # PhySioLog Database Testing Guide
 
-Temporaly, the database in instance/physiolog.db, you can see the table for the users and health entries with the following command:
+For debugging (ie.., FLASK_DEBUG =True), the database is a sqlite database located at instance/physiolog.db. You can see the table for the users and health entries with the following command:
 
 ```bash
 >>> sqlite3 instance/physiolog.db "PRAGMA table_info(health_entries);"
 >>> sqlite3 instance/physiolog.db "PRAGMA table_info(users);"
 ```
 
-## Flask Shell Testing
+In staging/production, we use PostgreSLQ as the database. To test the database connection and queries in staging, you can use the `psql` command line tool to connect to the PostgreSQL database and run SQL queries directly.
 
-To test in flask shell
+To connect to the staging database, you can use the following command:
+
+```bash
+>>> psql "postgresql://${USER}@localhost:5432/physiolog_staging"
+>>> \d+ health_entries
+>>> \d+ users
+```
+
+## Flask Shell 
+
+When using the Flask shell to interact with the databases and test queries, we use
+SQLAlchemy as the Object-relational mappings (ORM), to use queries to interact with the database.
+Note that we have only access to the Users database table in the flask shell, as the HealthEntry model is not imported in the shell context. To test queries on the health entries, we can use the API endpoints or connect directly to the database with `psql` as shown above.
+
+To activate the flask shell
 
 ```bash
 >>> uv run python -m flask shell
@@ -174,7 +188,7 @@ Rollback immediately if any of these are true:
 cp instance/physiolog.backup.YYYYMMDD_HHMMSS.db instance/physiolog.db
 ```
 
-3. Verify counts:
+1. Verify counts:
 
 ```bash
 sqlite3 instance/physiolog.db "SELECT COUNT(*) FROM users;"
@@ -198,13 +212,13 @@ dropdb physiolog_staging
 createdb physiolog_staging
 ```
 
-2. Restore from SQL dump:
+1. Restore from SQL dump:
 
 ```bash
 psql "postgresql://${USER}@localhost:5432/physiolog_staging" < /tmp/physiolog_staging_prechange.sql
 ```
 
-3. Validate restore:
+1. Validate restore:
 
 ```bash
 psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "SELECT COUNT(*) FROM users;"

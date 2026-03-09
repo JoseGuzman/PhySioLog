@@ -23,7 +23,7 @@ class FakeEntry:
     weight_kg: float | None = None
     body_fat_percent: float | None = None
     calories_kcal: int | None = None
-    protein_g: float | None = None
+    protein_g: int | None = None
     steps_count: int | None = None
     sleep_hours: float | None = None
 

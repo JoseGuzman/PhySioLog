@@ -83,7 +83,7 @@ class HasHealthMetrics(Protocol):
     weight_kg: float | None
     body_fat_percent: float | None
     calories_kcal: int | None
-    protein_g: float | None
+    protein_g: int | None
     steps_count: int | None
     sleep_hours: float | None
 

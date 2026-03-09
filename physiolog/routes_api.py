@@ -95,8 +95,8 @@ def entries() -> Response | tuple[Response, int]:
             - weight_kg (float, optional; accepts legacy `weight`)
             - body_fat_percent (float, optional; accepts legacy `body_fat`)
             - calories_kcal (int, optional; accepts legacy `calories`)
-            - protein_g (float, optional; accepts legacy `protein`)
-            - training_volume_kg (float, optional; accepts legacy `training_volume`)
+            - protein_g (int, optional; accepts legacy `protein`)
+            - training_volume_kg (int, optional; accepts legacy `training_volume`)
             - steps_count (int, optional; accepts legacy `steps`)
             - sleep_hours (str, optional; accepts legacy `sleep_total`) Format HH:MM
             - sleep_quality (str, optional)

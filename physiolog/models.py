@@ -95,15 +95,13 @@ class HealthEntry(db.Model):
     date: Mapped[Date] = mapped_column(unique=False, nullable=False, index=True)
     user: Mapped[User] = relationship(back_populates="entries")
 
-    weight_kg: Mapped[float | None] = mapped_column("weight", nullable=True)
-    body_fat_percent: Mapped[float | None] = mapped_column("body_fat", nullable=True)
-    calories_kcal: Mapped[float | None] = mapped_column("calories", nullable=True)
-    protein_g: Mapped[float | None] = mapped_column("protein", nullable=True)
-    training_volume_kg: Mapped[float | None] = mapped_column(
-        "training_volume", nullable=True
-    )
-    steps_count: Mapped[int | None] = mapped_column("steps", nullable=True)
-    sleep_hours: Mapped[float | None] = mapped_column("sleep_total", nullable=True)
+    weight_kg: Mapped[float | None] = mapped_column(nullable=True)
+    body_fat_percent: Mapped[float | None] = mapped_column(nullable=True)
+    calories_kcal: Mapped[int | None] = mapped_column(nullable=True)
+    protein_g: Mapped[int | None] = mapped_column(nullable=True)
+    training_volume_kg: Mapped[int | None] = mapped_column(nullable=True)
+    steps_count: Mapped[int | None] = mapped_column(nullable=True)
+    sleep_hours: Mapped[float | None] = mapped_column(nullable=True)
 
     sleep_quality: Mapped[str | None] = mapped_column(db.String(20), nullable=True)
     observations: Mapped[str | None] = mapped_column(db.Text, nullable=True)

@@ -52,7 +52,7 @@ def test_entries_lifecycle_contract(client) -> None:
         "weight_kg": 72.5,
         "body_fat_percent": 18.2,
         "calories_kcal": 2200,
-        "protein_g": 180.5,
+        "protein_g": 180,
         "steps_count": 8500,
         "sleep_hours": "06:55",
         "sleep_quality": "good",
@@ -67,7 +67,7 @@ def test_entries_lifecycle_contract(client) -> None:
     assert post_body["entry"]["weight_kg"] == 72.5
     assert post_body["entry"]["body_fat_percent"] == 18.2
     assert post_body["entry"]["calories_kcal"] == 2200
-    assert post_body["entry"]["protein_g"] == 180.5
+    assert post_body["entry"]["protein_g"] == 180
     assert post_body["entry"]["training_volume_kg"] is None
     assert post_body["entry"]["steps_count"] == 8500
     assert post_body["entry"]["sleep_hours"] == "06:55"
@@ -82,12 +82,12 @@ def test_entries_lifecycle_contract(client) -> None:
     assert get_one_body["entry"]["date"] == "2026-02-20"
     assert get_one_body["entry"]["sleep_hours"] == "06:55"
     assert get_one_body["entry"]["sleep_hours_decimal"] == pytest.approx(6 + (55 / 60))
-    assert get_one_body["entry"]["protein_g"] == 180.5
+    assert get_one_body["entry"]["protein_g"] == 180
 
     update_payload = {
         "date": "2026-02-20",
         "weight_kg": 73.1,
-        "protein_g": 190.0,
+        "protein_g": 190,
         "sleep_hours": "07:30",
         "observations": "updated entry",
     }
@@ -96,7 +96,7 @@ def test_entries_lifecycle_contract(client) -> None:
     put_body = put_res.get_json()
     assert put_body["success"] is True
     assert put_body["entry"]["weight_kg"] == 73.1
-    assert put_body["entry"]["protein_g"] == 190.0
+    assert put_body["entry"]["protein_g"] == 190
     assert put_body["entry"]["sleep_hours"] == "07:30"
     assert put_body["entry"]["sleep_hours_decimal"] == pytest.approx(7.5)
     assert put_body["entry"]["observations"] == "updated entry"
@@ -110,7 +110,7 @@ def test_entries_lifecycle_contract(client) -> None:
     assert get_all_body["entries"][0]["date"] == "2026-02-20"
     assert get_all_body["entries"][0]["sleep_hours"] == "07:30"
     assert get_all_body["entries"][0]["sleep_hours_decimal"] == pytest.approx(7.5)
-    assert get_all_body["entries"][0]["protein_g"] == 190.0
+    assert get_all_body["entries"][0]["protein_g"] == 190
 
 
 @pytest.mark.parametrize("bad_sleep", [7.5, "24:00", "7:3", "abc"])
