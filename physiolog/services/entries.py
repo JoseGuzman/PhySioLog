@@ -43,14 +43,19 @@ def build_entry_fields(
     data: Mapping[str, Any], sleep_decimal: float | None
 ) -> dict[str, Any]:
     """Build the shared field mapping for create/update entry flows."""
+    def pick_value(new_key: str, old_key: str) -> Any:
+        if new_key in data:
+            return data.get(new_key)
+        return data.get(old_key)
+
     return {
-        "weight": data.get("weight"),
-        "body_fat": data.get("body_fat"),
-        "calories": data.get("calories"),
-        "protein": data.get("protein"),
-        "training_volume": data.get("training_volume"),
-        "steps": data.get("steps"),
-        "sleep_total": sleep_decimal,
+        "weight_kg": pick_value("weight_kg", "weight"),
+        "body_fat_percent": pick_value("body_fat_percent", "body_fat"),
+        "calories_kcal": pick_value("calories_kcal", "calories"),
+        "protein_g": pick_value("protein_g", "protein"),
+        "training_volume_kg": pick_value("training_volume_kg", "training_volume"),
+        "steps_count": pick_value("steps_count", "steps"),
+        "sleep_hours": sleep_decimal,
         "sleep_quality": data.get("sleep_quality"),
         "observations": data.get("observations"),
     }

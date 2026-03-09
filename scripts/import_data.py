@@ -9,11 +9,10 @@ Usage:
 >>>  uv run python scripts/import_data.py data/health_data.cs
 
 
-Creates Demo User with Email = demo@example.com 
-and password from DEMO_USER_PASSWORD env var or prompt.
+Creates Demo User with Name = David Musterman, and Email = demo@example.com 
+The password is set in DEMO_USER_PASSWORD env var or prompt.
 It has age=49, height_cm=168, weight_kg=70 (can be edited in app). 
 All imported entries from data/health_data.csv are linked to this user.
-
 """
 
 import argparse
@@ -136,23 +135,23 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
         if "date" in col_lower:
             column_map["date"] = col
         elif "weight" in col_lower and "kg" in col_lower:
-            column_map["weight"] = col
+            column_map["weight_kg"] = col
         elif "body" in col_lower and "fat" in col_lower:
-            column_map["body_fat"] = col
+            column_map["body_fat_percent"] = col
         elif "calorie" in col_lower:
-            column_map["calories"] = col
+            column_map["calories_kcal"] = col
         elif "protein" in col_lower:
-            column_map["protein"] = col
+            column_map["protein_g"] = col
         elif (
             "training" in col_lower and "volume" in col_lower
         ) or "volumen" in col_lower:
-            column_map["training_volume"] = col
+            column_map["training_volume_kg"] = col
         elif "step" in col_lower:
-            column_map["steps"] = col
+            column_map["steps_count"] = col
         elif "sleep total" in col_lower or "sleep_hours" in col_lower or (
             ("sleep" in col_lower) and ("total" in col_lower)
         ):
-            column_map["sleep_total"] = col
+            column_map["sleep_hours"] = col
         elif "sleep quality" in col_lower or (
             ("sleep" in col_lower) and ("quality" in col_lower)
         ):
@@ -179,7 +178,7 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
         demo_user = User.query.filter_by(email=demo_email).first()
         if not demo_user:
             demo_user = User(
-                name="Demo User",
+                name="David Mustermann",
                 email=demo_email,
                 age=49,
                 height_cm=168,
@@ -210,13 +209,13 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                     continue
 
                 training_volume_val = (
-                    parse_number(row.get(column_map.get("training_volume")))
-                    if "training_volume" in column_map
+                    parse_number(row.get(column_map.get("training_volume_kg")))
+                    if "training_volume_kg" in column_map
                     else None
                 )
                 protein_val = (
-                    parse_number(row.get(column_map.get("protein")))
-                    if "protein" in column_map
+                    parse_number(row.get(column_map.get("protein_g")))
+                    if "protein_g" in column_map
                     else None
                 )
 
@@ -227,12 +226,12 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                     changed = False
                     if (
                         training_volume_val is not None
-                        and existing.training_volume != training_volume_val
+                        and existing.training_volume_kg != training_volume_val
                     ):
-                        existing.training_volume = training_volume_val
+                        existing.training_volume_kg = training_volume_val
                         changed = True
-                    if protein_val is not None and existing.protein != protein_val:
-                        existing.protein = protein_val
+                    if protein_val is not None and existing.protein_g != protein_val:
+                        existing.protein_g = protein_val
                         changed = True
                     if changed:
                         updated += 1
@@ -241,31 +240,33 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                     continue
 
                 calories_val = (
-                    parse_number(row.get(column_map.get("calories")))
-                    if "calories" in column_map
+                    parse_number(row.get(column_map.get("calories_kcal")))
+                    if "calories_kcal" in column_map
                     else None
                 )
                 steps_val = (
-                    parse_number(row.get(column_map.get("steps")))
-                    if "steps" in column_map
+                    parse_number(row.get(column_map.get("steps_count")))
+                    if "steps_count" in column_map
                     else None
                 )
 
                 entry = HealthEntry(
                     user_id=demo_user.id,
                     date=entry_date,
-                    weight=parse_number(row.get(column_map.get("weight")))
-                    if "weight" in column_map
+                    weight_kg=parse_number(row.get(column_map.get("weight_kg")))
+                    if "weight_kg" in column_map
                     else None,
-                    body_fat=parse_number(row.get(column_map.get("body_fat")))
-                    if "body_fat" in column_map
+                    body_fat_percent=parse_number(
+                        row.get(column_map.get("body_fat_percent"))
+                    )
+                    if "body_fat_percent" in column_map
                     else None,
-                    calories=int(calories_val) if calories_val is not None else None,
-                    protein=protein_val,
-                    training_volume=training_volume_val,
-                    steps=int(steps_val) if steps_val is not None else None,
-                    sleep_total=parse_time(row.get(column_map.get("sleep_total")))
-                    if "sleep_total" in column_map
+                    calories_kcal=int(calories_val) if calories_val is not None else None,
+                    protein_g=protein_val,
+                    training_volume_kg=training_volume_val,
+                    steps_count=int(steps_val) if steps_val is not None else None,
+                    sleep_hours=parse_time(row.get(column_map.get("sleep_hours")))
+                    if "sleep_hours" in column_map
                     else None,
                     sleep_quality=row.get(column_map.get("sleep_quality"))
                     if "sleep_quality" in column_map

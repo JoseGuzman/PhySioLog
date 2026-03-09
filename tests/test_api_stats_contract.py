@@ -50,12 +50,12 @@ def client(app):
 def test_stats_success_contract_shape(client) -> None:
     payload = {
         "date": date.today().isoformat(),
-        "weight": 72.0,
-        "body_fat": 18.0,
-        "calories": 2100,
-        "protein": 175.0,
-        "steps": 8000,
-        "sleep_total": "07:30",
+        "weight_kg": 72.0,
+        "body_fat_percent": 18.0,
+        "calories_kcal": 2100,
+        "protein_g": 175.0,
+        "steps_count": 8000,
+        "sleep_hours": "07:30",
     }
     assert client.post("/api/entries", json=payload).status_code == 201
 

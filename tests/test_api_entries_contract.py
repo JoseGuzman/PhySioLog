@@ -49,12 +49,12 @@ def client(app):
 def test_entries_lifecycle_contract(client) -> None:
     create_payload = {
         "date": "2026-02-20",
-        "weight": 72.5,
-        "body_fat": 18.2,
-        "calories": 2200,
-        "protein": 180.5,
-        "steps": 8500,
-        "sleep_total": "06:55",
+        "weight_kg": 72.5,
+        "body_fat_percent": 18.2,
+        "calories_kcal": 2200,
+        "protein_g": 180.5,
+        "steps_count": 8500,
+        "sleep_hours": "06:55",
         "sleep_quality": "good",
         "observations": "felt energetic",
     }
@@ -64,14 +64,14 @@ def test_entries_lifecycle_contract(client) -> None:
     post_body = post_res.get_json()
     assert post_body["success"] is True
     assert post_body["entry"]["date"] == "2026-02-20"
-    assert post_body["entry"]["weight"] == 72.5
-    assert post_body["entry"]["body_fat"] == 18.2
-    assert post_body["entry"]["calories"] == 2200
-    assert post_body["entry"]["protein"] == 180.5
-    assert post_body["entry"]["training_volume"] is None
-    assert post_body["entry"]["steps"] == 8500
-    assert post_body["entry"]["sleep_total"] == "06:55"
-    assert post_body["entry"]["sleep_total_decimal"] == pytest.approx(6 + (55 / 60))
+    assert post_body["entry"]["weight_kg"] == 72.5
+    assert post_body["entry"]["body_fat_percent"] == 18.2
+    assert post_body["entry"]["calories_kcal"] == 2200
+    assert post_body["entry"]["protein_g"] == 180.5
+    assert post_body["entry"]["training_volume_kg"] is None
+    assert post_body["entry"]["steps_count"] == 8500
+    assert post_body["entry"]["sleep_hours"] == "06:55"
+    assert post_body["entry"]["sleep_hours_decimal"] == pytest.approx(6 + (55 / 60))
     assert post_body["entry"]["sleep_quality"] == "good"
     assert post_body["entry"]["observations"] == "felt energetic"
 
@@ -80,25 +80,25 @@ def test_entries_lifecycle_contract(client) -> None:
     get_one_body = get_one_res.get_json()
     assert get_one_body["success"] is True
     assert get_one_body["entry"]["date"] == "2026-02-20"
-    assert get_one_body["entry"]["sleep_total"] == "06:55"
-    assert get_one_body["entry"]["sleep_total_decimal"] == pytest.approx(6 + (55 / 60))
-    assert get_one_body["entry"]["protein"] == 180.5
+    assert get_one_body["entry"]["sleep_hours"] == "06:55"
+    assert get_one_body["entry"]["sleep_hours_decimal"] == pytest.approx(6 + (55 / 60))
+    assert get_one_body["entry"]["protein_g"] == 180.5
 
     update_payload = {
         "date": "2026-02-20",
-        "weight": 73.1,
-        "protein": 190.0,
-        "sleep_total": "07:30",
+        "weight_kg": 73.1,
+        "protein_g": 190.0,
+        "sleep_hours": "07:30",
         "observations": "updated entry",
     }
     put_res = client.put("/api/entries", json=update_payload)
     assert put_res.status_code == 200
     put_body = put_res.get_json()
     assert put_body["success"] is True
-    assert put_body["entry"]["weight"] == 73.1
-    assert put_body["entry"]["protein"] == 190.0
-    assert put_body["entry"]["sleep_total"] == "07:30"
-    assert put_body["entry"]["sleep_total_decimal"] == pytest.approx(7.5)
+    assert put_body["entry"]["weight_kg"] == 73.1
+    assert put_body["entry"]["protein_g"] == 190.0
+    assert put_body["entry"]["sleep_hours"] == "07:30"
+    assert put_body["entry"]["sleep_hours_decimal"] == pytest.approx(7.5)
     assert put_body["entry"]["observations"] == "updated entry"
 
     get_all_res = client.get("/api/entries")
@@ -108,16 +108,16 @@ def test_entries_lifecycle_contract(client) -> None:
     assert isinstance(get_all_body["entries"], list)
     assert len(get_all_body["entries"]) == 1
     assert get_all_body["entries"][0]["date"] == "2026-02-20"
-    assert get_all_body["entries"][0]["sleep_total"] == "07:30"
-    assert get_all_body["entries"][0]["sleep_total_decimal"] == pytest.approx(7.5)
-    assert get_all_body["entries"][0]["protein"] == 190.0
+    assert get_all_body["entries"][0]["sleep_hours"] == "07:30"
+    assert get_all_body["entries"][0]["sleep_hours_decimal"] == pytest.approx(7.5)
+    assert get_all_body["entries"][0]["protein_g"] == 190.0
 
 
 @pytest.mark.parametrize("bad_sleep", [7.5, "24:00", "7:3", "abc"])
 def test_entries_sleep_validation_rejects_invalid_values(client, bad_sleep: object) -> None:
     res = client.post(
         "/api/entries",
-        json={"date": "2026-02-21", "sleep_total": bad_sleep},
+        json={"date": "2026-02-21", "sleep_hours": bad_sleep},
     )
     assert res.status_code == 400
     body = res.get_json()
@@ -129,8 +129,8 @@ def test_entries_window_filtering_returns_only_window_entries(client) -> None:
     in_window_date = date.today() - timedelta(days=1)
     out_window_date = date.today() - timedelta(days=10)
 
-    in_payload = {"date": in_window_date.isoformat(), "sleep_total": "07:00"}
-    out_payload = {"date": out_window_date.isoformat(), "sleep_total": "06:30"}
+    in_payload = {"date": in_window_date.isoformat(), "sleep_hours": "07:00"}
+    out_payload = {"date": out_window_date.isoformat(), "sleep_hours": "06:30"}
 
     assert client.post("/api/entries", json=in_payload).status_code == 201
     assert client.post("/api/entries", json=out_payload).status_code == 201

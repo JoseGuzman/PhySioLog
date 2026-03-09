@@ -24,15 +24,20 @@ function clearEntryFields() {
 }
 
 function fillEntryFields(entry) {
-    setFieldValue("weight", entry.weight);
-    setFieldValue("bodyFat", entry.body_fat);
-    setFieldValue("calories", entry.calories);
-    setFieldValue("protein", entry.protein);
-    setFieldValue("trainingVolume", entry.training_volume);
-    setFieldValue("steps", entry.steps);
+    setFieldValue("weight", entry.weight_kg ?? entry.weight);
+    setFieldValue("bodyFat", entry.body_fat_percent ?? entry.body_fat);
+    setFieldValue("calories", entry.calories_kcal ?? entry.calories);
+    setFieldValue("protein", entry.protein_g ?? entry.protein);
+    setFieldValue(
+        "trainingVolume",
+        entry.training_volume_kg ?? entry.training_volume
+    );
+    setFieldValue("steps", entry.steps_count ?? entry.steps);
     setFieldValue(
         "sleep",
-        entry.sleep_total || decimalHoursToHHMM(entry.sleep_total_decimal)
+        entry.sleep_hours ||
+            entry.sleep_total ||
+            decimalHoursToHHMM(entry.sleep_hours_decimal ?? entry.sleep_total_decimal)
     );
     setFieldValue("observations", entry.observations);
 }
@@ -93,13 +98,13 @@ function collectEntryPayload() {
     const sleepValue = normalizeSleepTotal(entry$("sleep")?.value);
     return {
         date: entry$("date")?.value,
-        weight: parseFloat(entry$("weight")?.value) || null,
-        body_fat: parseFloat(entry$("bodyFat")?.value) || null,
-        calories: parseInt(entry$("calories")?.value, 10) || null,
-        protein: parseFloat(entry$("protein")?.value) || null,
-        training_volume: parseFloat(entry$("trainingVolume")?.value) || null,
-        steps: parseInt(entry$("steps")?.value, 10) || null,
-        sleep_total: sleepValue,
+        weight_kg: parseFloat(entry$("weight")?.value) || null,
+        body_fat_percent: parseFloat(entry$("bodyFat")?.value) || null,
+        calories_kcal: parseInt(entry$("calories")?.value, 10) || null,
+        protein_g: parseFloat(entry$("protein")?.value) || null,
+        training_volume_kg: parseFloat(entry$("trainingVolume")?.value) || null,
+        steps_count: parseInt(entry$("steps")?.value, 10) || null,
+        sleep_hours: sleepValue,
         observations: entry$("observations")?.value?.trim() || null,
     };
 }

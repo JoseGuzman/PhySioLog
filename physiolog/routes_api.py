@@ -92,11 +92,13 @@ def entries() -> Response | tuple[Response, int]:
 
         Expected JSON fields:
             - date (str, required): Format YYYY-MM-DD
-            - weight (float, optional)
-            - body_fat (float, optional)
-            - calories (int, optional)
-            - steps (int, optional)
-            - sleep_total (str, optional): Format HH:MM
+            - weight_kg (float, optional; accepts legacy `weight`)
+            - body_fat_percent (float, optional; accepts legacy `body_fat`)
+            - calories_kcal (int, optional; accepts legacy `calories`)
+            - protein_g (float, optional; accepts legacy `protein`)
+            - training_volume_kg (float, optional; accepts legacy `training_volume`)
+            - steps_count (int, optional; accepts legacy `steps`)
+            - sleep_hours (str, optional; accepts legacy `sleep_total`) Format HH:MM
             - sleep_quality (str, optional)
             - observations (str, optional)
 
@@ -124,7 +126,8 @@ def entries() -> Response | tuple[Response, int]:
 
         try:
             parsed_date = parse_entry_date_required(data)
-            sleep_decimal = parse_optional_sleep_total_hhmm(data.get("sleep_total"))
+            sleep_raw = data.get("sleep_hours", data.get("sleep_total"))
+            sleep_decimal = parse_optional_sleep_total_hhmm(sleep_raw)
         except ValueError as exc:
             return jsonify({"success": False, "error": str(exc)}), 400
 

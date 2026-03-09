@@ -25,11 +25,11 @@ Use cases
     >>> from dataclasses import dataclass
     >>> @dataclass
     ... class FakeEntry:
-    ...     weight: float | None = 70.0
-    ...     body_fat: float | None = 20.0
-    ...     calories: int | None = 2000
-    ...     steps: int | None = 8000
-    ...     sleep_total: float | None = 7.5
+    ...     weight_kg: float | None = 70.0
+    ...     body_fat_percent: float | None = 20.0
+    ...     calories_kcal: int | None = 2000
+    ...     steps_count: int | None = 8000
+    ...     sleep_hours: float | None = 7.5
     >>> compute_stats([FakeEntry()])
 """
 
@@ -40,12 +40,12 @@ from typing import Iterable, Protocol
 # from .models import HealthEntry
 # Map output statistic keys -> HealthEntry attribute names
 METRICS: dict[str, str] = {
-    "avg_weight": "weight",
-    "avg_body_fat": "body_fat",
-    "avg_calories": "calories",
-    "avg_protein": "protein",
-    "avg_steps": "steps",
-    "avg_sleep": "sleep_total",
+    "avg_weight": "weight_kg",
+    "avg_body_fat": "body_fat_percent",
+    "avg_calories": "calories_kcal",
+    "avg_protein": "protein_g",
+    "avg_steps": "steps_count",
+    "avg_sleep": "sleep_hours",
 }
 
 
@@ -66,26 +66,26 @@ class HasHealthMetrics(Protocol):
         - Enable reuse of statistical functions outside Flask or SQLAlchemy.
 
     Required attributes:
-        weight (float | None):
+        weight_kg (float | None):
             Body weight in kilograms.
-        body_fat (float | None):
+        body_fat_percent (float | None):
             Body fat percentage.
-        calories (int | None):
+        calories_kcal (int | None):
             Daily caloric intake.
-        protein (float | None):
+        protein_g (float | None):
             Daily protein intake in grams.
-        steps (int | None):
+        steps_count (int | None):
             Number of steps recorded.
-        sleep_total (float | None):
+        sleep_hours (float | None):
             Total sleep duration in hours.
     """
 
-    weight: float | None
-    body_fat: float | None
-    calories: int | None
-    protein: float | None
-    steps: int | None
-    sleep_total: float | None
+    weight_kg: float | None
+    body_fat_percent: float | None
+    calories_kcal: int | None
+    protein_g: float | None
+    steps_count: int | None
+    sleep_hours: float | None
 
 
 def compute_stats(entries: Iterable[HasHealthMetrics]) -> dict[str, float | int | None]:

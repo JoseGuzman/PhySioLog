@@ -20,24 +20,39 @@ from physiolog.services import compute_stats
 
 @dataclass
 class FakeEntry:
-    weight: float | None = None
-    body_fat: float | None = None
-    calories: int | None = None
-    protein: float | None = None
-    steps: int | None = None
-    sleep_total: float | None = None
+    weight_kg: float | None = None
+    body_fat_percent: float | None = None
+    calories_kcal: int | None = None
+    protein_g: float | None = None
+    steps_count: int | None = None
+    sleep_hours: float | None = None
 
 
 def test_compute_stats_basic() -> None:
     entries = [
         FakeEntry(
-            weight=70.0, body_fat=20.0, calories=2000, protein=160.0, steps=8000, sleep_total=7.0
+            weight_kg=70.0,
+            body_fat_percent=20.0,
+            calories_kcal=2000,
+            protein_g=160.0,
+            steps_count=8000,
+            sleep_hours=7.0,
         ),
         FakeEntry(
-            weight=72.0, body_fat=None, calories=2200, protein=180.0, steps=None, sleep_total=8.0
+            weight_kg=72.0,
+            body_fat_percent=None,
+            calories_kcal=2200,
+            protein_g=180.0,
+            steps_count=None,
+            sleep_hours=8.0,
         ),
         FakeEntry(
-            weight=None, body_fat=18.0, calories=None, protein=None, steps=6000, sleep_total=None
+            weight_kg=None,
+            body_fat_percent=18.0,
+            calories_kcal=None,
+            protein_g=None,
+            steps_count=6000,
+            sleep_hours=None,
         ),
     ]
 

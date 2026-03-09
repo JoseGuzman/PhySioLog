@@ -95,13 +95,15 @@ class HealthEntry(db.Model):
     date: Mapped[Date] = mapped_column(unique=False, nullable=False, index=True)
     user: Mapped[User] = relationship(back_populates="entries")
 
-    weight: Mapped[float | None] = mapped_column(nullable=True)
-    body_fat: Mapped[float | None] = mapped_column(nullable=True)
-    calories: Mapped[float | None] = mapped_column(nullable=True)
-    protein: Mapped[float | None] = mapped_column(nullable=True)
-    training_volume: Mapped[float | None] = mapped_column(nullable=True)
-    steps: Mapped[int | None] = mapped_column(nullable=True)
-    sleep_total: Mapped[float | None] = mapped_column(nullable=True)
+    weight_kg: Mapped[float | None] = mapped_column("weight", nullable=True)
+    body_fat_percent: Mapped[float | None] = mapped_column("body_fat", nullable=True)
+    calories_kcal: Mapped[float | None] = mapped_column("calories", nullable=True)
+    protein_g: Mapped[float | None] = mapped_column("protein", nullable=True)
+    training_volume_kg: Mapped[float | None] = mapped_column(
+        "training_volume", nullable=True
+    )
+    steps_count: Mapped[int | None] = mapped_column("steps", nullable=True)
+    sleep_hours: Mapped[float | None] = mapped_column("sleep_total", nullable=True)
 
     sleep_quality: Mapped[str | None] = mapped_column(db.String(20), nullable=True)
     observations: Mapped[str | None] = mapped_column(db.Text, nullable=True)
@@ -111,14 +113,23 @@ class HealthEntry(db.Model):
         return {
             "id": self.id,
             "date": self.date.strftime("%Y-%m-%d"),
-            "weight": self.weight,
-            "body_fat": self.body_fat,
-            "calories": self.calories,
-            "protein": self.protein,
-            "training_volume": self.training_volume,
-            "steps": self.steps,
-            "sleep_total": _decimal_hours_to_hhmm(self.sleep_total),
-            "sleep_total_decimal": self.sleep_total,
+            "weight_kg": self.weight_kg,
+            "body_fat_percent": self.body_fat_percent,
+            "calories_kcal": self.calories_kcal,
+            "protein_g": self.protein_g,
+            "training_volume_kg": self.training_volume_kg,
+            "steps_count": self.steps_count,
+            "sleep_hours": _decimal_hours_to_hhmm(self.sleep_hours),
+            "sleep_hours_decimal": self.sleep_hours,
+            # Compatibility aliases (legacy API keys)
+            "weight": self.weight_kg,
+            "body_fat": self.body_fat_percent,
+            "calories": self.calories_kcal,
+            "protein": self.protein_g,
+            "training_volume": self.training_volume_kg,
+            "steps": self.steps_count,
+            "sleep_total": _decimal_hours_to_hhmm(self.sleep_hours),
+            "sleep_total_decimal": self.sleep_hours,
             "sleep_quality": self.sleep_quality,
             "observations": self.observations,
         }
