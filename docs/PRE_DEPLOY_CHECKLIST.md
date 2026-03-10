@@ -46,11 +46,11 @@ Use this checklist before first cloud deployment.
 
 ## 4) Database and Migrations
 
-- [ ] Use PostgreSQL in staging and production.
+- [x] Use PostgreSQL in staging and production.
 - [ ] Run migrations against PostgreSQL before first release.
 - [ ] Verify indexes/constraints in production schema.
 - [ ] Backup/restore procedure documented and tested.
-- [ ] Keep SQLite only for local dev.
+- [x] Keep SQLite only for local dev.
 
 ## 5) Auth and Account Security
 

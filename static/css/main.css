@@ -18,9 +18,15 @@ ChatGPT-ish dark UI: clean sidebar, subtle borders, soft hover, calm typography
     --hover: #202020;
     --active: #232323;
 
-    /* ChatGPT-ish green */
+    /* App semantic colors */
     --accent: #58b79d;
     --focus: #58b79d;
+    --status-positive: #22c55e;
+    --status-positive-bg: rgba(34, 197, 94, 0.10);
+    --status-positive-border: rgba(34, 197, 94, 0.25);
+    --status-negative: #ef4444;
+    --status-negative-bg: rgba(239, 68, 68, 0.10);
+    --status-negative-border: rgba(239, 68, 68, 0.25);
 
     --radius: 12px;
     --radius-sm: 10px;
@@ -296,6 +302,19 @@ Main content
 
 .topbar-profile {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar-user-name {
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 600;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .profile-btn {
@@ -318,6 +337,12 @@ Main content
     font-weight: 800;
     display: grid;
     place-items: center;
+}
+
+@media (max-width: 720px) {
+    .topbar-user-name {
+        display: none;
+    }
 }
 
 .profile-menu {

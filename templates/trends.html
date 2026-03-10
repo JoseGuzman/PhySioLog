@@ -43,8 +43,33 @@
 
     .stat-card {
         background: rgba(255, 255, 255, 0.03);
+        border: 1px solid transparent;
         border-radius: 12px;
         padding: 12px 14px;
+    }
+
+    .stat-card.is-positive {
+        background: var(--status-positive-bg);
+        border-color: var(--status-positive-border);
+    }
+
+    .stat-card.is-negative {
+        background: var(--status-negative-bg);
+        border-color: var(--status-negative-border);
+    }
+
+    [data-theme="light"] .main-content .stat-card.is-positive {
+        background: var(--status-positive-bg);
+        border-color: var(--status-positive-border);
+    }
+
+    [data-theme="light"] .main-content .stat-card.is-negative {
+        background: var(--status-negative-bg);
+        border-color: var(--status-negative-border);
+    }
+
+    .stat-card.is-neutral {
+        border-color: transparent;
     }
 
     .stat-card .label {
@@ -68,11 +93,11 @@
     }
 
     .stat-card .delta.is-positive {
-        color: #22c55e;
+        color: var(--status-positive);
     }
 
     .stat-card .delta.is-negative {
-        color: #ef4444;
+        color: var(--status-negative);
     }
 
     .stat-card .delta.is-neutral {

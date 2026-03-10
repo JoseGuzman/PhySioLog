@@ -81,10 +81,10 @@
             <div class="sidebar-section-title">ADMIN</div>
             <ul class="sidebar-menu">
                 <li>
-                    <a href="{{ url_for('web.users') }}"
-                        class="{% if request.endpoint == 'web.users' %}active{% endif %}">
+                    <a href="{{ url_for('web.clients') }}"
+                        class="{% if request.endpoint == 'web.clients' %}active{% endif %}">
                         <i data-lucide="users" class="icon"></i>
-                        <span>Users</span>
+                        <span>Clients</span>
                     </a>
                 </li>
             </ul>
@@ -108,6 +108,7 @@
                 </span>
             </div>
             <div class="topbar-profile">
+                <span class="topbar-user-name">{{ current_user.name or current_user.email or "User" }}</span>
                 <button id="profileMenuBtn" class="profile-btn" type="button" aria-haspopup="true"
                     aria-expanded="false">
                     <span class="profile-avatar">{{ (current_user.name or current_user.email or "U")[:1] | upper

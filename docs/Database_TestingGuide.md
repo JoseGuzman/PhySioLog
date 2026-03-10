@@ -23,10 +23,11 @@ When using the Flask shell to interact with the databases and test queries, we u
 SQLAlchemy as the Object-relational mappings (ORM), to use queries to interact with the database.
 Note that we have only access to the Users database table in the flask shell, as the HealthEntry model is not imported in the shell context. To test queries on the health entries, we can use the API endpoints or connect directly to the database with `psql` as shown above.
 
-To activate the flask shell
+The activaiton the flask shell will access the database configured for the current environment (development, staging, production) based on the `APP_ENV` variable. For example, if `APP_ENV=development`, it will access the sqlite database at instance/physiolog.db. If `APP_ENV=staging`, it will access the PostgreSQL database configured for staging. 
 
 ```bash
 >>> uv run python -m flask shell
+Database URL: postgresql+psycopg://{USER}@localhost:5432/physiolog_staging
 Python 3.12.12 (main, Jan 27 2026, 23:31:45) [Clang 21.1.4 ] on darwin
 App: physiolog
 Instance: /path/to/repo/instance

@@ -91,7 +91,8 @@ def create_app(config_class=None) -> Flask:
     # provide shell context for development
     @app.shell_context_processor
     def make_shell_context():
-        """Shell context for flask shell command in development
+        """Shell context allows acces to
+        for flask shell command in development
 
         Returns:
             dict: A dictionary of app and db and User models
@@ -108,10 +109,13 @@ def create_app(config_class=None) -> Flask:
 
     # The app context is needed to register blueprints and initialize the database
     with app.app_context():
-        # Create database tables if they don't exist
-        # database creation only if AUTO_CREATE_DB = true
+        # print the database URL for debugging purposes
+        print(f"Database URL: {db.engine.url}")
+
         create_db = app.config.get("AUTO_CREATE_DB", False)
         debug = app.config.get("DEBUG", False)
+        # Create database tables if they don't exist
+        # database creation only if AUTO_CREATE_DB = true
         if create_db or debug:
             db.create_all()
             if app.config.get("AUTH_BOOTSTRAP_USER_ENABLED", False):

@@ -9,7 +9,7 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 from urllib.parse import urlparse
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from .extensions import db
 from .models import HealthEntry, User
@@ -138,24 +138,91 @@ def coach():
 
 
 @web_bp.route("/admin")
-@web_bp.route("/users")
+@web_bp.route("/clients")
+#@web_bp.route("/users")
 @login_required
-def users():
-    """Admin users page with list of users and subscription status."""
+def clients():
+    """Admin clients page with list of clients and subscription status."""
     if not current_user.is_admin:
         abort(403)
 
-    users_with_last_entry = (
+    email_query = request.args.get("email", "").strip().lower()
+    per_page_raw = request.args.get("per_page", "10").strip().lower()
+    page_raw = request.args.get("page", "1").strip()
+
+    allowed_per_page = {"5", "10", "20", "all"}
+    if per_page_raw not in allowed_per_page:
+        per_page_raw = "10"
+
+    per_page = per_page_raw if per_page_raw == "all" else int(per_page_raw)
+
+    try:
+        page = int(page_raw)
+    except ValueError:
+        page = 1
+    if page < 1:
+        page = 1
+
+    query = (
         db.session.query(
             User,
             func.max(HealthEntry.date).label("last_entry_date"),
         )
         .outerjoin(HealthEntry, HealthEntry.user_id == User.id)
-        .group_by(User.id)
-        .order_by(User.name.asc(), User.email.asc())
-        .all()
     )
-    return render_template("users_list.html", users_with_last_entry=users_with_last_entry)
+
+    if email_query:
+        query = query.filter(
+            or_(
+                User.email.ilike(f"%{email_query}%"),
+                User.name.ilike(f"%{email_query}%"),
+            )
+        )
+
+    query = query.group_by(User.id)
+
+    total_clients = query.count()
+    total_pages = 1 if per_page == "all" else max(1, (total_clients + per_page - 1) // per_page)
+    if page > total_pages:
+        page = total_pages
+
+    paginated_query = query.order_by(User.name.asc(), User.email.asc())
+    if per_page != "all":
+        paginated_query = paginated_query.offset((page - 1) * per_page).limit(per_page)
+
+    users_with_last_entry = paginated_query.all()
+    return render_template(
+        "clients.html",
+        users_with_last_entry=users_with_last_entry,
+        email_query=email_query,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+        per_page_options=["5", "10", "20", "all"],
+    )
+
+
+@web_bp.route("/admin/clients/<int:user_id>/subscription", methods=["POST"])
+@web_bp.route("/admin/users/<int:user_id>/subscription", methods=["POST"])
+@login_required
+def update_client_subscription(user_id: int):
+    """Admin-only subscription status update."""
+    if not current_user.is_admin:
+        abort(403)
+
+    user = User.query.get_or_404(user_id)
+    next_status = request.form.get("status", "").strip().lower()
+    email_query = request.form.get("email", "").strip().lower()
+    per_page = request.form.get("per_page", "10").strip()
+    page = request.form.get("page", "1").strip()
+
+    if next_status not in {"active", "inactive"}:
+        abort(400)
+
+    user.has_subscription = next_status == "active"
+    db.session.commit()
+
+    return redirect(url_for("web.clients", email=email_query, per_page=per_page, page=page))
 
 
 # test route

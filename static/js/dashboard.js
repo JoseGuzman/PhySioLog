@@ -80,10 +80,13 @@ const TREND_STAT_METRICS = [
 function clearMetricChangeDeltas() {
     for (const { deltaId } of TREND_CHANGE_METRICS) {
         const el = $(deltaId);
+        const cardEl = el?.closest(".stat-card");
         if (!el) continue;
         el.textContent = "--";
         el.classList.remove("is-positive", "is-negative");
         el.classList.add("is-neutral");
+        cardEl?.classList.remove("is-positive", "is-negative");
+        cardEl?.classList.add("is-neutral");
     }
 }
 
@@ -110,6 +113,7 @@ function renderMetricChangeDeltas() {
     for (const { dataKey, deltaId } of TREND_CHANGE_METRICS) {
         const deltaEl = $(deltaId);
         if (!deltaEl) continue;
+        const cardEl = deltaEl.closest(".stat-card");
 
         const series = visibleEntries
             .map((e) => ({ date: e?.date, value: getMetricValue(e, dataKey) }))
@@ -122,6 +126,8 @@ function renderMetricChangeDeltas() {
             deltaEl.textContent = "--";
             deltaEl.classList.remove("is-positive", "is-negative");
             deltaEl.classList.add("is-neutral");
+            cardEl?.classList.remove("is-positive", "is-negative");
+            cardEl?.classList.add("is-neutral");
             continue;
         }
 
@@ -131,6 +137,8 @@ function renderMetricChangeDeltas() {
             deltaEl.textContent = "--";
             deltaEl.classList.remove("is-positive", "is-negative");
             deltaEl.classList.add("is-neutral");
+            cardEl?.classList.remove("is-positive", "is-negative");
+            cardEl?.classList.add("is-neutral");
             continue;
         }
 
@@ -138,9 +146,17 @@ function renderMetricChangeDeltas() {
         const sign = pct > 0 ? "+" : "";
         deltaEl.textContent = `${sign}${pct.toFixed(2)}%`;
         deltaEl.classList.remove("is-positive", "is-negative", "is-neutral");
-        if (pct > 0) deltaEl.classList.add("is-positive");
-        else if (pct < 0) deltaEl.classList.add("is-negative");
-        else deltaEl.classList.add("is-neutral");
+        cardEl?.classList.remove("is-positive", "is-negative", "is-neutral");
+        if (pct > 0) {
+            deltaEl.classList.add("is-positive");
+            cardEl?.classList.add("is-positive");
+        } else if (pct < 0) {
+            deltaEl.classList.add("is-negative");
+            cardEl?.classList.add("is-negative");
+        } else {
+            deltaEl.classList.add("is-neutral");
+            cardEl?.classList.add("is-neutral");
+        }
     }
 }
 
