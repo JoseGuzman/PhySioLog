@@ -9,9 +9,9 @@ Usage:
 >>>  uv run python scripts/import_data.py data/health_data.cs
 
 
-Creates Demo User with Name = David Musterman, and Email = demo@example.com 
+Creates Demo User with Name = Demo Musterman, and Email = demo@example.com
 The password is set in DEMO_USER_PASSWORD env var or prompt.
-It has age=49, height_cm=168, weight_kg=70 (can be edited in app). 
+It has age=49, height_cm=168, weight_kg=70 (can be edited in app).
 All imported entries from data/health_data.csv are linked to this user.
 """
 
@@ -148,8 +148,10 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
             column_map["training_volume_kg"] = col
         elif "step" in col_lower:
             column_map["steps_count"] = col
-        elif "sleep total" in col_lower or "sleep_hours" in col_lower or (
-            ("sleep" in col_lower) and ("total" in col_lower)
+        elif (
+            "sleep total" in col_lower
+            or "sleep_hours" in col_lower
+            or (("sleep" in col_lower) and ("total" in col_lower))
         ):
             column_map["sleep_hours"] = col
         elif "sleep quality" in col_lower or (
@@ -178,7 +180,7 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
         demo_user = User.query.filter_by(email=demo_email).first()
         if not demo_user:
             demo_user = User(
-                name="David Mustermann",
+                name="Demo Mustermann",
                 email=demo_email,
                 age=49,
                 height_cm=168,
@@ -190,9 +192,7 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                     f"Using DEMO_USER_PASSWORD from environment: {demo_password is not None}"
                 )
             if demo_password is None:
-                demo_password = getpass(
-                    "Enter password for demo@example.com: "
-                ).strip()
+                demo_password = getpass("Enter password for demo@example.com: ").strip()
             if not demo_password:
                 print("Error: Password cannot be empty")
                 sys.exit(1)
@@ -261,7 +261,9 @@ def import_data(app, filepath: str, demo_password: str | None = None) -> None:
                     )
                     if "body_fat_percent" in column_map
                     else None,
-                    calories_kcal=int(calories_val) if calories_val is not None else None,
+                    calories_kcal=int(calories_val)
+                    if calories_val is not None
+                    else None,
                     protein_g=protein_val,
                     training_volume_kg=training_volume_val,
                     steps_count=int(steps_val) if steps_val is not None else None,

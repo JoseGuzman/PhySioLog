@@ -120,6 +120,39 @@
         font-size: 0.84rem;
         margin-top: 4px;
     }
+
+    .window-buttons-wrap {
+        width: 100%;
+    }
+
+    .window-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .window-btn {
+        background: var(--field-bg);
+        color: var(--text);
+        border: 1px solid var(--border-2);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .window-btn:hover {
+        transform: none;
+        filter: none;
+        border-color: var(--focus);
+    }
+
+    .window-btn.is-active {
+        background: var(--accent);
+        color: #12322b;
+        border-color: transparent;
+    }
 </style>
 {% endblock %}
 
@@ -133,8 +166,9 @@
 
     <!-- LEFT: Inputs -->
     <div class="panel">
-        <h2>User Metrics</h2>
-        <small>Your profile will be updated when you press Update.</small>
+        <h2>Calories calculator</h2>
+        <small>Metabolism is calculated based on general physiological data. Your profile will be updated when you press
+            Update.</small>
 
         <form id="tdeeForm" style="margin-top: 14px;">
             <div class="inputs-grid">
@@ -173,17 +207,13 @@
                 </div>
 
                 <div class="full">
-                    <button type="button" id="recalcBtn">Update</button>
+                    <button type="button" id="recalcBtn">Calculate</button>
                 </div>
             </div>
         </form>
-    </div>
-
-    <!-- RIGHT: Results -->
-    <div class="results-grid">
 
         <!-- BMR / TDEE -->
-        <div class="result-block blue">
+        <div class="result-block" style="margin-top: 14px;">
             <h2>Metabolism</h2>
 
             <div class="result-row">
@@ -201,65 +231,105 @@
                 </div>
                 <div class="result-value result-big"><span id="tdeeOut">—</span> kcal</div>
             </div>
-
         </div>
+    </div>
 
-        <!-- Weight loss -->
-        <div class="result-block green">
-            <h2>Weight Loss</h2>
+    <!-- RIGHT: Results -->
+    <div class="panel">
+        <h2>Your individual Metabolic Model</h2>
+        <small>Personalized energy balance snapshot.</small>
+        <div class="results-grid" style="margin-top: 14px;">
 
-            <div class="result-row">
-                <div class="result-label">
-                    Calories (deficit)
-                    <div class="minmax">
-                        <span>min: <span id="cutMinOut">—</span> kcal</span>
-                        <span>max: <span id="cutMaxOut">—</span> kcal</span>
-                    </div>
+            <div class="window-buttons-wrap">
+                <div class="window-buttons" role="group" aria-label="Model time window">
+                    <button type="button" class="window-btn">Last 3 months</button>
+                    <button type="button" class="window-btn">Last 6 months</button>
+                    <button type="button" class="window-btn">Last 12 months</button>
+                    <button type="button" class="window-btn is-active" aria-pressed="true">All</button>
                 </div>
-                <div class="result-value result-big"><span id="cutCaloriesOut">—</span> kcal</div>
             </div>
 
-            <div class="result-row">
-                <div class="result-label">
-                    Protein (per day)
-                    <div class="minmax">
-                        <span>min: <span id="cutProteinMinOut">—</span> g</span>
-                        <span>max: <span id="cutProteinMaxOut">—</span> g</span>
-                    </div>
+            <!-- Individual Metabolic Model -->
+            <div class="result-block blue">
+                <h2>Individual Metabolic Model</h2>
+
+                <div class="result-row">
+                    <div class="result-label">Estimated TDEE</div>
+                    <div class="result-value result-big">2520 kcal</div>
                 </div>
 
+                <div class="result-row">
+                    <div class="result-label">Current intake</div>
+                    <div class="result-value result-big">2310 kcal</div>
+                </div>
 
-                <div class="result-value result-big"><span id="cutProteinOut">—</span> g</div>
+                <div class="result-row">
+                    <div class="result-label">Estimated deficit</div>
+                    <div class="result-value result-big">210 kcal/day</div>
+                </div>
+
+                <div class="result-row">
+                    <div class="result-label">Predicted fat loss</div>
+                    <div class="result-value result-big">~0.2 kg/week</div>
+                </div>
+            </div>
+
+            <!-- Weight loss -->
+            <div class="result-block green">
+                <h2>Weight Loss</h2>
+
+                <div class="result-row">
+                    <div class="result-label">
+                        Calories (deficit)
+                        <div class="minmax">
+                            <span>min: <span id="cutMinOut">—</span> kcal</span>
+                            <span>max: <span id="cutMaxOut">—</span> kcal</span>
+                        </div>
+                    </div>
+                    <div class="result-value result-big"><span id="cutCaloriesOut">—</span> kcal</div>
+                </div>
+
+                <div class="result-row">
+                    <div class="result-label">
+                        Protein (per day)
+                        <div class="minmax">
+                            <span>min: <span id="cutProteinMinOut">—</span> g</span>
+                            <span>max: <span id="cutProteinMaxOut">—</span> g</span>
+                        </div>
+                    </div>
+
+
+                    <div class="result-value result-big"><span id="cutProteinOut">—</span> g</div>
+                </div>
+            </div>
+
+            <!-- Lean bulk -->
+            <div class="result-block orange">
+                <h2>Lean Bulk</h2>
+
+                <div class="result-row">
+                    <div class="result-label">
+                        Calories (surplus per day)
+                        <div class="minmax">
+                            <span>min: <span id="bulkMinOut">—</span> kcal</span>
+                            <span>max: <span id="bulkMaxOut">—</span> kcal</span>
+                        </div>
+                    </div>
+                    <div class="result-value result-big"><span id="bulkCaloriesOut">—</span> kcal</div>
+                </div>
+
+                <div class="result-row">
+                    <div class="result-label">
+                        Protein (per day)
+                        <div class="minmax">
+                            <span>min: <span id="bulkProteinMinOut">—</span> g</span>
+                            <span>max: <span id="bulkProteinMaxOut">—</span> g</span>
+                        </div>
+                    </div>
+                    <div class="result-value result-big"><span id="bulkProteinOut">—</span> g</div>
+                </div>
             </div>
         </div>
-
-        <!-- Lean bulk -->
-        <div class="result-block orange">
-            <h2>Lean Bulk</h2>
-
-            <div class="result-row">
-                <div class="result-label">
-                    Calories (surplus per day)
-                    <div class="minmax">
-                        <span>min: <span id="bulkMinOut">—</span> kcal</span>
-                        <span>max: <span id="bulkMaxOut">—</span> kcal</span>
-                    </div>
-                </div>
-                <div class="result-value result-big"><span id="bulkCaloriesOut">—</span> kcal</div>
-            </div>
-
-            <div class="result-row">
-                <div class="result-label">
-                    Protein (per day)
-                    <div class="minmax">
-                        <span>min: <span id="bulkProteinMinOut">—</span> g</span>
-                        <span>max: <span id="bulkProteinMaxOut">—</span> g</span>
-                    </div>
-                </div>
-                <div class="result-value result-big"><span id="bulkProteinOut">—</span> g</div>
-            </div>
-        </div>
-
     </div>
 </div>
 {% endblock %}

@@ -213,8 +213,15 @@ def entries() -> Response | tuple[Response, int]:
             return jsonify({"success": False, "error": "format is 7d,30d,3m,1y"}), 400
 
     if days is not None:
-        start_date = date.today() - timedelta(days=days - 1)
-        query = query.filter(HealthEntry.date >= start_date)
+        latest_entry = (
+            HealthEntry.query.filter_by(user_id=current_user.id)
+            .order_by(HealthEntry.date.desc())
+            .first()
+        )
+        if latest_entry:
+            end_date = latest_entry.date
+            start_date = end_date - timedelta(days=days - 1)
+            query = query.filter(HealthEntry.date >= start_date)
 
     all_entries = query.all()
     serialized_entries = [entry.to_dict() for entry in all_entries]
@@ -420,14 +427,17 @@ def stats() -> Response | tuple[Response, int]:
         days = None  # all time
 
     # query = HealthEntry.query.order_by(HealthEntry.date.desc())
-    query = HealthEntry.query.filter_by(user_id=current_user.id).order_by(
-        HealthEntry.date.desc()
-    )
+    base_query = HealthEntry.query.filter_by(user_id=current_user.id)
+    query = base_query.order_by(HealthEntry.date.desc())
 
     start_date = None
-    end_date = date.today()
+    end_date = None
 
     if days is not None:
+        latest_entry = base_query.order_by(HealthEntry.date.desc()).first()
+        if not latest_entry:
+            return jsonify({"success": False, "error": "No data available"}), 404
+        end_date = latest_entry.date
         start_date = end_date - timedelta(days=days - 1)
         query = query.filter(HealthEntry.date >= start_date)
 
