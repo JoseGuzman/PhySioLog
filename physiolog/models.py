@@ -149,14 +149,13 @@ class HealthEntry(db.Model):
     @property
     def fat_mass_change_7d(self) -> float | None:
         """
-        Average daily fat-mass change using the entry from 7 records earlier.
-        This value is moree stable than the day-to-day change, which can be noisy
+        Average daily fat-mass change across the last 7 entries, ignoring missing values.
+        This value is more stable than the day-to-day change, which can be noisy
         due to water retention and other factors.
 
         Assuming 1 Kg of fat requires energy equivalent of 7700 kcal, we can
-        estimate the maintenance calories (calories to maintain the individual's
-        physiological activity) by simmply total calories - fat_mass_change *7700.
-        (see maintenance_calories_kcal() )
+        estimate the maintenance calories by simply total calories - fat_mass_change * 7700.
+        (see maintenance_kcal() )
         """
         current_fat_mass = self.fat_mass_kg
         if current_fat_mass is None:
@@ -171,18 +170,22 @@ class HealthEntry(db.Model):
             .limit(7)
             .all()
         )
-        if len(previous_entries) < 7:
+
+        previous_fat_values = [
+            entry.fat_mass_kg
+            for entry in reversed(previous_entries)
+            if entry.fat_mass_kg is not None
+        ]
+        if not previous_fat_values:
             return None
 
-        baseline_entry = previous_entries[-1]
-        if baseline_entry.fat_mass_kg is None:
-            return None
-
-        return round((current_fat_mass - baseline_entry.fat_mass_kg) / 7, 3)
+        baseline_fat_mass = previous_fat_values[0]
+        valid_days = len(previous_fat_values)
+        return round((current_fat_mass - baseline_fat_mass) / valid_days, 3)
 
     @property
     def calories_kcal_7d(self) -> float | None:
-        """Seven-entry rolling average of calories for the same user."""
+        """Average calories across the last 7 entries, ignoring missing values."""
         entries = (
             HealthEntry.query.filter(
                 HealthEntry.user_id == self.user_id,
@@ -192,18 +195,16 @@ class HealthEntry(db.Model):
             .limit(7)
             .all()
         )
-        if len(entries) < 7:
-            return None
 
         calories_values = [
             entry.calories_kcal
             for entry in reversed(entries)
             if entry.calories_kcal is not None
         ]
-        if len(calories_values) < 7:
+        if not calories_values:
             return None
 
-        return round(sum(calories_values) / 7, 2)
+        return round(sum(calories_values) / len(calories_values), 2)
 
     @property
     def maintenance_kcal(self) -> int | None:

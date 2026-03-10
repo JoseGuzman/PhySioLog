@@ -119,6 +119,10 @@
         letter-spacing: 0;
     }
 
+    .result-value.is-positive {
+        color: var(--status-positive);
+    }
+
     .result-delta.is-positive {
         color: var(--status-positive);
     }
@@ -288,11 +292,11 @@
 
             <!-- Individual Metabolic Model -->
             <div class="result-block blue">
-                <h2>Personal estimation</h2>
+                <h2>Personal metabolic estimation</h2>
 
                 <div class="result-row">
                     <div class="result-label">Estimated DEE</div>
-                    <div class="result-value result-big"><span id="maintenanceTdeeOut">—</span> kcal</div>
+                    <div class="result-value result-big is-positive"><span id="maintenanceTdeeOut">—</span> kcal</div>
                 </div>
 
                 <div class="result-row">
@@ -545,7 +549,7 @@
         const dates = entries.map((e) => e.date);
         const maintenanceData = entries.map((e) => e.maintenance_kcal);
         const calories7dData = entries.map((e) => e.calories_kcal_7d);
-        const maintenance21d = metabolismMovingAverage(maintenanceData, 21);
+        const maintenance14d = metabolismMovingAverage(maintenanceData, 14);
         const maintenanceAvg = averageFinite(maintenanceData);
         const calories7dAvg = averageFinite(calories7dData);
         const maintenanceSd = standardDeviation(maintenanceData);
@@ -607,11 +611,11 @@
             },
             {
                 x: dates,
-                y: maintenance21d,
-                name: "21-Day Average",
+                y: maintenance14d,
+                name: "14-Day Average",
                 type: "scatter",
                 mode: "lines",
-                line: { width: 2, color: "#f97316" },
+                line: { width: 2, color: "#22c55e" },
                 hoverinfo: "skip",
                 hovertemplate: null,
             },
@@ -651,7 +655,7 @@
                 name: "Period Average",
                 type: "scatter",
                 mode: "lines",
-                line: { width: 2, dash: "dash", color: "#22c55e" },
+                line: { width: 2, dash: "dash", color: "#f97316" },
                 hovertemplate: "Period average: %{y:.0f} kcal<extra></extra>",
             });
         }
