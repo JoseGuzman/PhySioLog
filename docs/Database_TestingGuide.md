@@ -121,7 +121,7 @@ sqlite3 -header -csv instance/physiolog.db \
 > ./tmp/physiolog_migration/users.csv
 
 sqlite3 -header -csv instance/physiolog.db \
-"SELECT id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations FROM health_entries;" \
+"SELECT id,user_id,date,weight_kg,body_fat_percent,calories_kcal,training_volume_kg,steps_count,sleep_hours,sleep_quality,observations,protein_g FROM health_entries;" \
 > ./tmp/physiolog_migration/health_entries.csv
 ```
 
@@ -155,7 +155,7 @@ Import the CSV files into PostgreSQL:
 
 ```bash
 psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "\copy users(id,name,age,height_cm,weight_kg,email,password_hash,is_active_user,is_admin,has_subscription) FROM '/tmp/physiolog_migration/users.csv' CSV HEADER"
-psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "\copy health_entries(id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations) FROM '/tmp/physiolog_migration/health_entries.csv' CSV HEADER"
+psql "postgresql://${USER}@localhost:5432/physiolog_staging" -c "\copy health_entries(id,user_id,date,weight_kg,body_fat_percent,calories_kcal,training_volume_kg,steps_count,sleep_hours,sleep_quality,observations,protein_g) FROM '/tmp/physiolog_migration/health_entries.csv' CSV HEADER"
 ```
 
 Verify counts in PostgreSQL:

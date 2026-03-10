@@ -119,15 +119,6 @@ class HealthEntry(db.Model):
             "steps_count": self.steps_count,
             "sleep_hours": _decimal_hours_to_hhmm(self.sleep_hours),
             "sleep_hours_decimal": self.sleep_hours,
-            # Compatibility aliases (legacy API keys)
-            "weight": self.weight_kg,
-            "body_fat": self.body_fat_percent,
-            "calories": self.calories_kcal,
-            "protein": self.protein_g,
-            "training_volume": self.training_volume_kg,
-            "steps": self.steps_count,
-            "sleep_total": _decimal_hours_to_hhmm(self.sleep_hours),
-            "sleep_total_decimal": self.sleep_hours,
             "sleep_quality": self.sleep_quality,
             "observations": self.observations,
         }

@@ -84,6 +84,16 @@
         border-color: #dfe3e9;
     }
 
+    .panel.individual-model-panel {
+        background: rgba(56, 189, 248, 0.10);
+        border-color: rgba(56, 189, 248, 0.25);
+    }
+
+    [data-theme="light"] .panel.individual-model-panel {
+        background: rgba(56, 189, 248, 0.10);
+        border-color: rgba(56, 189, 248, 0.25);
+    }
+
     .result-row {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -235,7 +245,7 @@
     </div>
 
     <!-- RIGHT: Results -->
-    <div class="panel">
+    <div class="panel individual-model-panel">
         <h2>Your individual Metabolic Model</h2>
         <small>Personalized energy balance snapshot.</small>
         <div class="results-grid" style="margin-top: 14px;">

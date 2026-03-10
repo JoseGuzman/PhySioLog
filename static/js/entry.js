@@ -24,20 +24,15 @@ function clearEntryFields() {
 }
 
 function fillEntryFields(entry) {
-    setFieldValue("weight", entry.weight_kg ?? entry.weight);
-    setFieldValue("bodyFat", entry.body_fat_percent ?? entry.body_fat);
-    setFieldValue("calories", entry.calories_kcal ?? entry.calories);
-    setFieldValue("protein", entry.protein_g ?? entry.protein);
-    setFieldValue(
-        "trainingVolume",
-        entry.training_volume_kg ?? entry.training_volume
-    );
-    setFieldValue("steps", entry.steps_count ?? entry.steps);
+    setFieldValue("weight", entry.weight_kg);
+    setFieldValue("bodyFat", entry.body_fat_percent);
+    setFieldValue("calories", entry.calories_kcal);
+    setFieldValue("protein", entry.protein_g);
+    setFieldValue("trainingVolume", entry.training_volume_kg);
+    setFieldValue("steps", entry.steps_count);
     setFieldValue(
         "sleep",
-        entry.sleep_hours ||
-            entry.sleep_total ||
-            decimalHoursToHHMM(entry.sleep_hours_decimal ?? entry.sleep_total_decimal)
+        entry.sleep_hours || decimalHoursToHHMM(entry.sleep_hours_decimal)
     );
     setFieldValue("observations", entry.observations);
 }

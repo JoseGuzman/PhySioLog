@@ -122,12 +122,12 @@ __Response (200 OK):__
     {
       "id": 1,
       "date": "2026-02-15",
-      "weight": 72.5,
-      "body_fat": 18.2,
-      "calories": 2200,
-      "steps": 8500,
-      "sleep_total": "07:30",
-      "sleep_total_decimal": 7.5,
+      "weight_kg": 72.5,
+      "body_fat_percent": 18.2,
+      "calories_kcal": 2200,
+      "steps_count": 8500,
+      "sleep_hours": "07:30",
+      "sleep_hours_decimal": 7.5,
       "sleep_quality": "good",
       "observations": "felt energetic"
     }
@@ -155,12 +155,12 @@ __Response (200 OK):__
   "entry": {
     "id": 1,
     "date": "2026-02-15",
-    "weight": 72.5,
-    "body_fat": 18.2,
-    "calories": 2200,
-    "steps": 8500,
-    "sleep_total": "07:30",
-    "sleep_total_decimal": 7.5,
+    "weight_kg": 72.5,
+    "body_fat_percent": 18.2,
+    "calories_kcal": 2200,
+    "steps_count": 8500,
+    "sleep_hours": "07:30",
+    "sleep_hours_decimal": 7.5,
     "sleep_quality": "good",
     "observations": "felt energetic"
   }
@@ -192,8 +192,8 @@ __Response (200 OK):__
   "entries": [
     {
       "date": "2026-02-15",
-      "sleep_total": "07:30",
-      "sleep_total_decimal": 7.5
+      "sleep_hours": "07:30",
+      "sleep_hours_decimal": 7.5
     }
   ]
 }
@@ -222,8 +222,8 @@ Create a new health entry.
 
 Sleep unit contract:
 
-- Request (`POST`/`PUT`): `sleep_total` must be `HH:MM` (string)
-- Response (`GET`/`POST`/`PUT`): `sleep_total` is `HH:MM`, `sleep_total_decimal` is decimal hours
+- Request (`POST`/`PUT`): `sleep_hours` must be `HH:MM` (string)
+- Response (`GET`/`POST`/`PUT`): `sleep_hours` is `HH:MM`, `sleep_hours_decimal` is decimal hours
 
 __Command:__
 
@@ -232,11 +232,11 @@ curl -X POST http://localhost:5000/api/entries \
   -H "Content-Type: application/json" \
   -d '{
     "date": "2026-02-15",
-    "weight": 72.5,
-    "body_fat": 18.2,
-    "calories": 2200,
-    "steps": 8500,
-    "sleep_total": "07:30",
+    "weight_kg": 72.5,
+    "body_fat_percent": 18.2,
+    "calories_kcal": 2200,
+    "steps_count": 8500,
+    "sleep_hours": "07:30",
     "sleep_quality": "good",
     "observations": "felt energetic"
   }'
@@ -250,7 +250,7 @@ __Response (201 Created):__
   "entry": {
     "id": 1,
     "date": "2026-02-15",
-    "weight": 72.5,
+    "weight_kg": 72.5,
     ...
   }
 }
@@ -258,7 +258,7 @@ __Response (201 Created):__
 
 __Error Cases:__
 
-- __400 Bad Request:__ Missing date, invalid JSON, invalid date format, or invalid `sleep_total` format (`HH:MM`)
+- __400 Bad Request:__ Missing date, invalid JSON, invalid date format, or invalid `sleep_hours` format (`HH:MM`)
 - __409 Conflict:__ Entry for the provided date already exists
 
 ---
@@ -274,12 +274,12 @@ curl -X PUT http://localhost:5000/api/entries \
   -H "Content-Type: application/json" \
   -d '{
     "date": "2026-02-15",
-    "weight": 73.1,
-    "body_fat": 18.0,
-    "calories": 2250,
-    "training_volume": 4700,
-    "steps": 9100,
-    "sleep_total": "07:48",
+    "weight_kg": 73.1,
+    "body_fat_percent": 18.0,
+    "calories_kcal": 2250,
+    "training_volume_kg": 4700,
+    "steps_count": 9100,
+    "sleep_hours": "07:48",
     "observations": "updated entry"
   }'
 ```

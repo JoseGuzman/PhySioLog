@@ -60,21 +60,21 @@ function decimalHoursToHHMM(value) {
 }
 
 const TREND_CHANGE_METRICS = [
-    { dataKey: "weight", deltaId: "stat-avg_weight_change" },
-    { dataKey: "body_fat", deltaId: "stat-avg_body_fat_change" },
-    { dataKey: "steps", deltaId: "stat-avg_steps_change" },
-    { dataKey: "sleep_total_decimal", deltaId: "stat-avg_sleep_change" },
-    { dataKey: "calories", deltaId: "stat-avg_calories_change" },
-    { dataKey: "protein", deltaId: "stat-avg_protein_change" },
+    { dataKey: "weight_kg", deltaId: "stat-avg_weight_change" },
+    { dataKey: "body_fat_percent", deltaId: "stat-avg_body_fat_change" },
+    { dataKey: "steps_count", deltaId: "stat-avg_steps_change" },
+    { dataKey: "sleep_hours_decimal", deltaId: "stat-avg_sleep_change" },
+    { dataKey: "calories_kcal", deltaId: "stat-avg_calories_change" },
+    { dataKey: "protein_g", deltaId: "stat-avg_protein_change" },
 ];
 
 const TREND_STAT_METRICS = [
-    { dataKey: "weight", statKey: "avg_weight" },
-    { dataKey: "body_fat", statKey: "avg_body_fat" },
-    { dataKey: "calories", statKey: "avg_calories" },
-    { dataKey: "protein", statKey: "avg_protein" },
-    { dataKey: "steps", statKey: "avg_steps" },
-    { dataKey: "sleep_total_decimal", statKey: "avg_sleep" },
+    { dataKey: "weight_kg", statKey: "avg_weight" },
+    { dataKey: "body_fat_percent", statKey: "avg_body_fat" },
+    { dataKey: "calories_kcal", statKey: "avg_calories" },
+    { dataKey: "protein_g", statKey: "avg_protein" },
+    { dataKey: "steps_count", statKey: "avg_steps" },
+    { dataKey: "sleep_hours_decimal", statKey: "avg_sleep" },
 ];
 
 function clearMetricChangeDeltas() {
@@ -91,9 +91,8 @@ function clearMetricChangeDeltas() {
 }
 
 function getMetricValue(entry, dataKey) {
-    if (dataKey === "sleep_total_decimal") {
-        if (typeof entry?.sleep_total_decimal === "number" && Number.isFinite(entry.sleep_total_decimal)) return entry.sleep_total_decimal;
-        if (typeof entry?.sleep_total === "number" && Number.isFinite(entry.sleep_total)) return entry.sleep_total;
+    if (dataKey === "sleep_hours_decimal") {
+        if (typeof entry?.sleep_hours_decimal === "number" && Number.isFinite(entry.sleep_hours_decimal)) return entry.sleep_hours_decimal;
         return null;
     }
     const v = entry?.[dataKey];
@@ -688,7 +687,7 @@ async function loadCharts(
 
     // Weight
     if ($("weightChart")) {
-        const weightData = entries.map((e) => e.weight);
+        const weightData = entries.map((e) => e.weight_kg);
         const weightMA = calculateMovingAverage(weightData, 7);
 
         Plotly.react(
@@ -721,7 +720,7 @@ async function loadCharts(
 
     // Body fat
     if ($("bodyFatChart")) {
-        const bfData = entries.map((e) => e.body_fat);
+        const bfData = entries.map((e) => e.body_fat_percent);
         const bfMA = calculateMovingAverage(bfData, 7);
 
         Plotly.react(
@@ -754,7 +753,7 @@ async function loadCharts(
 
     // Steps
     if ($("stepsChart")) {
-        const stepsData = entries.map((e) => e.steps);
+        const stepsData = entries.map((e) => e.steps_count);
         const stepsMA = calculateMovingAverage(stepsData, 7);
 
         Plotly.react(
@@ -791,11 +790,7 @@ async function loadCharts(
 
     // Sleep
     if ($("sleepChart")) {
-        const sleepData = entries.map((e) =>
-            typeof e.sleep_total_decimal === "number"
-                ? e.sleep_total_decimal
-                : e.sleep_total
-        );
+        const sleepData = entries.map((e) => e.sleep_hours_decimal);
         const sleepMA = calculateMovingAverage(sleepData, 7);
 
         Plotly.react(
@@ -842,7 +837,7 @@ async function loadCharts(
 
     // Calories
     if ($("caloriesChart")) {
-        const caloriesData = entries.map((e) => e.calories);
+        const caloriesData = entries.map((e) => e.calories_kcal);
         const caloriesMA = calculateMovingAverage(caloriesData, 7);
 
         Plotly.react(
@@ -878,7 +873,7 @@ async function loadCharts(
 
     // Protein
     if ($("proteinChart")) {
-        const proteinData = entries.map((e) => e.protein);
+        const proteinData = entries.map((e) => e.protein_g);
         const proteinMA = calculateMovingAverage(proteinData, 7);
 
         Plotly.react(
@@ -914,7 +909,7 @@ async function loadCharts(
 
     // Training volume (dot plot)
     if ($("trainingVolumeChart")) {
-        const tvData = entries.map((e) => e.training_volume);
+        const tvData = entries.map((e) => e.training_volume_kg);
         const tvMA = calculateMovingAverage(tvData, 7);
 
         Plotly.react(

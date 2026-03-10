@@ -25,7 +25,7 @@ psql "$PSQL_URI" -c "TRUNCATE TABLE health_entries, users RESTART IDENTITY CASCA
 
 # 2) import users first, then entries (use actual file path)
 psql "$PSQL_URI" -c "\copy users(id,name,age,height_cm,weight_kg,email,password_hash,is_active_user,is_admin,has_subscription) FROM './tmp/physiolog_migration/users.csv' CSV HEADER"
-psql "$PSQL_URI" -c "\copy health_entries(id,user_id,date,weight,body_fat,calories,training_volume,steps,sleep_total,sleep_quality,observations) FROM './tmp/physiolog_migration/health_entries.csv' CSV HEADER"
+psql "$PSQL_URI" -c "\copy health_entries(id,user_id,date,weight_kg,body_fat_percent,calories_kcal,training_volume_kg,steps_count,sleep_hours,sleep_quality,observations,protein_g) FROM './tmp/physiolog_migration/health_entries.csv' CSV HEADER"
 
 # 3) sequence fix after explicit IDs
 psql "$PSQL_URI" -c "SELECT setval(pg_get_serial_sequence('users','id'), COALESCE((SELECT MAX(id) FROM users),1), true);"
