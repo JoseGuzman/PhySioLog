@@ -5,65 +5,12 @@
 {% block content %}
 <div class="page-header">
     <h1>Test Page</h1>
-    <p>Quick API checks for entry creation and observations rendering</p>
-</div>
-
-<div class="stats" id="stats">
-    <div class="stat-card">
-        <div class="stat-label">Loading...</div>
-        <div class="stat-value">--</div>
-    </div>
+    <p>Maintenance kcal distribution example</p>
 </div>
 
 <div class="form-section" style="margin-top: 16px;">
-    <h2>Create Test Entry</h2>
-    <form id="entryForm">
-        <div class="form-grid">
-            <div>
-                <label for="date">Date</label>
-                <input type="date" id="date" required>
-            </div>
-            <div>
-                <label for="weight">Weight (kg)</label>
-                <input type="number" step="0.1" id="weight" inputmode="decimal">
-            </div>
-            <div>
-                <label for="bodyFat">Body Fat (%)</label>
-                <input type="number" step="0.1" id="bodyFat" inputmode="decimal">
-            </div>
-            <div>
-                <label for="calories">Calories</label>
-                <input type="number" id="calories" inputmode="numeric">
-            </div>
-            <div>
-                <label for="steps">Steps</label>
-                <input type="number" id="steps" inputmode="numeric">
-            </div>
-            <div>
-                <label for="sleep">Sleep (hours)</label>
-                <input type="number" step="0.1" id="sleep" inputmode="decimal">
-            </div>
-        </div>
-
-        <div class="form-divider"></div>
-
-        <div class="observations-block">
-            <label for="observations">Comments / Observations</label>
-            <textarea id="observations" rows="3" placeholder="Write a short note to verify DB persistence"></textarea>
-        </div>
-
-        <button type="submit">Create Test Entry</button>
-    </form>
-</div>
-
-<div class="form-section" style="margin-top: 16px;">
-    <h2>Latest Observations</h2>
-    <div id="entriesList" style="display: grid; gap: 10px;">
-        <div class="stat-card">
-            <div class="stat-label">Loading entries...</div>
-            <div class="stat-value">--</div>
-        </div>
-    </div>
+    <h2>Maintenance kcal Histogram</h2>
+    <div id="maintenanceHistogram" style="height: 340px;"></div>
 </div>
 
 
@@ -71,116 +18,132 @@
 
 {% block scripts %}
 <script>
-    async function loadStats() {
-        try {
-            const res = await fetch('/api/stats');
-            const payload = await res.json();
-            const stats = payload.stats || {};
-
-            document.getElementById('stats').innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-label">Avg Weight</div>
-                    <div class="stat-value">${stats.avg_weight || '--'}<span style="font-size: 0.5em; color: #888;">kg</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Avg Body Fat</div>
-                    <div class="stat-value">${stats.avg_body_fat || '--'}<span style="font-size: 0.5em; color: #888;"> %</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Avg Calories</div>
-                    <div class="stat-value">${stats.avg_calories || '--'}<span style="font-size: 0.5em; color: #888;">kcal</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Avg Steps</div>
-                    <div class="stat-value">${Math.round(stats.avg_steps || 0).toLocaleString()}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Avg Sleep</div>
-                    <div class="stat-value">${stats.avg_sleep || '--'}<span style="font-size: 0.5em; color: #888;"> h</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Entries</div>
-                    <div class="stat-value">${stats.total_entries || 0}</div>
-                </div>
-            `;
-        } catch (error) {
-            console.error('Error loading stats:', error);
-        }
+    function mean(values) {
+        if (!values.length) return null;
+        return values.reduce((sum, value) => sum + value, 0) / values.length;
     }
 
-    async function loadEntries() {
+    function stddev(values, avg) {
+        if (values.length < 2 || avg === null) return null;
+        const variance =
+            values.reduce((sum, value) => sum + ((value - avg) ** 2), 0) / values.length;
+        return Math.sqrt(variance);
+    }
+
+    function normalPdf(x, avg, sd) {
+        if (sd === null || sd === 0) return 0;
+        const z = (x - avg) / sd;
+        return Math.exp(-0.5 * z * z) / (sd * Math.sqrt(2 * Math.PI));
+    }
+
+    async function loadMaintenanceHistogram() {
         try {
             const res = await fetch('/api/entries');
-            const entries = await res.json();
-            const list = document.getElementById('entriesList');
+            const payload = await res.json();
+            const entries = Array.isArray(payload) ? payload : payload?.entries;
+            const el = document.getElementById('maintenanceHistogram');
 
-            if (!Array.isArray(entries) || entries.length === 0) {
-                list.innerHTML = `
-                    <div class="stat-card">
-                        <div class="stat-label">No entries yet</div>
-                        <div class="stat-value">Add one above</div>
-                    </div>
-                `;
-                return;
+            if (!el || !Array.isArray(entries)) return;
+
+            const values = entries
+                .map((entry) => entry.maintenance_kcal)
+                .filter((value) => typeof value === 'number' && Number.isFinite(value));
+
+            if (!values.length) return;
+
+            const avg = mean(values);
+            const sd = stddev(values, avg);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const step = Math.max(1, (max - min) / 80);
+
+            const curveX = [];
+            const curveY = [];
+            for (let x = min; x <= max; x += step) {
+                curveX.push(x);
+                curveY.push(normalPdf(x, avg, sd));
             }
 
-            const html = entries.slice(0, 8).map((entry) => `
-                <div class="stat-card">
-                    <div class="stat-label">${entry.date}</div>
-                    <div style="color: #cfcfcf; line-height: 1.4;">
-                        ${entry.observations ? entry.observations : '<span style="color:#7a7a7a;">No observations</span>'}
-                    </div>
-                </div>
-            `).join('');
+            const bandX = curveX.filter((x) => x >= (avg - sd) && x <= (avg + sd));
+            const bandY = bandX.map((x) => normalPdf(x, avg, sd));
+            const rugTop = Math.max(...curveY) * 0.08;
 
-            list.innerHTML = html;
+            Plotly.newPlot(
+                'maintenanceHistogram',
+                [
+                    {
+                        x: values,
+                        y: values.map(() => rugTop),
+                        type: 'scatter',
+                        mode: 'markers',
+                        marker: {
+                            color: '#38bdf8',
+                            symbol: 'line-ns-open',
+                            size: 16,
+                            line: { width: 1.5, color: '#38bdf8' },
+                        },
+                        hovertemplate: 'Maintenance: %{x:.0f} kcal<extra></extra>',
+                        name: 'Maintenance values',
+                    },
+                    {
+                        x: bandX,
+                        y: bandY,
+                        type: 'scatter',
+                        mode: 'lines',
+                        line: { width: 0 },
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(34, 197, 94, 0.12)',
+                        hoverinfo: 'skip',
+                        showlegend: false,
+                    },
+                    {
+                        x: curveX,
+                        y: curveY,
+                        type: 'scatter',
+                        mode: 'lines',
+                        line: { color: '#f97316', width: 2 },
+                        name: 'Normal fit',
+                    },
+                ],
+                {
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    margin: { t: 20, r: 20, b: 60, l: 60 },
+                    xaxis: { title: 'Maintenance (kcal)' },
+                    yaxis: {
+                        showticklabels: false,
+                        ticks: '',
+                        showgrid: false,
+                        zeroline: false,
+                        range: [0, Math.max(...curveY) * 1.1],
+                    },
+                    shapes: [
+                        {
+                            type: 'line',
+                            xref: 'x',
+                            yref: 'paper',
+                            x0: avg,
+                            x1: avg,
+                            y0: 0,
+                            y1: 1,
+                            line: { color: '#22c55e', width: 2, dash: 'dash' },
+                        },
+                    ],
+                    showlegend: true,
+                },
+                {
+                    responsive: true,
+                    displaylogo: false,
+                    scrollZoom: false,
+                    modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+                }
+            );
         } catch (error) {
-            console.error('Error loading entries:', error);
+            console.error('Error loading maintenance histogram:', error);
         }
-    }
-
-    document.getElementById('entryForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const data = {
-            date: document.getElementById('date').value,
-            weight: parseFloat(document.getElementById('weight').value) || null,
-            body_fat: parseFloat(document.getElementById('bodyFat').value) || null,
-            calories: parseInt(document.getElementById('calories').value) || null,
-            steps: parseInt(document.getElementById('steps').value) || null,
-            sleep_total: parseFloat(document.getElementById('sleep').value) || null,
-            observations: document.getElementById('observations').value.trim() || null,
-        };
-
-        try {
-            const res = await fetch('/api/entries', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (res.ok) {
-                alert('Entry added!');
-                e.target.reset();
-                loadStats();
-                loadEntries();
-            } else {
-                alert('Error adding entry');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error adding entry');
-        }
-    });
-
-    // Set default date = today
-    const dateEl = document.getElementById('date');
-    if (dateEl && !dateEl.value) {
-        dateEl.value = new Date().toISOString().slice(0, 10);
     }
 
     // Load data on page load
-    loadStats();
-    loadEntries();
+    loadMaintenanceHistogram();
 </script>
 {% endblock %}

@@ -545,6 +545,7 @@
         const dates = entries.map((e) => e.date);
         const maintenanceData = entries.map((e) => e.maintenance_kcal);
         const calories7dData = entries.map((e) => e.calories_kcal_7d);
+        const maintenance21d = metabolismMovingAverage(maintenanceData, 21);
         const maintenanceAvg = averageFinite(maintenanceData);
         const calories7dAvg = averageFinite(calories7dData);
         const maintenanceSd = standardDeviation(maintenanceData);
@@ -601,6 +602,16 @@
                 type: "scatter",
                 mode: "markers",
                 marker: { opacity: 0.6, line: { width: 0 }, color: "#38bdf8" },
+                hoverinfo: "skip",
+                hovertemplate: null,
+            },
+            {
+                x: dates,
+                y: maintenance21d,
+                name: "21-Day Average",
+                type: "scatter",
+                mode: "lines",
+                line: { width: 2, color: "#f97316" },
                 hoverinfo: "skip",
                 hovertemplate: null,
             },
