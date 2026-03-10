@@ -93,18 +93,137 @@ class HealthEntry(db.Model):
     )
     # The date of the entry is not unique, allowing for multiple users
     date: Mapped[Date] = mapped_column(unique=False, nullable=False, index=True)
+    # Relationship back to User
     user: Mapped[User] = relationship(back_populates="entries")
 
+    # this is optional, as users may not want to track all metrics every day
     weight_kg: Mapped[float | None] = mapped_column(nullable=True)
     body_fat_percent: Mapped[float | None] = mapped_column(nullable=True)
     calories_kcal: Mapped[int | None] = mapped_column(nullable=True)
     protein_g: Mapped[int | None] = mapped_column(nullable=True)
-    training_volume_kg: Mapped[int | None] = mapped_column(nullable=True)
     steps_count: Mapped[int | None] = mapped_column(nullable=True)
     sleep_hours: Mapped[float | None] = mapped_column(nullable=True)
 
+    # if user trains, they can log the total training volume (weight x reps)
+    training_volume_kg: Mapped[int | None] = mapped_column(nullable=True)
+
+    # For sentiment analysis
     sleep_quality: Mapped[str | None] = mapped_column(db.String(20), nullable=True)
     observations: Mapped[str | None] = mapped_column(db.Text, nullable=True)
+
+    @property
+    def fat_mass_kg(self) -> float | None:
+        """Derived fat mass from weight and body fat percentage."""
+        if self.weight_kg is None or self.body_fat_percent is None:
+            return None
+        return round(self.weight_kg * self.body_fat_percent / 100, 2)
+
+    @property
+    def lean_mass_kg(self) -> float | None:
+        """Derived lean mass from total weight minus fat mass."""
+        fat_mass = self.fat_mass_kg
+        if self.weight_kg is None or fat_mass is None:
+            return None
+        return round(self.weight_kg - fat_mass, 2)
+
+    @property
+    def fat_mass_change(self) -> float | None:
+        """Difference in fat mass compared with the previous entry for the same user."""
+        current_fat_mass = self.fat_mass_kg
+        if current_fat_mass is None:
+            return None
+
+        previous_entry = (
+            HealthEntry.query.filter(
+                HealthEntry.user_id == self.user_id,
+                HealthEntry.date < self.date,
+            )
+            .order_by(HealthEntry.date.desc())
+            .first()
+        )
+        if previous_entry is None or previous_entry.fat_mass_kg is None:
+            return None
+
+        return round(current_fat_mass - previous_entry.fat_mass_kg, 2)
+
+    @property
+    def fat_mass_change_7d(self) -> float | None:
+        """
+        Average daily fat-mass change using the entry from 7 records earlier.
+        This value is moree stable than the day-to-day change, which can be noisy
+        due to water retention and other factors.
+
+        Assuming 1 Kg of fat requires energy equivalent of 7700 kcal, we can
+        estimate the maintenance calories (calories to maintain the individual's
+        physiological activity) by simmply total calories - fat_mass_change *7700.
+        (see maintenance_calories_kcal() )
+        """
+        current_fat_mass = self.fat_mass_kg
+        if current_fat_mass is None:
+            return None
+
+        previous_entries = (
+            HealthEntry.query.filter(
+                HealthEntry.user_id == self.user_id,
+                HealthEntry.date < self.date,
+            )
+            .order_by(HealthEntry.date.desc())
+            .limit(7)
+            .all()
+        )
+        if len(previous_entries) < 7:
+            return None
+
+        baseline_entry = previous_entries[-1]
+        if baseline_entry.fat_mass_kg is None:
+            return None
+
+        return round((current_fat_mass - baseline_entry.fat_mass_kg) / 7, 3)
+
+    @property
+    def calories_kcal_7d(self) -> float | None:
+        """Seven-entry rolling average of calories for the same user."""
+        entries = (
+            HealthEntry.query.filter(
+                HealthEntry.user_id == self.user_id,
+                HealthEntry.date <= self.date,
+            )
+            .order_by(HealthEntry.date.desc())
+            .limit(7)
+            .all()
+        )
+        if len(entries) < 7:
+            return None
+
+        calories_values = [
+            entry.calories_kcal
+            for entry in reversed(entries)
+            if entry.calories_kcal is not None
+        ]
+        if len(calories_values) < 7:
+            return None
+
+        return round(sum(calories_values) / 7, 2)
+
+    @property
+    def maintenance_kcal(self) -> int | None:
+        """
+        Estimated maintenance calories from intake and fat-mass trend.
+        maintenance calories = calories_kcal_7d - (fat_mass_change_7d * CONSTANT)
+
+        CONSTANT is adapted from 
+        Max Wishnofsky, “Caloric equivalents of gained or lost weight,” 
+        The American Journal of Clinical Nutrition (1958), DOI: 10.1093/ajcn/6.5.542
+        """
+        # fat energy equivalent
+        KCAL_PER_KG_FAT = 7700
+
+        if self.calories_kcal_7d is None or self.fat_mass_change_7d is None:
+            return None
+
+        return int(
+            round(self.calories_kcal_7d - (self.fat_mass_change_7d * KCAL_PER_KG_FAT))
+        )
 
     def to_dict(self) -> dict[str, object]:
         """Serialize the entry into JSON-friendly primitives."""
@@ -113,6 +232,12 @@ class HealthEntry(db.Model):
             "date": self.date.strftime("%Y-%m-%d"),
             "weight_kg": self.weight_kg,
             "body_fat_percent": self.body_fat_percent,
+            "fat_mass_kg": self.fat_mass_kg,
+            "fat_mass_change": self.fat_mass_change,
+            "fat_mass_change_7d": self.fat_mass_change_7d,
+            "calories_kcal_7d": self.calories_kcal_7d,
+            "maintenance_kcal": self.maintenance_kcal,
+            "lean_mass_kg": self.lean_mass_kg,
             "calories_kcal": self.calories_kcal,
             "protein_g": self.protein_g,
             "training_volume_kg": self.training_volume_kg,

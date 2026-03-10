@@ -119,6 +119,18 @@
         letter-spacing: 0;
     }
 
+    .result-delta.is-positive {
+        color: var(--status-positive);
+    }
+
+    .result-delta.is-negative {
+        color: var(--status-negative);
+    }
+
+    .result-delta.is-neutral {
+        color: var(--text);
+    }
+
     .result-big {
         font-size: 1.2rem;
     }
@@ -162,6 +174,14 @@
         background: var(--accent);
         color: #12322b;
         border-color: transparent;
+    }
+
+    #maintenanceChart {
+        height: 340px;
+    }
+
+    .metabolism-chart-wrap {
+        margin-top: 14px;
     }
 </style>
 {% endblock %}
@@ -246,99 +266,55 @@
 
     <!-- RIGHT: Results -->
     <div class="panel individual-model-panel">
-        <h2>Your individual Metabolic Model</h2>
-        <small>Personalized energy balance snapshot.</small>
+        <h2>Personal Metabolic Model</h2>
+        <small>Caloric maintenace based on balance snapshot.</small>
         <div class="results-grid" style="margin-top: 14px;">
 
             <div class="window-buttons-wrap">
+                <input type="hidden" id="metabolismWindowSelect" value="">
                 <div class="window-buttons" role="group" aria-label="Model time window">
-                    <button type="button" class="window-btn">Last 3 months</button>
-                    <button type="button" class="window-btn">Last 6 months</button>
-                    <button type="button" class="window-btn">Last 12 months</button>
-                    <button type="button" class="window-btn is-active" aria-pressed="true">All</button>
+                    <button type="button" class="window-btn" data-metabolism-window-value="3m">Last 3 months</button>
+                    <button type="button" class="window-btn" data-metabolism-window-value="6m">Last 6 months</button>
+                    <button type="button" class="window-btn" data-metabolism-window-value="1y">Last 12 months</button>
+                    <button type="button" class="window-btn is-active" data-metabolism-window-value=""
+                        aria-pressed="true">All</button>
                 </div>
+            </div>
+
+            <div class="result-block blue metabolism-chart-wrap">
+                <h2>Estimated Daily Energy Expenditure (DEE)</h2>
+                <div id="maintenanceChart"></div>
             </div>
 
             <!-- Individual Metabolic Model -->
             <div class="result-block blue">
-                <h2>Individual Metabolic Model</h2>
+                <h2>Personal estimation</h2>
 
                 <div class="result-row">
-                    <div class="result-label">Estimated TDEE</div>
-                    <div class="result-value result-big">2520 kcal</div>
+                    <div class="result-label">Estimated DEE</div>
+                    <div class="result-value result-big"><span id="maintenanceTdeeOut">—</span> kcal</div>
                 </div>
 
                 <div class="result-row">
-                    <div class="result-label">Current intake</div>
-                    <div class="result-value result-big">2310 kcal</div>
+                    <div class="result-label">Caloric intake</div>
+                    <div class="result-value result-big"><span id="caloriesIntakeOut">—</span> kcal</div>
                 </div>
 
                 <div class="result-row">
-                    <div class="result-label">Estimated deficit</div>
-                    <div class="result-value result-big">210 kcal/day</div>
+                    <div class="result-label">Change in calories</div>
+                    <div class="result-value result-big">
+                        <span id="estimatedDeficitOut" class="result-delta is-neutral">—</span> kcal/day
+                    </div>
                 </div>
 
                 <div class="result-row">
-                    <div class="result-label">Predicted fat loss</div>
-                    <div class="result-value result-big">~0.2 kg/week</div>
+                    <div class="result-label">Fat mass change</div>
+                    <div class="result-value result-big">
+                        <span id="predictedFatChangeOut" class="result-delta is-neutral">—</span> kg/week
+                    </div>
                 </div>
             </div>
 
-            <!-- Weight loss -->
-            <div class="result-block green">
-                <h2>Weight Loss</h2>
-
-                <div class="result-row">
-                    <div class="result-label">
-                        Calories (deficit)
-                        <div class="minmax">
-                            <span>min: <span id="cutMinOut">—</span> kcal</span>
-                            <span>max: <span id="cutMaxOut">—</span> kcal</span>
-                        </div>
-                    </div>
-                    <div class="result-value result-big"><span id="cutCaloriesOut">—</span> kcal</div>
-                </div>
-
-                <div class="result-row">
-                    <div class="result-label">
-                        Protein (per day)
-                        <div class="minmax">
-                            <span>min: <span id="cutProteinMinOut">—</span> g</span>
-                            <span>max: <span id="cutProteinMaxOut">—</span> g</span>
-                        </div>
-                    </div>
-
-
-                    <div class="result-value result-big"><span id="cutProteinOut">—</span> g</div>
-                </div>
-            </div>
-
-            <!-- Lean bulk -->
-            <div class="result-block orange">
-                <h2>Lean Bulk</h2>
-
-                <div class="result-row">
-                    <div class="result-label">
-                        Calories (surplus per day)
-                        <div class="minmax">
-                            <span>min: <span id="bulkMinOut">—</span> kcal</span>
-                            <span>max: <span id="bulkMaxOut">—</span> kcal</span>
-                        </div>
-                    </div>
-                    <div class="result-value result-big"><span id="bulkCaloriesOut">—</span> kcal</div>
-                </div>
-
-                <div class="result-row">
-                    <div class="result-label">
-                        Protein (per day)
-                        <div class="minmax">
-                            <span>min: <span id="bulkProteinMinOut">—</span> g</span>
-                            <span>max: <span id="bulkProteinMaxOut">—</span> g</span>
-                        </div>
-                    </div>
-                    <div class="result-value result-big"><span id="bulkProteinOut">—</span> g</div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -351,15 +327,64 @@
         if (el) el.textContent = val;
     }
 
+    function setSignedDelta(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.classList.remove("is-positive", "is-negative", "is-neutral");
+
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+            el.textContent = "—";
+            el.classList.add("is-neutral");
+            return;
+        }
+
+        const rounded = Math.round(value);
+        const sign = rounded > 0 ? "+" : "";
+        el.textContent = `${sign}${rounded}`;
+
+        if (rounded > 0) {
+            el.classList.add("is-positive");
+        } else if (rounded < 0) {
+            el.classList.add("is-negative");
+        } else {
+            el.classList.add("is-neutral");
+        }
+    }
+
+    function setSignedKgDelta(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.classList.remove("is-positive", "is-negative", "is-neutral");
+
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+            el.textContent = "—";
+            el.classList.add("is-neutral");
+            return;
+        }
+
+        const rounded = value.toFixed(2);
+        const sign = value > 0 ? "+" : "";
+        el.textContent = `${sign}${rounded}`;
+
+        if (value > 0) {
+            el.classList.add("is-positive");
+        } else if (value < 0) {
+            el.classList.add("is-negative");
+        } else {
+            el.classList.add("is-neutral");
+        }
+    }
+
     function clearCalcOutputs() {
         const ids = [
             "bmrOut", "tdeeOut", "tdeeMinOut", "tdeeMaxOut",
-            "cutCaloriesOut", "cutMinOut", "cutMaxOut",
-            "cutProteinOut", "cutProteinMinOut", "cutProteinMaxOut",
-            "bulkCaloriesOut", "bulkMinOut", "bulkMaxOut",
-            "bulkProteinOut", "bulkProteinMinOut", "bulkProteinMaxOut",
+            "maintenanceTdeeOut", "caloriesIntakeOut",
         ];
         ids.forEach((id) => setText(id, "--"));
+        setSignedDelta("estimatedDeficitOut", null);
+        setSignedKgDelta("predictedFatChangeOut", null);
     }
 
     function parseMaybeNumber(raw) {
@@ -402,6 +427,245 @@
         return Math.round(n);
     }
 
+    function getMetabolismWindowValue() {
+        return document.getElementById("metabolismWindowSelect")?.value ?? "";
+    }
+
+    function wireMetabolismWindowButtons() {
+        const hidden = document.getElementById("metabolismWindowSelect");
+        const buttons = Array.from(
+            document.querySelectorAll(".window-btn[data-metabolism-window-value]")
+        );
+        if (!hidden || !buttons.length) return;
+
+        const renderActive = (value) => {
+            for (const btn of buttons) {
+                const active = (btn.dataset.metabolismWindowValue ?? "") === (value ?? "");
+                btn.classList.toggle("is-active", active);
+                btn.setAttribute("aria-pressed", active ? "true" : "false");
+            }
+        };
+
+        renderActive(hidden.value ?? "");
+
+        for (const btn of buttons) {
+            btn.addEventListener("click", async () => {
+                const nextValue = btn.dataset.metabolismWindowValue ?? "";
+                hidden.value = nextValue;
+                renderActive(nextValue);
+                await loadMaintenanceChart();
+            });
+        }
+    }
+
+    function metabolismMovingAverage(data, windowSize = 7) {
+        const result = [];
+        for (let i = 0; i < data.length; i++) {
+            const start = Math.max(0, i - windowSize + 1);
+            const window = data.slice(start, i + 1).filter((v) => v != null);
+            if (!window.length) {
+                result.push(null);
+                continue;
+            }
+            result.push(window.reduce((a, b) => a + b, 0) / window.length);
+        }
+        return result;
+    }
+
+    function averageFinite(values) {
+        const nums = values.filter((v) => typeof v === "number" && Number.isFinite(v));
+        if (!nums.length) return null;
+        return nums.reduce((sum, value) => sum + value, 0) / nums.length;
+    }
+
+    function standardDeviation(values) {
+        const nums = values.filter((v) => typeof v === "number" && Number.isFinite(v));
+        if (nums.length < 2) return null;
+
+        const mean = nums.reduce((sum, value) => sum + value, 0) / nums.length;
+        const variance =
+            nums.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / nums.length;
+
+        return Math.sqrt(variance);
+    }
+
+    function getMetabolismPlotBgColor() {
+        const isLight = document.documentElement.getAttribute("data-theme") === "light";
+        if (isLight) return "#ffffff";
+        return (
+            getComputedStyle(document.documentElement).getPropertyValue("--panel").trim() ||
+            "#252525"
+        );
+    }
+
+    function getMetabolismAxisTheme() {
+        const isLight = document.documentElement.getAttribute("data-theme") === "light";
+        return isLight
+            ? {
+                grid: "#e5e7eb",
+                tick: "#9ca3af",
+                line: "#cbd5e1",
+                zero: "#e5e7eb",
+                font: "#4b5563",
+            }
+            : {
+                grid: "#333",
+                tick: "#888",
+                line: "#888",
+                zero: "#2e2e2e",
+                font: "#e0e0e0",
+            };
+    }
+
+    const METABOLISM_PLOTLY_CONFIG = {
+        responsive: true,
+        displaylogo: false,
+        scrollZoom: false,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+    };
+
+    async function loadMaintenanceChart() {
+        const chartEl = document.getElementById("maintenanceChart");
+        if (!chartEl) return;
+
+        const windowValue = getMetabolismWindowValue();
+        const url = windowValue
+            ? `/api/entries?window=${encodeURIComponent(windowValue)}`
+            : "/api/entries";
+
+        const res = await fetch(url);
+        if (!res.ok) return;
+
+        const payload = await res.json();
+        const entries = Array.isArray(payload) ? payload : payload?.entries;
+        if (!Array.isArray(entries) || !entries.length) return;
+
+        entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const dates = entries.map((e) => e.date);
+        const maintenanceData = entries.map((e) => e.maintenance_kcal);
+        const calories7dData = entries.map((e) => e.calories_kcal_7d);
+        const maintenanceAvg = averageFinite(maintenanceData);
+        const calories7dAvg = averageFinite(calories7dData);
+        const maintenanceSd = standardDeviation(maintenanceData);
+        const axisTheme = getMetabolismAxisTheme();
+        const baseLayout = {
+            paper_bgcolor: "rgba(0,0,0,0)",
+            plot_bgcolor: "rgba(0,0,0,0)",
+            font: { color: axisTheme.font },
+            hovermode: false,
+            showlegend: false,
+            margin: { t: 20, r: 20, b: 60, l: 60 },
+            xaxis: {
+                gridcolor: axisTheme.grid,
+                tickcolor: axisTheme.tick,
+                tickfont: { color: axisTheme.font },
+                linecolor: axisTheme.line,
+                zerolinecolor: axisTheme.zero,
+                layer: "below traces",
+            },
+            yaxis: {
+                gridcolor: axisTheme.grid,
+                tickcolor: axisTheme.tick,
+                tickfont: { color: axisTheme.font },
+                linecolor: axisTheme.line,
+                zerolinecolor: axisTheme.zero,
+                layer: "below traces",
+            },
+        };
+
+        setText(
+            "maintenanceTdeeOut",
+            maintenanceAvg === null ? "—" : String(Math.round(maintenanceAvg))
+        );
+        setText(
+            "caloriesIntakeOut",
+            calories7dAvg === null ? "—" : String(Math.round(calories7dAvg))
+        );
+        const estimatedDeficit =
+            maintenanceAvg === null || calories7dAvg === null
+                ? null
+                : calories7dAvg - maintenanceAvg;
+
+        setSignedDelta("estimatedDeficitOut", estimatedDeficit);
+        setSignedKgDelta(
+            "predictedFatChangeOut",
+            estimatedDeficit === null ? null : (estimatedDeficit * 7) / 7700
+        );
+
+        const chartTraces = [
+            {
+                x: dates,
+                y: maintenanceData,
+                name: "Estimated Maintenance",
+                type: "scatter",
+                mode: "markers",
+                marker: { opacity: 0.6, line: { width: 0 }, color: "#38bdf8" },
+                hoverinfo: "skip",
+                hovertemplate: null,
+            },
+        ];
+
+        if (maintenanceAvg !== null && maintenanceSd !== null) {
+            chartTraces.push(
+                {
+                    x: dates,
+                    y: dates.map(() => maintenanceAvg + maintenanceSd),
+                    type: "scatter",
+                    mode: "lines",
+                    line: { width: 0 },
+                    hoverinfo: "skip",
+                    hovertemplate: null,
+                    showlegend: false,
+                },
+                {
+                    x: dates,
+                    y: dates.map(() => maintenanceAvg - maintenanceSd),
+                    type: "scatter",
+                    mode: "lines",
+                    fill: "tonexty",
+                    fillcolor: "rgba(34, 197, 94, 0.12)",
+                    line: { width: 0 },
+                    hoverinfo: "skip",
+                    hovertemplate: null,
+                    showlegend: false,
+                }
+            );
+        }
+
+        if (maintenanceAvg !== null) {
+            chartTraces.push({
+                x: dates,
+                y: dates.map(() => maintenanceAvg),
+                name: "Period Average",
+                type: "scatter",
+                mode: "lines",
+                line: { width: 2, dash: "dash", color: "#22c55e" },
+                hovertemplate: "Period average: %{y:.0f} kcal<extra></extra>",
+            });
+        }
+
+        Plotly.react(
+            "maintenanceChart",
+            chartTraces,
+            {
+                ...baseLayout,
+                xaxis: {
+                    ...baseLayout.xaxis,
+                    type: "date",
+                    tickangle: -30,
+                },
+                yaxis: {
+                    ...baseLayout.yaxis,
+                    title: "Maintenance (kcal)",
+                },
+            },
+            METABOLISM_PLOTLY_CONFIG
+        );
+    }
+
+    window.loadMetabolism = () => loadMaintenanceChart().catch((err) => console.error(err));
+
     function recalc() {
 
         // for MBR calculation 
@@ -439,25 +703,6 @@
         setText('tdeeMinOut', round(min));
         setText('tdeeMaxOut', round(max));
 
-        // Weight Loss suggestions
-        // −10–15 % TDEE
-        // Protein 2.0 – 2.4 g/kg per day
-        setText('cutCaloriesOut', round(tdee * 0.875));
-        setText('cutMinOut', round(tdee * 0.85));
-        setText('cutMaxOut', round(tdee * 0.90));
-        setText('cutProteinOut', round(weight * 2.2));
-        setText('cutProteinMinOut', round(weight * 2.0));
-        setText('cutProteinMaxOut', round(weight * 2.4));
-
-        // Lean Bulk
-        // +5–10 % over TDEE
-        // Protein 1.6 – 2.2 g/kg per day
-        setText('bulkCaloriesOut', round(tdee * 1.075));
-        setText('bulkMinOut', round(tdee * 1.05));
-        setText('bulkMaxOut', round(tdee * 1.10));
-        setText('bulkProteinOut', round(weight * 2.0));
-        setText('bulkProteinMinOut', round(weight * 1.6));
-        setText('bulkProteinMaxOut', round(weight * 2.2));
     }
 
     // listeners
@@ -485,6 +730,8 @@
         clearCalcOutputs();
         await loadUserProfile();
         recalc();
+        wireMetabolismWindowButtons();
+        await loadMaintenanceChart();
     });
 
 </script>

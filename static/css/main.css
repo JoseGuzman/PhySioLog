@@ -509,6 +509,16 @@ Page header + cards
     padding: 16px;
 }
 
+.surface-green {
+    background: rgba(34, 197, 94, 0.10);
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.surface-orange {
+    background: rgba(251, 146, 60, 0.10);
+    border-color: rgba(251, 146, 60, 0.25);
+}
+
 .stat-label {
     color: var(--muted-2);
     font-size: 0.78em;

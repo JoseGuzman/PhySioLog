@@ -245,6 +245,9 @@
                 if (typeof window.loadTrends === "function") {
                     window.loadTrends();
                 }
+                if (typeof window.loadMetabolism === "function") {
+                    window.loadMetabolism();
+                }
             }
 
             const saved = localStorage.getItem("theme-choice") || "light";

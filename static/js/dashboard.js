@@ -393,6 +393,8 @@ const BASE_LAYOUT = {
 const MYCOLORS = {
     weight: { dots: "#2dd4bf", line: "#fb7185" },
     fat: { dots: "#38bdf8", line: "#fb923c" },
+    fatMass: { dots: "#f97316", line: "#22c55e" },
+    leanMass: { dots: "#0ea5e9", line: "#84cc16" },
     // Opaque equivalents of 35% alpha over #252525 plot background
     steps: { bar: "#245d39", line: "#fb7185" },
     sleep: { bar: "#534970", line: "#fb923c" },
@@ -401,7 +403,7 @@ const MYCOLORS = {
     training: { line: "#38bdf8", dots: "#f97316" },
 };
 
-const CHART_IDS = ["weightChart", "bodyFatChart", "stepsChart", "sleepChart", "caloriesChart", "proteinChart", "trainingVolumeChart"];
+const CHART_IDS = ["weightChart", "bodyFatChart", "fatMassChart", "leanMassChart", "stepsChart", "sleepChart", "caloriesChart", "proteinChart", "trainingVolumeChart"];
 
 const PLOTLY_CONFIG = {
     responsive: true,
@@ -746,6 +748,72 @@ async function loadCharts(
                     ...(xAxisRange ? { range: xAxisRange } : {}),
                 },
                 hovermode: "x closets",
+            },
+            PLOTLY_CONFIG
+        );
+    }
+
+    // Fat mass
+    if ($("fatMassChart")) {
+        const fatMassData = entries.map((e) => e.fat_mass_kg);
+        const fatMassMA = calculateMovingAverage(fatMassData, 7);
+
+        Plotly.react(
+            "fatMassChart",
+            [
+                {
+                    x: dates, y: fatMassData, name: "Daily Fat Mass", type: "scatter", mode: "markers",
+                    marker: { opacity: 0.6, line: { width: 0 }, color: MYCOLORS.fatMass.dots }
+                },
+                {
+                    x: dates, y: fatMassMA, name: "7-Day Average", type: "scatter", mode: "lines",
+                    line: { width: 2, color: MYCOLORS.fatMass.line }
+                },
+            ],
+            {
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
+                yaxis: { ...baseLayout.yaxis, title: "Fat Mass (kg)" },
+                xaxis: {
+                    ...baseLayout.xaxis,
+                    ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
+                },
+                hovermode: "x closest",
+            },
+            PLOTLY_CONFIG
+        );
+    }
+
+    // Lean mass
+    if ($("leanMassChart")) {
+        const leanMassData = entries.map((e) => e.lean_mass_kg);
+        const leanMassMA = calculateMovingAverage(leanMassData, 7);
+
+        Plotly.react(
+            "leanMassChart",
+            [
+                {
+                    x: dates, y: leanMassData, name: "Daily Lean Mass", type: "scatter", mode: "markers",
+                    marker: { opacity: 0.6, line: { width: 0 }, color: MYCOLORS.leanMass.dots }
+                },
+                {
+                    x: dates, y: leanMassMA, name: "7-Day Average", type: "scatter", mode: "lines",
+                    line: { width: 2, color: MYCOLORS.leanMass.line }
+                },
+            ],
+            {
+                ...baseLayout,
+                paper_bgcolor: plotBg,
+                plot_bgcolor: plotBg,
+                yaxis: { ...baseLayout.yaxis, title: "Lean Mass (kg)" },
+                xaxis: {
+                    ...baseLayout.xaxis,
+                    ...makeXAxis(-30),
+                    ...(xAxisRange ? { range: xAxisRange } : {}),
+                },
+                hovermode: "x closest",
             },
             PLOTLY_CONFIG
         );
