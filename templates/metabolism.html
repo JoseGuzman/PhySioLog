@@ -251,19 +251,13 @@
             <h2>Metabolism</h2>
 
             <div class="result-row">
-                <div class="result-label">Basal Metabolic Rate (BMR)</div>
-                <div class="result-value result-big"><span id="bmrOut">—</span> kcal</div>
+                <div class="result-label">Total Daily Energy Expenditure (TDEE)</div>
+                <div class="result-value result-big"><span id="tdeeOut">—</span> kcal</div>
             </div>
 
             <div class="result-row">
-                <div class="result-label">
-                    Total Daily Energy Expenditure (TDEE)
-                    <div class="minmax">
-                        <span>min: <span id="tdeeMinOut">—</span> kcal</span>
-                        <span>max: <span id="tdeeMaxOut">—</span> kcal</span>
-                    </div>
-                </div>
-                <div class="result-value result-big"><span id="tdeeOut">—</span> kcal</div>
+                <div class="result-label">Basal Metabolic Rate (BMR)</div>
+                <div class="result-value result-big"><span id="bmrOut">—</span> kcal</div>
             </div>
         </div>
     </div>
@@ -271,7 +265,7 @@
     <!-- RIGHT: Results -->
     <div class="panel individual-model-panel">
         <h2>Personal Metabolic Model</h2>
-        <small>Caloric maintenace based on balance snapshot.</small>
+        <small>Caloric maintenace based on data entry from: </small>
         <div class="results-grid" style="margin-top: 14px;">
 
             <div class="window-buttons-wrap">
@@ -383,7 +377,7 @@
 
     function clearCalcOutputs() {
         const ids = [
-            "bmrOut", "tdeeOut", "tdeeMinOut", "tdeeMaxOut",
+            "bmrOut", "tdeeOut",
             "maintenanceTdeeOut", "caloriesIntakeOut",
         ];
         ids.forEach((id) => setText(id, "--"));
@@ -715,8 +709,6 @@
         const min = tdee * 0.95;
         const max = tdee * 1.05;
 
-        setText('tdeeMinOut', round(min));
-        setText('tdeeMaxOut', round(max));
 
     }
 
