@@ -43,7 +43,7 @@
   <header class="users-head">
     <div class="users-head-main">
       <h1>Documents</h1>
-      <p>Click on the document to read the information </p>
+      <p>List of documents.</p>
     </div>
     <div class="users-head-controls">
       <div class="users-head-toolbar">
@@ -71,10 +71,12 @@
           {% for page_number in range(1, total_pages + 1) %}
           {% if current_section %}
           <a class="pagination-link {% if page_number == page %}is-current{% endif %}"
-            href="{{ url_for('web.docs_page', doc_path=current_section, q=docs_query, per_page=per_page, page=page_number) }}">{{ page_number }}</a>
+            href="{{ url_for('web.docs_page', doc_path=current_section, q=docs_query, per_page=per_page, page=page_number) }}">{{
+            page_number }}</a>
           {% else %}
           <a class="pagination-link {% if page_number == page %}is-current{% endif %}"
-            href="{{ url_for('web.docs_index', q=docs_query, per_page=per_page, page=page_number) }}">{{ page_number }}</a>
+            href="{{ url_for('web.docs_index', q=docs_query, per_page=per_page, page=page_number) }}">{{ page_number
+            }}</a>
           {% endif %}
           {% endfor %}
           {% if current_section %}
@@ -139,8 +141,8 @@
 </section>
 {% else %}
 <section class="docs-markdown">
-  <h2>Select a document</h2>
-  <small>Choose a docs folder in the main sidebar, then pick a page.</small>
+  <!-- <h2>Select a document</h2>-->
+  <small>Click on the document to load the content.</small>
 </section>
 {% endif %}
 {% endblock %}
@@ -158,6 +160,5 @@
     }
   };
 </script>
-<script id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 {% endblock %}
