@@ -76,6 +76,30 @@
 
             </ul>
         </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">DOCS</div>
+            <ul class="sidebar-menu">
+                {% if docs_sections %}
+                {% for section in docs_sections %}
+                <li>
+                    <a href="{{ url_for('web.docs_page', doc_path=section) }}"
+                        class="{% if request.endpoint == 'web.docs_page' and section == current_section %}active{% endif %}">
+                        <i data-lucide="folder" class="icon"></i>
+                        <span>{{ section.replace('_', ' ') }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li>
+                    <a href="{{ url_for('web.docs_index') }}"
+                        class="{% if request.endpoint == 'web.docs_index' %}active{% endif %}">
+                        <i data-lucide="book-open" class="icon"></i>
+                        <span>Docs Home</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
         {% if current_user.is_admin %}
         <div class="sidebar-section">
             <div class="sidebar-section-title">ADMIN</div>

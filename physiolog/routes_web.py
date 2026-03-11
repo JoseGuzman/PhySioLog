@@ -6,7 +6,10 @@ It defines the web routes for the PhySioLog Flask application.
 Author: Jose Guzman, sjm.guzman<at>gmail.com
 """
 
+from pathlib import Path
 from urllib.parse import urlparse
+
+import markdown2
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func, or_
@@ -15,6 +18,114 @@ from .extensions import db
 from .models import HealthEntry, User
 
 web_bp = Blueprint("web", __name__)
+DOCS_DIR = Path("docs").resolve()
+MARKDOWN_EXTRAS = ["fenced-code-blocks", "tables", "break-on-newline"]
+DOCS_PER_PAGE_OPTIONS = ["5", "10", "20", "all"]
+
+
+def build_docs_tree() -> dict[str, list[dict[str, str]]]:
+    tree: dict[str, list[dict[str, str]]] = {}
+    if not DOCS_DIR.exists():
+        return tree
+
+    for file in sorted(DOCS_DIR.rglob("*.md")):
+        rel = file.relative_to(DOCS_DIR)
+        section = rel.parent.as_posix() if rel.parent.as_posix() != "." else "general"
+        text = file.read_text(encoding="utf-8")
+        h1_title = None
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("# "):
+                h1_title = stripped[2:].strip()
+                break
+        tree.setdefault(section, []).append(
+            {
+                "name": rel.stem.replace("_", " "),
+                "title": h1_title or rel.stem.replace("_", " "),
+                "doc_path": rel.with_suffix("").as_posix(),
+            }
+        )
+
+    for pages in tree.values():
+        pages.sort(key=lambda page: page["name"].lower())
+
+    return dict(sorted(tree.items(), key=lambda item: item[0].lower()))
+
+
+@web_bp.app_context_processor
+def inject_docs_sections():
+    tree = build_docs_tree()
+    return {"docs_sections": list(tree.keys())}
+
+
+def _resolve_doc_file(doc_path: str) -> Path | None:
+    candidate = (DOCS_DIR / f"{doc_path}.md").resolve()
+    if DOCS_DIR not in candidate.parents:
+        return None
+    if not candidate.exists() or not candidate.is_file():
+        return None
+    return candidate
+
+
+def _section_from_doc_path(doc_path: str) -> str:
+    parent = Path(doc_path).parent.as_posix()
+    return parent if parent != "." else "general"
+
+
+def _normalize_markdown_whitespace(text: str) -> str:
+    # Ensure lines containing only spaces/tabs are treated as blank separators.
+    lines = ["" if not line.strip() else line.rstrip() for line in text.splitlines()]
+    return "\n".join(lines)
+
+
+def _filter_section_pages(
+    section_pages: list[dict[str, str]],
+    docs_query: str,
+) -> list[dict[str, str]]:
+    query = docs_query.strip().lower()
+    if not query:
+        return section_pages
+    return [
+        page
+        for page in section_pages
+        if query in page["name"].lower() or query in page["title"].lower()
+    ]
+
+
+def _parse_docs_pagination_args() -> tuple[int, int | str]:
+    per_page_raw = request.args.get("per_page", "10").strip().lower()
+    if per_page_raw not in {"5", "10", "20", "all"}:
+        per_page_raw = "10"
+    per_page: int | str = per_page_raw if per_page_raw == "all" else int(per_page_raw)
+
+    page_raw = request.args.get("page", "1").strip()
+    try:
+        page = int(page_raw)
+    except ValueError:
+        page = 1
+    if page < 1:
+        page = 1
+    return page, per_page
+
+
+def _paginate_docs(
+    section_pages: list[dict[str, str]],
+    page: int,
+    per_page: int | str,
+) -> tuple[list[dict[str, str]], int, int]:
+    total_docs = len(section_pages)
+    total_pages = (
+        1 if per_page == "all" else max(1, (total_docs + per_page - 1) // per_page)
+    )
+    if page > total_pages:
+        page = total_pages
+
+    if per_page == "all":
+        return section_pages, page, total_pages
+
+    start = (page - 1) * per_page
+    end = start + per_page
+    return section_pages[start:end], page, total_pages
 
 
 @web_bp.route("/")
@@ -137,9 +248,86 @@ def coach():
     return render_template("coach.html")
 
 
+@web_bp.route("/docs")
+@login_required
+def docs_index():
+    tree = build_docs_tree()
+    docs_query = request.args.get("q", "").strip()
+    page, per_page = _parse_docs_pagination_args()
+    current_section = next(iter(tree), None)
+    section_pages = tree.get(current_section, []) if current_section else []
+    section_pages = _filter_section_pages(section_pages, docs_query)
+    section_pages, page, total_pages = _paginate_docs(section_pages, page, per_page)
+    return render_template(
+        "docs_layout.html",
+        tree=tree,
+        current=None,
+        current_section=current_section,
+        section_pages=section_pages,
+        docs_query=docs_query,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+        per_page_options=DOCS_PER_PAGE_OPTIONS,
+        content=None,
+    )
+
+
+@web_bp.route("/docs/<path:doc_path>")
+@login_required
+def docs_page(doc_path: str):
+    tree = build_docs_tree()
+    docs_query = request.args.get("q", "").strip()
+    page, per_page = _parse_docs_pagination_args()
+    doc_file = _resolve_doc_file(doc_path)
+
+    if doc_file is None:
+        section_pages = tree.get(doc_path)
+        if section_pages is None:
+            abort(404)
+        section_pages = _filter_section_pages(section_pages, docs_query)
+        section_pages, page, total_pages = _paginate_docs(section_pages, page, per_page)
+        return render_template(
+            "docs_layout.html",
+            tree=tree,
+            current=None,
+            current_section=doc_path,
+            section_pages=section_pages,
+            docs_query=docs_query,
+            page=page,
+            per_page=per_page,
+            total_pages=total_pages,
+            per_page_options=DOCS_PER_PAGE_OPTIONS,
+            content=None,
+        )
+
+    text = doc_file.read_text(encoding="utf-8")
+    normalized_text = _normalize_markdown_whitespace(text)
+    html = markdown2.markdown(normalized_text, extras=MARKDOWN_EXTRAS)
+    current = doc_file.relative_to(DOCS_DIR).with_suffix("").as_posix()
+    current_section = _section_from_doc_path(current)
+
+    section_pages = _filter_section_pages(tree.get(current_section, []), docs_query)
+    section_pages, page, total_pages = _paginate_docs(section_pages, page, per_page)
+
+    return render_template(
+        "docs_layout.html",
+        tree=tree,
+        current=current,
+        current_section=current_section,
+        section_pages=section_pages,
+        docs_query=docs_query,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+        per_page_options=DOCS_PER_PAGE_OPTIONS,
+        content=html,
+    )
+
+
 @web_bp.route("/admin")
 @web_bp.route("/clients")
-#@web_bp.route("/users")
+# @web_bp.route("/users")
 @login_required
 def clients():
     """Admin clients page with list of clients and subscription status."""
@@ -163,13 +351,10 @@ def clients():
     if page < 1:
         page = 1
 
-    query = (
-        db.session.query(
-            User,
-            func.max(HealthEntry.date).label("last_entry_date"),
-        )
-        .outerjoin(HealthEntry, HealthEntry.user_id == User.id)
-    )
+    query = db.session.query(
+        User,
+        func.max(HealthEntry.date).label("last_entry_date"),
+    ).outerjoin(HealthEntry, HealthEntry.user_id == User.id)
 
     if email_query:
         query = query.filter(
@@ -182,7 +367,9 @@ def clients():
     query = query.group_by(User.id)
 
     total_clients = query.count()
-    total_pages = 1 if per_page == "all" else max(1, (total_clients + per_page - 1) // per_page)
+    total_pages = (
+        1 if per_page == "all" else max(1, (total_clients + per_page - 1) // per_page)
+    )
     if page > total_pages:
         page = total_pages
 
@@ -222,7 +409,9 @@ def update_client_subscription(user_id: int):
     user.has_subscription = next_status == "active"
     db.session.commit()
 
-    return redirect(url_for("web.clients", email=email_query, per_page=per_page, page=page))
+    return redirect(
+        url_for("web.clients", email=email_query, per_page=per_page, page=page)
+    )
 
 
 # test route

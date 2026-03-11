@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}PhysioLog Docs{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .docs-markdown {
+    margin-top: 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+
+  .docs-markdown pre {
+    overflow-x: auto;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(127, 127, 127, 0.12);
+  }
+
+  .docs-markdown code {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(127, 127, 127, 0.12);
+  }
+
+  .docs-markdown table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .docs-markdown th,
+  .docs-markdown td {
+    border: 1px solid var(--border-color, #d0d7de);
+    padding: 8px 10px;
+    text-align: left;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="users-card">
+  <header class="users-head">
+    <div class="users-head-main">
+      <h1>Documents</h1>
+      <p>Click on the document to read the information </p>
+    </div>
+    <div class="users-head-controls">
+      <div class="users-head-toolbar">
+        <form method="get"
+          action="{% if current_section %}{{ url_for('web.docs_page', doc_path=current_section) }}{% else %}{{ url_for('web.docs_index') }}{% endif %}"
+          class="email-filter-form">
+          <input type="hidden" name="per_page" value="{{ per_page }}">
+          <input type="hidden" name="page" value="1">
+          <input type="search" name="q" value="{{ docs_query or '' }}" placeholder="Search name or title"
+            class="email-filter-input">
+          <button type="submit" class="email-filter-btn">Filter</button>
+        </form>
+        <nav class="pagination" aria-label="Documents pagination">
+          {% if current_section %}
+          <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_page', doc_path=current_section, q=docs_query, per_page=per_page, page=1) }}">&lt;&lt;</a>
+          <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_page', doc_path=current_section, q=docs_query, per_page=per_page, page=page - 1) }}">&lt;</a>
+          {% else %}
+          <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_index', q=docs_query, per_page=per_page, page=1) }}">&lt;&lt;</a>
+          <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_index', q=docs_query, per_page=per_page, page=page - 1) }}">&lt;</a>
+          {% endif %}
+          {% for page_number in range(1, total_pages + 1) %}
+          {% if current_section %}
+          <a class="pagination-link {% if page_number == page %}is-current{% endif %}"
+            href="{{ url_for('web.docs_page', doc_path=current_section, q=docs_query, per_page=per_page, page=page_number) }}">{{ page_number }}</a>
+          {% else %}
+          <a class="pagination-link {% if page_number == page %}is-current{% endif %}"
+            href="{{ url_for('web.docs_index', q=docs_query, per_page=per_page, page=page_number) }}">{{ page_number }}</a>
+          {% endif %}
+          {% endfor %}
+          {% if current_section %}
+          <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_page', doc_path=current_section, q=docs_query, per_page=per_page, page=page + 1) }}">&gt;</a>
+          <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_page', doc_path=current_section, q=docs_query, per_page=per_page, page=total_pages) }}">&gt;&gt;</a>
+          {% else %}
+          <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_index', q=docs_query, per_page=per_page, page=page + 1) }}">&gt;</a>
+          <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
+            href="{{ url_for('web.docs_index', q=docs_query, per_page=per_page, page=total_pages) }}">&gt;&gt;</a>
+          {% endif %}
+        </nav>
+        <form method="get"
+          action="{% if current_section %}{{ url_for('web.docs_page', doc_path=current_section) }}{% else %}{{ url_for('web.docs_index') }}{% endif %}"
+          class="page-size-form">
+          <input type="hidden" name="q" value="{{ docs_query or '' }}">
+          <input type="hidden" name="page" value="1">
+          <select name="per_page" class="page-size-select" onchange="this.form.submit()">
+            {% for option in per_page_options %}
+            <option value="{{ option }}" {% if option==per_page %}selected{% endif %}>{{ option|capitalize }}
+              documents</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+    </div>
+  </header>
+  <div class="users-table-wrap">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Document</th>
+          <th>Title</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if section_pages %}
+        {% for doc in section_pages %}
+        <tr>
+          <td>
+            <a href="{{ url_for('web.docs_page', doc_path=doc.doc_path, q=docs_query, per_page=per_page, page=page) }}">
+              {{ doc.name }}
+            </a>
+          </td>
+          <td>{{ doc.title }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="2">No documents found for this section/filter.</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% if content %}
+<section class="docs-markdown">
+  {{ content|safe }}
+</section>
+{% else %}
+<section class="docs-markdown">
+  <h2>Select a document</h2>
+  <small>Choose a docs folder in the main sidebar, then pick a page.</small>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}

@@ -39,6 +39,43 @@ def window_to_days(window_str: str) -> int | None:
     raise ValueError("Invalid window format")
 
 
+def parse_json_object_payload():
+    """Validate request JSON payload and return dict or (response, status)."""
+    if not request.is_json:
+        return jsonify({"success": False, "error": "Content-Type must be application/json"}), 400
+    data = request.json
+    if data is None or not isinstance(data, dict):
+        return jsonify({"success": False, "error": "Invalid JSON data"}), 400
+    return data
+
+
+def parse_profile_number(value):
+    """Parse optional positive numeric profile field."""
+    if value in (None, "", "--"):
+        return None
+    try:
+        n = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("age, height_cm and weight_kg must be numeric or empty") from exc
+    if n <= 0:
+        raise ValueError("age, height_cm and weight_kg must be greater than 0")
+    return n
+
+
+def resolve_days_from_query(days_param: int | None, window: str) -> int | None:
+    """Resolve days from explicit ?days= or ?window=Xd/Xm/Xy."""
+    if days_param is not None:
+        if days_param <= 0:
+            raise ValueError("days must be a positive integer")
+        return days_param
+    if window:
+        try:
+            return window_to_days(window)
+        except (ValueError, TypeError) as exc:
+            raise ValueError("format is 7d,30d,3m,1y") from exc
+    return None
+
+
 @api_bp.route("/llm-smoke", methods=["GET"])
 def llm_smoke() -> Response | tuple[Response, int]:
     """
@@ -115,14 +152,10 @@ def entries() -> Response | tuple[Response, int]:
                 JSON response containing success status and data or error message.
     """
     if request.method in {"POST", "PUT"}:
-        if not request.is_json:
-            return jsonify(
-                {"success": False, "error": "Content-Type must be application/json"}
-            ), 400
-
-        data = request.json
-        if data is None or not isinstance(data, dict):
-            return jsonify({"success": False, "error": "Invalid JSON data"}), 400
+        payload = parse_json_object_payload()
+        if isinstance(payload, tuple):
+            return payload
+        data = payload
 
         try:
             parsed_date = parse_entry_date_required(data)
@@ -199,18 +232,10 @@ def entries() -> Response | tuple[Response, int]:
     query = HealthEntry.query.filter_by(user_id=current_user.id).order_by(
         HealthEntry.date.desc()
     )
-    days = None
-    if days_param is not None:
-        if days_param <= 0:
-            return jsonify(
-                {"success": False, "error": "days must be a positive integer"}
-            ), 400
-        days = days_param
-    elif window:
-        try:
-            days = window_to_days(window)
-        except (ValueError, TypeError):
-            return jsonify({"success": False, "error": "format is 7d,30d,3m,1y"}), 400
+    try:
+        days = resolve_days_from_query(days_param, window)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)}), 400
 
     if days is not None:
         latest_entry = (
@@ -247,32 +272,15 @@ def user_profile() -> Response | tuple[Response, int]:
             200,
         )
 
-    if not request.is_json:
-        return jsonify(
-            {"success": False, "error": "Content-Type must be application/json"}
-        ), 400
-
-    data = request.json
-    if data is None or not isinstance(data, dict):
-        return jsonify({"success": False, "error": "Invalid JSON data"}), 400
-
-    def parse_num(value):
-        if value in (None, "", "--"):
-            return None
-        try:
-            n = float(value)
-        except (TypeError, ValueError) as exc:
-            raise ValueError(
-                "age, height_cm and weight_kg must be numeric or empty"
-            ) from exc
-        if n <= 0:
-            raise ValueError("age, height_cm and weight_kg must be greater than 0")
-        return n
+    payload = parse_json_object_payload()
+    if isinstance(payload, tuple):
+        return payload
+    data = payload
 
     try:
-        age_val = parse_num(data.get("age"))
-        height_val = parse_num(data.get("height_cm"))
-        weight_val = parse_num(data.get("weight_kg"))
+        age_val = parse_profile_number(data.get("age"))
+        height_val = parse_profile_number(data.get("height_cm"))
+        weight_val = parse_profile_number(data.get("weight_kg"))
     except ValueError as exc:
         return jsonify({"success": False, "error": str(exc)}), 400
 
@@ -322,23 +330,10 @@ def user_settings() -> Response | tuple[Response, int]:
             200,
         )
 
-    if not request.is_json:
-        return jsonify({"success": False, "error": "Content-Type must be application/json"}), 400
-
-    data = request.json
-    if data is None or not isinstance(data, dict):
-        return jsonify({"success": False, "error": "Invalid JSON data"}), 400
-
-    def parse_num(value):
-        if value in (None, "", "--"):
-            return None
-        try:
-            n = float(value)
-        except (TypeError, ValueError) as exc:
-            raise ValueError("age, height_cm and weight_kg must be numeric or empty") from exc
-        if n <= 0:
-            raise ValueError("age, height_cm and weight_kg must be greater than 0")
-        return n
+    payload = parse_json_object_payload()
+    if isinstance(payload, tuple):
+        return payload
+    data = payload
 
     try:
         name = str(data.get("name", current_user.name or "")).strip()
@@ -358,9 +353,9 @@ def user_settings() -> Response | tuple[Response, int]:
                 return jsonify({"success": False, "error": "passwords do not match"}), 400
             current_user.set_password(password)
 
-        age_val = parse_num(data.get("age"))
-        height_val = parse_num(data.get("height_cm"))
-        weight_val = parse_num(data.get("weight_kg"))
+        age_val = parse_profile_number(data.get("age"))
+        height_val = parse_profile_number(data.get("height_cm"))
+        weight_val = parse_profile_number(data.get("weight_kg"))
     except ValueError as exc:
         return jsonify({"success": False, "error": str(exc)}), 400
 
@@ -411,20 +406,10 @@ def stats() -> Response | tuple[Response, int]:
     window = request.args.get("window", default="", type=str).lower().strip()
 
     # Decide days
-    days = None
-    if days_param is not None:
-        if days_param <= 0:
-            return jsonify(
-                {"success": False, "error": "days must be a positive integer"}
-            ), 400
-        days = days_param
-    elif window:  # window provided and not empty
-        try:
-            days = window_to_days(window)
-        except (ValueError, TypeError):
-            return jsonify({"success": False, "error": "format is 7d,30d,3m,1y"}), 400
-    else:
-        days = None  # all time
+    try:
+        days = resolve_days_from_query(days_param, window)
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)}), 400
 
     # query = HealthEntry.query.order_by(HealthEntry.date.desc())
     base_query = HealthEntry.query.filter_by(user_id=current_user.id)

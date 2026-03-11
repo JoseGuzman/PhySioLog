@@ -495,6 +495,46 @@ Page header + cards
     font-size: 0.95em;
 }
 
+/* Markdown heading parity with app page headers */
+.docs-markdown h1 {
+    color: var(--text);
+    font-size: 1.6em;
+    margin-bottom: 6px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.docs-markdown h2 {
+    color: var(--text);
+    font-size: 1.2em;
+    margin: 16px 0 8px;
+    font-weight: 700;
+}
+
+.docs-markdown h3 {
+    color: var(--text);
+    font-size: 1.05em;
+    margin: 14px 0 8px;
+    font-weight: 700;
+}
+
+.docs-markdown p {
+    color: var(--text);
+    font-size: 0.95em;
+    line-height: 1.6;
+    margin: 0 0 12px;
+}
+
+.docs-markdown ul,
+.docs-markdown ol {
+    margin: 0 0 12px;
+    padding-left: 1.5rem;
+}
+
+.docs-markdown li {
+    margin: 0 0 6px;
+}
+
 .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -550,6 +590,175 @@ Charts
     font-size: 1.05em;
     margin: 6px 6px 12px;
     font-weight: 700;
+}
+
+/* =========================
+Shared List Card (Clients/Docs)
+========================= */
+.users-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.users-head {
+    display: block;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+}
+
+[data-theme="light"] .users-head {
+    background: #ffffff;
+    border-bottom-color: #dfe3e9;
+}
+
+.users-head-main {
+    min-width: 0;
+}
+
+.users-head-controls {
+    display: flex;
+    margin-top: 14px;
+    width: 100%;
+}
+
+.users-head-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: nowrap;
+}
+
+.users-head h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+.users-head p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.email-filter-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex: 1 1 360px;
+    min-width: 280px;
+}
+
+.email-filter-input {
+    width: 100%;
+    min-width: 180px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-2);
+    background: var(--field-bg);
+    color: var(--text);
+}
+
+.email-filter-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-2);
+    background: var(--panel-2);
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    width: auto;
+    justify-content: flex-start;
+    margin-left: 0;
+}
+
+.page-size-select,
+.pagination-link {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-2);
+    background: var(--panel-2);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.page-size-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 320px;
+    margin-left: auto;
+}
+
+.page-size-select {
+    width: 100%;
+}
+
+.pagination-link.is-current {
+    background: var(--accent);
+    color: #12322b;
+    border-color: transparent;
+}
+
+.pagination-link.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.users-table-wrap {
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.users-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--panel-2);
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.users-table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--panel) 88%, var(--panel-2) 12%);
+}
+
+.users-table tbody tr:hover {
+    background: var(--hover);
+}
+
+.users-table td a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.users-table td a:hover {
+    text-decoration: underline;
 }
 
 /* =========================
@@ -802,5 +1011,32 @@ Responsive: icon-only sidebar
     .chat-input-bar button {
         padding: 10px 16px;
         border-radius: 8px;
+    }
+}
+
+@media (max-width: 920px) {
+    .users-head-controls {
+        margin-top: 14px;
+    }
+
+    .users-head-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .email-filter-form,
+    .page-size-form,
+    .pagination {
+        width: 100%;
+        min-width: 0;
+        justify-content: flex-start;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    .page-size-form {
+        margin-left: 0;
     }
 }
