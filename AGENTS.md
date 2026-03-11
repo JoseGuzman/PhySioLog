@@ -1,4 +1,4 @@
-# Agent Instructions
+# Codex Agent Instructions for PhysioLog
 
 Work in REVIEW-FIRST mode.
 
@@ -16,5 +16,5 @@ Rules:
 
 Follow it strictly.
 
-    - Use docs/AI_CONTEXT.md as the project contract. 
-    - Use docs/AI_INSTRUCTIONS.md as the repository's agent instructions
+    - Use dev_docs/ai/AI_CONTEXT.md as the project contract. 
+    - Use dev_docs/ai/AI_INSTRUCTIONS.md as the repository's agent instructions
