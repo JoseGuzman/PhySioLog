@@ -1,7 +1,7 @@
-# Body Fat Measurement with Home Bioimpedance Scales
+# Measurement Biases of Body Fat with Home Bioimpedance Scales
 
 This document explains the principles of Total Body Water (TBW), Hydration Effects, and
-Measurement Noise when collecting body fat percentage data using home Bioelectrical Impedance Analysis (BIA) scales.
+Measurement biases when collecting body fat percentage data using home Bioelectrical Impedance Analysis (BIA) scales.
 
 ## 1. Overview
 
@@ -17,20 +17,20 @@ Because the method relies heavily on water distribution in the body, short-term 
 
 ## 2. Total Body Water (TBW)
 
-Total Body Water (TBW) is the total amount of water contained in the body and its assumed distributed across body weight.
+Total Body Water (TBW) is the total amount of water contained in the body and is distributed across body compartments.[2]
 
 | Compartment | Description | % of TBW |
 |---|---|
-| ICW | Intracellular water (inside cells) | ~65% |
-| ECW | Extracellular water (blood plasma + interstitial fluid) | ~35% |
+| IntraCellular Water (ICW) | water contained inside cells | ~67% |
+| Extracellular Water (ECW) | water outside of cells (blood plasma + interstitial fluid) | ~33% |
 
-Note that ECW is more conductive to electricity than ICW, which is why BIA devices are sensitive to changes in ECW. Increases in ECW under conditions suchs as inflammation or high sodium intake can lead to overestimation of TBW and underestimation of body fat percentage.
+Note that ECW is more conductive to electricity than ICW, which is why BIA devices are very sensitive to changes in ECW. Increases in ECW under conditions suchs as inflammation or high sodium intake can lead to overestimation of TBW and underestimation of body fat percentage.
 
 ---
 
 ## 3. Hydration Constant of Lean Tissue
 
-Lean tissue contains approximately 73% water. Therefore BIA devices estimate lean mass using:
+Lean tissue contains approximately 73% water.[1] Therefore BIA devices estimate lean mass using:
 
 $$
 \text{Lean Mass} = \text{TBW} / 0.73
@@ -45,26 +45,28 @@ $$
 Finally:
 
 $$
-\text{Body Fat} \% = \text{Fat Mass} / \text{Body Weight}
+\text{Body Fat} \% = \frac{\text{Fat Mass} }{\text{Body Weight} } \times 100
 $$
 
----
+### Example Calculation
 
-## 4. Example Calculation
+Assume Weight = **70 kg** and the BIA estimates TBW = **40 kg**, then
 
-Assume Weight = **70 kg** and Estimated TBW = **40 kg**
+$$
+\text{Lean Mass} = 40 \text{ kg} / 0.73 = 54.8 \text{ kg}
+$$
 
-Lean mass:
+and fat mass is then derived as:
 
-Lean mass = 40 / 0.73 = 54.8 kg
+$$
+\text{Fat Mass} = 70 \text{ kg} - 54.8 \text{ kg} = 15.2 \text{ kg}
+$$
 
-Fat mass:
+Giving a fat percentage of:
 
-Fat mass = 70 − 54.8 = 15.2 kg
-
-Body fat percentage:
-
-15.2 / 70 = 21.7 %
+$$
+\text{Body Fat} \% = \frac{15.2 \text{ kg} }{70 \text{ kg} } \times 100 = 21.7 \%
+$$
 
 ---
 
@@ -100,15 +102,8 @@ A **1 kg water change appears as a ~2% body fat drop**, even though no fat was l
 
 ### 6.1 Glycogen Storage and Training
 
-Muscle glycogen binds water.
-
-Rule of thumb:
-
-1 g glycogen ≈ 3 g water
-
-Example:
-
-+200 g glycogen → +600 g water
+Muscle glycogen binds water. Rule of thumb 1 g glycogen ≈ 3 g water. For example, 200 g of 
+glycogen can bind 600 g of water. This can lead to significant hydration changes in a short time.
 
 This commonly occurs:
 
@@ -116,9 +111,7 @@ This commonly occurs:
 - after rest days
 - after glycogen depletion training
 
-Result:
-
-Higher water → lower reported body fat
+The result is that higher water → lower reported body fat
 
 ---
 
@@ -271,3 +264,11 @@ This removes most hydration-related noise.
 - Small hydration changes can produce **large body fat fluctuations**.
 - Illness, inflammation, sodium intake, sleep, and training all influence body water.
 - The most reliable signal comes from **multi-day trends**, not single measurements.
+
+## References
+
+1. Wang Z, Deurenberg P, Wang W, Pietrobelli A, Baumgartner RN, Heymsfield SB. *Hydration of fat-free body mass: review and critique of a classic body-composition constant*. **Am J Clin Nutr**. 1999;69(5):833-841. doi:10.1093/ajcn/69.5.833.  
+   <https://pubmed.ncbi.nlm.nih.gov/10232621/>
+
+2. Mavrakis A, VanGordon S. *Physiology, Water Balance*. StatPearls Publishing; updated 2025.  
+   <https://www.ncbi.nlm.nih.gov/books/NBK541059/>
