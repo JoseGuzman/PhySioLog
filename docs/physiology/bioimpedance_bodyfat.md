@@ -17,20 +17,20 @@ Because the method relies heavily on water distribution in the body, short-term 
 
 ## 2. Total Body Water (TBW)
 
-Total Body Water (TBW) is the total amount of water contained in the body and is distributed across body compartments.[2]
+Total Body Water (TBW) is the total amount of water contained in the body and is distributed across body compartments [2].
 
 | Compartment | Description | % of TBW |
-|---|---|
+|---|---|---|
 | IntraCellular Water (ICW) | water contained inside cells | ~67% |
 | Extracellular Water (ECW) | water outside of cells (blood plasma + interstitial fluid) | ~33% |
 
-Note that ECW is more conductive to electricity than ICW, which is why BIA devices are very sensitive to changes in ECW. Increases in ECW under conditions suchs as inflammation or high sodium intake can lead to overestimation of TBW and underestimation of body fat percentage.
+Note that ECW is more conductive to electricity than ICW, which is why BIA devices are very sensitive to changes in ECW. Increases in ECW under conditions such as inflammation or high sodium intake can lead to overestimation of TBW and underestimation of body fat percentage.
 
 ---
 
 ## 3. Hydration Constant of Lean Tissue
 
-Lean tissue contains approximately 73% water, and our home BIA devices estimate lean mass using the following formula:
+Lean tissue contains approximately **73% water** [1], and home BIA devices estimate lean mass using the following formula:
 
 $$
 \text{Lean Mass} = \text{TBW} / 0.73
@@ -74,25 +74,28 @@ $$
 
 Because lean mass is calculated from the Total Body Water (TBW) divided by 0.73, **small water shifts** produce **large changes in the estimation of body fat percentages**.
 
-For example, assume the same person has a 1 kg increase in TBW (from 40 kg to 41 kg) - a value which is possible due to variation in water composition - but the total body weight remains constant at 70 kg.
+For example, assume the same person has a **1 kg increase in TBW** (from 40 kg to 41 kg) — a value which is possible due to variation in water composition — but the total body weight remains constant at **70 kg**.
 
 | Day | Total Body Water | Lean Mass | Fat Mass | Body Fat % |
 |-----|------------------|-----------|----------|------------|
 | Day 1 | 40 kg | 40 / 0.73 = 54.8 kg | 70 − 54.8 = 15.2 kg | 15.2 / 70 × 100 = 21.7 % |
 | Day 2 (+1 kg water) | 41 kg | 41 / 0.73 = 56.2 kg | 70 − 56.2 = 13.8 kg | 13.8 / 70 × 100 = 19.7 % |
 
-A **1 kg water change appears as a ~2% body fat drop** within a day, which is physiologically impossible. Assuming 1 kg of fat require 7700 kcal to be lost (Wishnofsky rule) [3], the amount of surplus energy would need to be 2 x 7700 = 15400 kcal, which is metabolically impossible.
+A **1 kg water change appears as a ~2% body fat drop** within a day, which is physiologically impossible. Assuming **1 kg of fat requires ~7700 kcal** to be lost (Wishnofsky rule) [3], the required energy deficit would be roughly:2 × 7700 = **15,400 kcal**, which is metabolically unrealistic over one day.
 
 ---
 
 ## 6. Physiological Situations that Change Body Water
 
-Large hydration deviation produce large variations and biases in our etimation of body fat, therefore it is importante to understand which physiological conditions lead to fluctuations in body water composition.
+Large hydration deviations produce large variations and biases in our estimation of body fat. It is therefore important to understand which physiological conditions lead to fluctuations in body water composition.
 
 ### 6.1 Glycogen Storage and Training
 
-Muscle glycogen binds water. The rule of thumb is that for every gram glycogen, 3 g water are stored [4]. For example, 200 g of
-glycogen can bind 600 g of water, leading to significant hydration changes in a short time.
+Muscle glycogen binds water. A commonly cited estimate is that **1 g glycogen binds approximately 3 g water** [4].
+
+For example:
+
+200 g glycogen → ~600 g water
 
 This commonly occurs:
 
@@ -100,7 +103,9 @@ This commonly occurs:
 - after rest days
 - after glycogen depletion training
 
-The result is that higher water → lower reported body fat
+The result is:
+
+higher water → **lower reported body fat**
 
 ### 6.2 Dehydration
 
@@ -114,7 +119,7 @@ Common causes:
 
 Result:
 
-Lower TBW → higher reported body fat
+Lower TBW → **higher reported body fat**
 
 ---
 
@@ -141,7 +146,7 @@ When this ratio changes, measurement errors occur.
 
 Assume:
 
-#### Normal condition
+### Normal condition
 
 | Component | Volume |
 |---|---|
@@ -149,7 +154,7 @@ Assume:
 | ECW | 14 L |
 | TBW | 40 L |
 
-#### Inflammatory condition
+### Inflammatory condition
 
 | Component | Volume |
 |---|---|
@@ -245,14 +250,7 @@ This removes most hydration-related noise.
 
 ---
 
-## 13. Key Takeaways
-
-- BIA scales estimate fat using **water-based models**.
-- Small hydration changes can produce **large body fat fluctuations**.
-- Illness, inflammation, sodium intake, sleep, and training all influence body water.
-- The most reliable signal comes from **multi-day trends**, not single measurements.
-
-## References
+# References
 
 1. Wang Z, Deurenberg P, Wang W, Pietrobelli A, Baumgartner RN, Heymsfield SB.  
    *Hydration of fat-free body mass: Review and critique of a classic body-composition constant.*  

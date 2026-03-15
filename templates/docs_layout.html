@@ -42,8 +42,8 @@
 <section class="users-card">
   <header class="users-head">
     <div class="users-head-main">
-      <h1>Documents</h1>
-      <p>List of documents.</p>
+      <h1>Scientific References</h1>
+      <p>List of reference documents.</p>
     </div>
     <div class="users-head-controls">
       <div class="users-head-toolbar">
@@ -110,7 +110,6 @@
     <table class="users-table">
       <thead>
         <tr>
-          <th>Document</th>
           <th>Title</th>
         </tr>
       </thead>
@@ -120,15 +119,14 @@
         <tr>
           <td>
             <a href="{{ url_for('web.docs_page', doc_path=doc.doc_path, q=docs_query, per_page=per_page, page=page) }}">
-              {{ doc.name }}
+              {{ doc.title }}
             </a>
           </td>
-          <td>{{ doc.title }}</td>
         </tr>
         {% endfor %}
         {% else %}
         <tr>
-          <td colspan="2">No documents found for this section/filter.</td>
+          <td colspan="1">No documents found for this section/filter.</td>
         </tr>
         {% endif %}
       </tbody>
@@ -142,7 +140,7 @@
 {% else %}
 <section class="docs-markdown">
   <!-- <h2>Select a document</h2>-->
-  <small>Click on the document to load the content.</small>
+  <small>Click on the document title to load the content.</small>
 </section>
 {% endif %}
 {% endblock %}
