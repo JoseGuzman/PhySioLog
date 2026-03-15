@@ -30,7 +30,7 @@ Note that ECW is more conductive to electricity than ICW, which is why BIA devic
 
 ## 3. Hydration Constant of Lean Tissue
 
-Lean tissue contains approximately 73% water.[1] Therefore BIA devices estimate lean mass using:
+Lean tissue contains approximately 73% water, and our home BIA devices estimate lean mass using the following formula:
 
 $$
 \text{Lean Mass} = \text{TBW} / 0.73
@@ -42,7 +42,7 @@ $$
 \text{Fat Mass} = \text{Body Weight} - \text{Lean Mass}
 $$
 
-Finally:
+To finally obtain the percentage of body fat:
 
 $$
 \text{Body Fat} \% = \frac{\text{Fat Mass} }{\text{Body Weight} } \times 100
@@ -72,38 +72,36 @@ $$
 
 ## 5. How Hydration Changes Affect Body Fat %
 
-Because lean mass is calculated from TBW, **small water shifts can produce large changes in estimated body fat**.
+Because lean mass is calculated from the Total Body Water (TBW) divided by 0.73, **small water shifts** produce **large changes in body fat estimates**.
 
-### Example
-
-Weight = **70 kg**
+For example, assume the same person has a 1 kg increase in TBW (from 40 kg to 41 kg) - a value which is possible due to variation in water composition- , but the body weight remains constant at 70 kg.
 
 #### Day 1
 
-TBW = 40 kg  
-Lean mass = 54.8 kg  
-Fat mass = 15.2 kg  
-Body fat = 21.7 %
+Total Body Weight = 40 kg  
+Lean mass = 40/0.73 = 54.8 kg  
+Fat mass = 70 - 54.8 = 15.2 kg  
+Body fat = 15.2/70 * 100 = 21.7 %
 
 #### Day 2 (1 kg additional body water)
 
-TBW = 41 kg  
-Lean mass = 41 / 0.73 = 56.2 kg  
+Total Body Weight = 41 kg  
+Lean mass = 41/0.73 = 56.2 kg  
 Fat mass = 70 − 56.2 = 13.8 kg  
-Body fat = 19.7 %
+Body fat = 13.8/70 * 100 = 19.7 %
 
-Result:
-
-A **1 kg water change appears as a ~2% body fat drop**, even though no fat was lost.
+A **1 kg water change appears as a ~2% body fat drop** within a day, which is physiologically impossible. Assuming 1 kg of fat require 7700 kcal to be lost (Wishnofsky rule) [3], the amount of surplus energy would need to be 2 x 7700 = 15400 kcal, which is metabolically impossible.
 
 ---
 
 ## 6. Physiological Situations that Change Body Water
 
+Large hydration deviation produce large variations and biases in our etimation of body fat, therefore it is importante to understand which physiological conditions lead to fluctuations in body water composition.
+
 ### 6.1 Glycogen Storage and Training
 
-Muscle glycogen binds water. Rule of thumb 1 g glycogen ≈ 3 g water. For example, 200 g of 
-glycogen can bind 600 g of water. This can lead to significant hydration changes in a short time.
+Muscle glycogen binds water. The rule of thumb is that for every gram glycogen, 3 g water are stored [4]. For example, 200 g of
+glycogen can bind 600 g of water, leading to significant hydration changes in a short time.
 
 This commonly occurs:
 
@@ -272,3 +270,10 @@ This removes most hydration-related noise.
 
 2. Mavrakis A, VanGordon S. *Physiology, Water Balance*. StatPearls Publishing; updated 2025.  
    <https://www.ncbi.nlm.nih.gov/books/NBK541059/>
+
+3. Wishnofsky M. *Caloric Equivalents of Gained or Lost Weight*. **Am J Clin Nutr**. 1958;6(5):542-546. doi:10.1093/ajcn/6.5.542.
+
+4. Bengt Saltin, Kent E. Olsson
+*Variation in total body water with muscle glycogen changes.*
+**Acta Physiologica Scandinavica.** 1970;80(1):11–18.
+DOI: 10.1111/j.1748-1716.1970.tb04764.x
