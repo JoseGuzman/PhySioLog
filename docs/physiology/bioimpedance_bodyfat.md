@@ -72,23 +72,14 @@ $$
 
 ## 5. How Hydration Changes Affect Body Fat %
 
-Because lean mass is calculated from the Total Body Water (TBW) divided by 0.73, **small water shifts** produce **large changes in body fat estimates**.
+Because lean mass is calculated from the Total Body Water (TBW) divided by 0.73, **small water shifts** produce **large changes in the estimation of body fat percentages**.
 
-For example, assume the same person has a 1 kg increase in TBW (from 40 kg to 41 kg) - a value which is possible due to variation in water composition- , but the body weight remains constant at 70 kg.
+For example, assume the same person has a 1 kg increase in TBW (from 40 kg to 41 kg) - a value which is possible due to variation in water composition - but the total body weight remains constant at 70 kg.
 
-#### Day 1
-
-Total Body Weight = 40 kg  
-Lean mass = 40/0.73 = 54.8 kg  
-Fat mass = 70 - 54.8 = 15.2 kg  
-Body fat = 15.2/70 * 100 = 21.7 %
-
-#### Day 2 (1 kg additional body water)
-
-Total Body Weight = 41 kg  
-Lean mass = 41/0.73 = 56.2 kg  
-Fat mass = 70 − 56.2 = 13.8 kg  
-Body fat = 13.8/70 * 100 = 19.7 %
+| Day | Total Body Water | Lean Mass | Fat Mass | Body Fat % |
+|-----|------------------|-----------|----------|------------|
+| Day 1 | 40 kg | 40 / 0.73 = 54.8 kg | 70 − 54.8 = 15.2 kg | 15.2 / 70 × 100 = 21.7 % |
+| Day 2 (+1 kg water) | 41 kg | 41 / 0.73 = 56.2 kg | 70 − 56.2 = 13.8 kg | 13.8 / 70 × 100 = 19.7 % |
 
 A **1 kg water change appears as a ~2% body fat drop** within a day, which is physiologically impossible. Assuming 1 kg of fat require 7700 kcal to be lost (Wishnofsky rule) [3], the amount of surplus energy would need to be 2 x 7700 = 15400 kcal, which is metabolically impossible.
 
@@ -110,8 +101,6 @@ This commonly occurs:
 - after glycogen depletion training
 
 The result is that higher water → lower reported body fat
-
----
 
 ### 6.2 Dehydration
 
@@ -265,15 +254,22 @@ This removes most hydration-related noise.
 
 ## References
 
-1. Wang Z, Deurenberg P, Wang W, Pietrobelli A, Baumgartner RN, Heymsfield SB. *Hydration of fat-free body mass: review and critique of a classic body-composition constant*. **Am J Clin Nutr**. 1999;69(5):833-841. doi:10.1093/ajcn/69.5.833.  
-   <https://pubmed.ncbi.nlm.nih.gov/10232621/>
+1. Wang Z, Deurenberg P, Wang W, Pietrobelli A, Baumgartner RN, Heymsfield SB.  
+   *Hydration of fat-free body mass: Review and critique of a classic body-composition constant.*  
+   **Am J Clin Nutr.** 1999;69(5):833–841.  
+   [PubMed](https://pubmed.ncbi.nlm.nih.gov/10232621/) · [DOI](https://doi.org/10.1093/ajcn/69.5.833)
 
-2. Mavrakis A, VanGordon S. *Physiology, Water Balance*. StatPearls Publishing; updated 2025.  
-   <https://www.ncbi.nlm.nih.gov/books/NBK541059/>
+2. Mavrakis A, VanGordon S.  
+   *Physiology, Water Balance.*  
+   **StatPearls Publishing**, 2025 update.  
+   [NCBI Bookshelf](https://www.ncbi.nlm.nih.gov/books/NBK541059/)
 
-3. Wishnofsky M. *Caloric Equivalents of Gained or Lost Weight*. **Am J Clin Nutr**. 1958;6(5):542-546. doi:10.1093/ajcn/6.5.542.
+3. Wishnofsky M.  
+   *Caloric Equivalents of Gained or Lost Weight.*  
+   **Am J Clin Nutr.** 1958;6(5):542–546.  
+   [PubMed](https://pubmed.ncbi.nlm.nih.gov/13594886/) · [DOI](https://doi.org/10.1093/ajcn/6.5.542)
 
-4. Bengt Saltin, Kent E. Olsson
-*Variation in total body water with muscle glycogen changes.*
-**Acta Physiologica Scandinavica.** 1970;80(1):11–18.
-DOI: 10.1111/j.1748-1716.1970.tb04764.x
+4. Olsson KE, Saltin B.  
+   *Variation in total body water with muscle glycogen changes in man.*  
+   **Acta Physiol Scand.** 1970;80(1):11–18.  
+   [PubMed](https://pubmed.ncbi.nlm.nih.gov/5475323/) · [DOI](https://doi.org/10.1111/j.1748-1716.1970.tb04764.x)
