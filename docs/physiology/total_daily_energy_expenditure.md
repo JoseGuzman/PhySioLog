@@ -14,7 +14,7 @@ It comprises the following physiological components:
 
 * Basal Metabolic Rate (BMR): Energy required for basic physiological functions.
 * Thermic Effect of Food (TEF): Energy used to digest and process food.
-* Non-Exercise Activity Thermogenesis (NEAT): Energy spent during daily movement.
+* Non-Exercise Activity Thermogenesis (NEAT): Energy spent during daily movement [3].
 * Exercise Activity Thermogenesis (EAT): Energy spent during structured exercise.
 
 In practice, **Basal Metabolic Rate (BMR)** is estimated from population variables (weight, height, age, and sex), then multiplied by an **Activity Factor (AF)** to approximate total daily expenditure [2].
