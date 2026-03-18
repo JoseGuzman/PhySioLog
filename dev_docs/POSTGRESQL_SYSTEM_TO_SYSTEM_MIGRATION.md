@@ -35,15 +35,24 @@ Before starting, confirm:
 - You can connect to the source database with `psql`
 - You can connect to the target PostgreSQL server with `psql`
 - You have credentials to create or restore into the target database
-- The source and target PostgreSQL versions are compatible
+- The source and target PostgreSQL server versions are compatible
 
-Check versions:
+Check local client-tool versions:
 
 ```bash
 psql --version
 pg_dump --version
 pg_restore --version
 ```
+
+Check the actual database server versions:
+
+```bash
+psql -h "$SOURCE_HOST" -p "$SOURCE_PORT" -U "$SOURCE_USER" -d "$SOURCE_DB" -c "SELECT version();"
+psql -h "$TARGET_HOST" -p "$TARGET_PORT" -U "$TARGET_USER" -d postgres -c "SELECT version();"
+```
+
+For PhysioLog, a logical migration from PostgreSQL `16.x` to `18.x` is a valid direction. Avoid relying on local CLI version output alone when deciding migration compatibility.
 
 ## Variables used in this guide
 
@@ -65,7 +74,7 @@ DUMP_FILE=physiolog_$(date +%Y-%m-%d_%H-%M-%S).dump
 
 ## Step 1: Inspect the source database
 
-Before exporting, confirm the source database and capture a few baseline values.
+Before exporting, confirm the source database server version and capture a few baseline values.
 
 Connect to the source database:
 
@@ -159,6 +168,7 @@ pg_restore \
   -d "$TARGET_DB" \
   --clean \
   --if-exists \
+  --no-owner \
   /tmp/"$DUMP_FILE"
 ```
 
@@ -166,9 +176,12 @@ Notes:
 
 - `--clean` drops existing objects before recreating them
 - `--if-exists` makes drop operations safer
+- `--no-owner` avoids restore failures when the source owner role does not exist on the target system
 - Only use this against a database you are prepared to overwrite
 
 If the target database must remain untouched until cutover, restore into a newly created staging or temporary database first.
+
+If you want to preserve source ownership exactly, create the required roles on the target before restore and omit `--no-owner`.
 
 ## Step 6: Validate the migrated database
 
@@ -253,9 +266,11 @@ pg_dump \
 
 - Do not copy PostgreSQL internal data files directly between machines
 - Do not restore into the wrong database when using `--clean`
-- Ensure roles and permissions exist on the target system
+- Use `localhost` explicitly if a host shell variable is unset; otherwise PostgreSQL may fall back to a local socket unexpectedly
+- Ensure the target PostgreSQL server is running before `createdb` or `pg_restore`
+- Ensure roles and permissions exist on the target system, or restore with `--no-owner`
 - If extensions are required, install them on the target before restore
-- If PostgreSQL major versions differ significantly, validate compatibility before migration
+- If PostgreSQL major versions differ significantly, validate compatibility using the server versions, not only the local client-tool versions
 
 ## Example end-to-end summary
 
