@@ -17,6 +17,6 @@ app = create_app()
 
 if __name__ == "__main__":
     print("\n🏃‍♂️ PhysioLog Starting (dev)...")
-    print("📊 Visit: http://localhost:5000\n")
+    print("📊 Visit: http://localhost:5001\n")
     # in development we run the Flask built-in server, not suitable for production
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)

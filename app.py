@@ -21,5 +21,5 @@ if __name__ == "__main__":
     # when running locally with uv run python app.py,
     # the app will be available at http://localhost:5000
     print("\n🏃‍♂️ Physiolog Starting...")
-    print("📊 Visit: http://localhost:5000\n")
-    app.run(host="0.0.0.0", port=5000)
+    print("📊 Visit: http://localhost:5001\n")
+    app.run(host="0.0.0.0", port=5001)
