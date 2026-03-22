@@ -1,4 +1,4 @@
-# Measurement Biases of Body Fat with Home Bioimpedance Scales
+# Measuring Body Fat with Home Bioimpedance Scales
 
 This document explains the principles of Total Body Water (TBW), Hydration Effects, and
 Measurement biases when collecting body fat percentage data using home Bioelectrical Impedance Analysis (BIA) scales.
