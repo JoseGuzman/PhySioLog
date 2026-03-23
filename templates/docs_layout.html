@@ -133,10 +133,12 @@
     </table>
   </div>
 </section>
-{% if content %}
+{% if content_blocks %}
+{% for block in content_blocks %}
 <section class="docs-markdown">
-  {{ content|safe }}
+  {{ block|safe }}
 </section>
+{% endfor %}
 {% else %}
 <section class="docs-markdown">
   <!-- <h2>Select a document</h2>-->

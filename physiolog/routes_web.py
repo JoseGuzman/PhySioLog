@@ -78,6 +78,26 @@ def _normalize_markdown_whitespace(text: str) -> str:
     return "\n".join(lines)
 
 
+def _render_docs_markdown_blocks(text: str) -> list[str]:
+    blocks: list[str] = []
+    current_lines: list[str] = []
+
+    for line in text.splitlines():
+        if line.strip() == "---":
+            block = _normalize_markdown_whitespace("\n".join(current_lines)).strip()
+            if block:
+                blocks.append(markdown2.markdown(block, extras=MARKDOWN_EXTRAS))
+            current_lines = []
+            continue
+        current_lines.append(line)
+
+    block = _normalize_markdown_whitespace("\n".join(current_lines)).strip()
+    if block:
+        blocks.append(markdown2.markdown(block, extras=MARKDOWN_EXTRAS))
+
+    return blocks
+
+
 def _filter_section_pages(
     section_pages: list[dict[str, str]],
     docs_query: str,
@@ -269,7 +289,7 @@ def docs_index():
         per_page=per_page,
         total_pages=total_pages,
         per_page_options=DOCS_PER_PAGE_OPTIONS,
-        content=None,
+        content_blocks=None,
     )
 
 
@@ -298,12 +318,11 @@ def docs_page(doc_path: str):
             per_page=per_page,
             total_pages=total_pages,
             per_page_options=DOCS_PER_PAGE_OPTIONS,
-            content=None,
+            content_blocks=None,
         )
 
     text = doc_file.read_text(encoding="utf-8")
-    normalized_text = _normalize_markdown_whitespace(text)
-    html = markdown2.markdown(normalized_text, extras=MARKDOWN_EXTRAS)
+    content_blocks = _render_docs_markdown_blocks(text)
     current = doc_file.relative_to(DOCS_DIR).with_suffix("").as_posix()
     current_section = _section_from_doc_path(current)
 
@@ -321,7 +340,7 @@ def docs_page(doc_path: str):
         per_page=per_page,
         total_pages=total_pages,
         per_page_options=DOCS_PER_PAGE_OPTIONS,
-        content=html,
+        content_blocks=content_blocks,
     )
 
 
