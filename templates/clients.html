@@ -4,6 +4,11 @@
 
 {% block extra_styles %}
 <style>
+    .clients-page {
+        display: grid;
+        gap: 18px;
+    }
+
     .users-card {
         background: var(--panel);
         border: 1px solid var(--border);
@@ -51,6 +56,161 @@
         margin-top: 4px;
         color: var(--muted);
         font-size: 0.9rem;
+    }
+
+    .coach-container {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .coach-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+    }
+
+    .session-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border-radius: 11px;
+        border: 1px solid var(--border-2);
+        background: var(--field-bg);
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .coach-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .coach-actions .divider {
+        width: 1px;
+        height: 24px;
+        background: var(--border);
+        margin: 0 4px;
+    }
+
+    .icon-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1px solid var(--border-2);
+        background: var(--field-bg);
+        color: var(--muted);
+        display: grid;
+        place-items: center;
+        padding: 0;
+    }
+
+    .coach-preview {
+        padding: 18px 20px;
+        background: var(--bg);
+        color: var(--muted);
+    }
+
+    [data-theme="light"] .coach-preview {
+        background: #f8fafc;
+    }
+
+    .chat-window {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        background: var(--bg);
+        scrollbar-color: #3a3a3a #101214;
+    }
+
+    .chat-window::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .chat-window::-webkit-scrollbar-track {
+        background: #101214;
+    }
+
+    .chat-window::-webkit-scrollbar-thumb {
+        background: #3a3a3a;
+        border-radius: 8px;
+    }
+
+    .chat-message {
+        display: flex;
+        max-width: min(860px, 78%);
+    }
+
+    .chat-message.user {
+        align-self: flex-end;
+    }
+
+    .chat-message.bot {
+        align-self: flex-start;
+    }
+
+    .bubble {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        font-size: 0.95em;
+        line-height: 1.45;
+        white-space: pre-line;
+        background: var(--panel);
+        color: var(--text);
+    }
+
+    .chat-message.user .bubble {
+        background: color-mix(in srgb, var(--accent) 16%, var(--panel) 84%);
+        border-color: color-mix(in srgb, var(--accent) 35%, var(--border) 65%);
+    }
+
+    .chat-input-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 14px;
+        border-top: 1px solid var(--border);
+        background: var(--panel);
+    }
+
+    .chat-input-bar input {
+        flex: 1;
+    }
+
+    [data-theme="light"] .chat-window {
+        background: #f8fafc;
+        scrollbar-color: #c8d3dc #eef3f7;
+    }
+
+    [data-theme="light"] .chat-window::-webkit-scrollbar-track {
+        background: #eef3f7;
+    }
+
+    [data-theme="light"] .chat-window::-webkit-scrollbar-thumb {
+        background: #c8d3dc;
+    }
+
+    [data-theme="light"] .bubble {
+        background: #ffffff;
+        border-color: #dfe3e9;
+    }
+
+    [data-theme="light"] .chat-message.user .bubble {
+        background: #eef7f3;
+        border-color: #cfe4d9;
     }
 
     .email-filter-form {
@@ -307,109 +467,194 @@
 {% endblock %}
 
 {% block content %}
-<section class="users-card">
-    <header class="users-head">
-        <div class="users-head-main">
-            <h1>Clients</h1>
-            <p>Registered clients and subscription status.</p>
-        </div>
+<div class="clients-page">
+    <section class="users-card">
+        <header class="users-head">
+            <div class="users-head-main">
+                <h1>Clients</h1>
+                <p>Registered clients and subscription status.</p>
+            </div>
 
-        <div class="users-head-controls">
-            <div class="users-head-toolbar">
-                <form method="get" action="{{ url_for('web.clients') }}" class="email-filter-form">
-                    <input type="hidden" name="per_page" value="{{ per_page }}">
-                    <input type="hidden" name="page" value="1">
-                    <input type="search" name="email" value="{{ email_query or '' }}" placeholder="Search name or email"
-                        class="email-filter-input">
-                    <button type="submit" class="email-filter-btn">Filter</button>
-                </form>
+            <div class="users-head-controls">
+                <div class="users-head-toolbar">
+                    <form method="get" action="{{ url_for('web.clients') }}" class="email-filter-form">
+                        <input type="hidden" name="per_page" value="{{ per_page }}">
+                        <input type="hidden" name="page" value="1">
+                        <input type="search" name="email" value="{{ email_query or '' }}"
+                            placeholder="Search name or email" class="email-filter-input">
+                        <button type="submit" class="email-filter-btn">Filter</button>
+                    </form>
 
-                <nav class="pagination" aria-label="Clients pagination">
-                    <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
-                        href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=1) }}">&lt;&lt;</a>
-                    <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
-                        href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=page - 1) }}">&lt;</a>
+                    <nav class="pagination" aria-label="Clients pagination">
+                        <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
+                            href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=1) }}">&lt;&lt;</a>
+                        <a class="pagination-link {% if page == 1 %}is-disabled{% endif %}"
+                            href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=page - 1) }}">&lt;</a>
 
-                    {% for page_number in range(1, total_pages + 1) %}
-                    <a class="pagination-link {% if page_number == page %}is-current{% endif %}"
-                        href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=page_number) }}">
-                        {{ page_number }}
-                    </a>
-                    {% endfor %}
-
-                    <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
-                        href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=page + 1) }}">&gt;</a>
-                    <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
-                        href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=total_pages) }}">&gt;&gt;</a>
-                </nav>
-
-                <form method="get" action="{{ url_for('web.clients') }}" class="page-size-form">
-                    <input type="hidden" name="email" value="{{ email_query or '' }}">
-                    <input type="hidden" name="page" value="1">
-                    <select id="perPageSelect" name="per_page" class="page-size-select" onchange="this.form.submit()">
-                        {% for option in per_page_options %}
-                        <option value="{{ option }}" {% if option==per_page %}selected{% endif %}>{{ option|capitalize
-                            }}
-                            clients</option>
+                        {% for page_number in range(1, total_pages + 1) %}
+                        <a class="pagination-link {% if page_number == page %}is-current{% endif %}"
+                            href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=page_number) }}">
+                            {{ page_number }}
+                        </a>
                         {% endfor %}
-                    </select>
-                </form>
+
+                        <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
+                            href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=page + 1) }}">&gt;</a>
+                        <a class="pagination-link {% if page == total_pages %}is-disabled{% endif %}"
+                            href="{{ url_for('web.clients', email=email_query, per_page=per_page, page=total_pages) }}">&gt;&gt;</a>
+                    </nav>
+
+                    <form method="get" action="{{ url_for('web.clients') }}" class="page-size-form">
+                        <input type="hidden" name="email" value="{{ email_query or '' }}">
+                        <input type="hidden" name="page" value="1">
+                        <select id="perPageSelect" name="per_page" class="page-size-select"
+                            onchange="this.form.submit()">
+                            {% for option in per_page_options %}
+                            <option value="{{ option }}" {% if option==per_page %}selected{% endif %}>{{ option|capitalize
+                                }}
+                                clients</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <div class="users-table-wrap">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subscription</th>
+                        <th>Last Entry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user, last_entry_date in users_with_last_entry %}
+                    <tr{% if selected_user_id == user.id %} class="is-selected"{% endif %}>
+                        <td>
+                            <span class="mobile-label">Select</span>
+                            <form method="post" action="{{ url_for('web.select_client', user_id=user.id) }}">
+                                <input type="hidden" name="email" value="{{ email_query or '' }}">
+                                <input type="hidden" name="per_page" value="{{ per_page }}">
+                                <input type="hidden" name="page" value="{{ page }}">
+                                <input type="radio" name="selected_user_id" value="{{ user.id }}"
+                                    {% if selected_user_id == user.id %}checked{% endif %}
+                                    onchange="this.form.submit()">
+                            </form>
+                        </td>
+                        <td><span class="mobile-label">Name</span>{{ user.name or "-" }}</td>
+                        <td><span class="mobile-label">Email</span>{{ user.email }}</td>
+                        <td>
+                            <span class="mobile-label">Subscription</span>
+                            <form method="post" action="{{ url_for('web.update_client_subscription', user_id=user.id) }}"
+                                class="subscription-form">
+                                <input type="hidden" name="email" value="{{ email_query or '' }}">
+                                <input type="hidden" name="per_page" value="{{ per_page }}">
+                                <input type="hidden" name="page" value="{{ page }}">
+                                {% if user.has_subscription %}
+                                <input type="hidden" name="status" value="inactive">
+                                <button type="submit" class="subscription-btn active">Active</button>
+                                {% else %}
+                                <input type="hidden" name="status" value="active">
+                                <button type="submit" class="subscription-btn inactive">Inactive</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                        <td>
+                            <span class="mobile-label">Last Entry</span>
+                            {{ last_entry_date.strftime("%Y-%m-%d") if last_entry_date else "-" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="coach-container">
+        <div class="coach-toolbar">
+            <span class="session-chip">
+                {% if selected_client %}
+                AI Agent · {{ selected_client.name or selected_client.email }}
+                {% else %}
+                AI Agent · No client selected
+                {% endif %}
+            </span>
+            <div class="coach-actions" aria-hidden="true">
+                <button type="button" class="icon-btn" tabindex="-1">
+                    <i data-lucide="brain-circuit" class="icon"></i>
+                </button>
+                <span class="divider"></span>
+                <button type="button" class="icon-btn" tabindex="-1">
+                    <i data-lucide="maximize-2" class="icon"></i>
+                </button>
             </div>
         </div>
-    </header>
 
-    <div class="users-table-wrap">
-        <table class="users-table">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Subscription</th>
-                    <th>Last Entry</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user, last_entry_date in users_with_last_entry %}
-                <tr{% if selected_user_id == user.id %} class="is-selected"{% endif %}>
-                    <td>
-                        <span class="mobile-label">Select</span>
-                        <form method="post" action="{{ url_for('web.select_client', user_id=user.id) }}">
-                            <input type="hidden" name="email" value="{{ email_query or '' }}">
-                            <input type="hidden" name="per_page" value="{{ per_page }}">
-                            <input type="hidden" name="page" value="{{ page }}">
-                            <input type="radio" name="selected_user_id" value="{{ user.id }}"
-                                {% if selected_user_id == user.id %}checked{% endif %}
-                                onchange="this.form.submit()">
-                        </form>
-                    </td>
-                    <td><span class="mobile-label">Name</span>{{ user.name or "-" }}</td>
-                    <td><span class="mobile-label">Email</span>{{ user.email }}</td>
-                    <td>
-                        <span class="mobile-label">Subscription</span>
-                        <form method="post" action="{{ url_for('web.update_client_subscription', user_id=user.id) }}"
-                            class="subscription-form">
-                            <input type="hidden" name="email" value="{{ email_query or '' }}">
-                            <input type="hidden" name="per_page" value="{{ per_page }}">
-                            <input type="hidden" name="page" value="{{ page }}">
-                            {% if user.has_subscription %}
-                            <input type="hidden" name="status" value="inactive">
-                            <button type="submit" class="subscription-btn active">Active</button>
-                            {% else %}
-                            <input type="hidden" name="status" value="active">
-                            <button type="submit" class="subscription-btn inactive">Inactive</button>
-                            {% endif %}
-                        </form>
-                    </td>
-                    <td>
-                        <span class="mobile-label">Last Entry</span>
-                        {{ last_entry_date.strftime("%Y-%m-%d") if last_entry_date else "-" }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div id="clientsCoachWindow" class="chat-window">
+            <div class="chat-message bot">
+                <div class="bubble">
+                    {% if selected_client %}
+                    Hi! I’m the personal agent for {{ selected_client.name }}. 🤖
+                    Ask me about progress, habits, recovery, or goals. 📈
+                    {% else %}
+                    Select a client above to load the coach context. 👆
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-</section>
+        <form id="clientsCoachForm" class="chat-input-bar">
+            <input type="text" id="clientsCoachInput" placeholder="Ask the bot..." autocomplete="off" required
+                {% if not selected_client %}disabled{% endif %}>
+            <button type="submit" {% if not selected_client %}disabled{% endif %}>Send</button>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const clientsCoachWindow = document.getElementById("clientsCoachWindow");
+    const clientsCoachForm = document.getElementById("clientsCoachForm");
+    const clientsCoachInput = document.getElementById("clientsCoachInput");
+
+    function addClientsCoachMessage(text, sender = "user") {
+        if (!clientsCoachWindow) return;
+
+        const msg = document.createElement("div");
+        msg.className = `chat-message ${sender}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = text;
+
+        msg.appendChild(bubble);
+        clientsCoachWindow.appendChild(msg);
+        clientsCoachWindow.scrollTop = clientsCoachWindow.scrollHeight;
+    }
+
+    function fakeClientsCoachReply(userText) {
+        return "Dummy coach reply for now 🤖\nLater this will call the OpenAI API. 🚀";
+    }
+
+    if (clientsCoachForm && clientsCoachInput) {
+        clientsCoachForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const text = clientsCoachInput.value.trim();
+            if (!text) return;
+
+            addClientsCoachMessage(text, "user");
+            clientsCoachInput.value = "";
+
+            setTimeout(() => {
+                addClientsCoachMessage(fakeClientsCoachReply(text), "bot");
+            }, 600);
+        });
+    }
+</script>
 {% endblock %}
