@@ -174,11 +174,18 @@ def _paginate_docs(
     return section_pages[start:end], page, total_pages
 
 
+def _default_landing_endpoint() -> str:
+    """Return the default landing endpoint for the authenticated user."""
+    if current_user.is_authenticated and current_user.is_admin:
+        return "web.clients"
+    return "web.metabolism"
+
+
 @web_bp.route("/")
 def index():
     """Redirect to overview if logged in, otherwise to login page"""
     if current_user.is_authenticated:
-        return redirect(url_for("web.metabolism"))
+        return redirect(url_for(_default_landing_endpoint()))
     return redirect(url_for("web.login"))
 
 
@@ -186,7 +193,7 @@ def index():
 def login():
     """Login page"""
     if current_user.is_authenticated:
-        return redirect(url_for("web.metabolism"))
+        return redirect(url_for(_default_landing_endpoint()))
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -199,7 +206,7 @@ def login():
                 parsed_url = urlparse(nxt)
                 if parsed_url.scheme or parsed_url.netloc:
                     nxt = None
-            return redirect(nxt or url_for("web.metabolism"))
+            return redirect(nxt or url_for(_default_landing_endpoint()))
         flash("Invalid email or password", "error")
     return render_template("login.html")
 
@@ -208,7 +215,7 @@ def login():
 def register():
     """Register page"""
     if current_user.is_authenticated:
-        return redirect(url_for("web.metabolism"))
+        return redirect(url_for(_default_landing_endpoint()))
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
