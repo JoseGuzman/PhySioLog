@@ -15,7 +15,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func, or_
 
 from .extensions import db
-from .models import HealthEntry, User
+from .models import AdminClientAssignment, HealthEntry, User
 
 web_bp = Blueprint("web", __name__)
 DOCS_DIR = Path("docs").resolve()
@@ -373,7 +373,14 @@ def clients():
     query = db.session.query(
         User,
         func.max(HealthEntry.date).label("last_entry_date"),
-    ).outerjoin(HealthEntry, HealthEntry.user_id == User.id)
+    ).join(
+        AdminClientAssignment,
+        AdminClientAssignment.client_user_id == User.id,
+    ).outerjoin(
+        HealthEntry, HealthEntry.user_id == User.id
+    ).filter(
+        AdminClientAssignment.admin_user_id == current_user.id
+    )
 
     if email_query:
         query = query.filter(
@@ -416,7 +423,20 @@ def update_client_subscription(user_id: int):
     if not current_user.is_admin:
         abort(403)
 
-    user = User.query.get_or_404(user_id)
+    user = (
+        db.session.query(User)
+        .join(
+            AdminClientAssignment,
+            AdminClientAssignment.client_user_id == User.id,
+        )
+        .filter(
+            AdminClientAssignment.admin_user_id == current_user.id,
+            User.id == user_id,
+        )
+        .first()
+    )
+    if user is None:
+        abort(404)
     next_status = request.form.get("status", "").strip().lower()
     email_query = request.form.get("email", "").strip().lower()
     per_page = request.form.get("per_page", "10").strip()

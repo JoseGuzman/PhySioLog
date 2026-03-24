@@ -47,6 +47,27 @@ def _decimal_hours_to_hhmm(value: float | None) -> str | None:
     return f"{hours:02d}:{minutes:02d}"
 
 
+class AdminClientAssignment(db.Model):
+    """Association table mapping admins to the users they manage."""
+
+    __tablename__ = "admin_client_assignments"
+    __table_args__ = (
+        UniqueConstraint(
+            "admin_user_id",
+            "client_user_id",
+            name="uix_admin_client_assignment",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    admin_user_id: Mapped[int] = mapped_column(
+        db.ForeignKey("users.id"), nullable=False, index=True
+    )
+    client_user_id: Mapped[int] = mapped_column(
+        db.ForeignKey("users.id"), nullable=False, index=True
+    )
+
+
 class User(UserMixin, db.Model):
     """Database model for users."""
 
