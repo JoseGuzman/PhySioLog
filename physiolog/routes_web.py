@@ -398,6 +398,7 @@ def clients():
 
     query = db.session.query(
         User,
+        func.count(HealthEntry.id).label("entry_count"),
         func.max(HealthEntry.date).label("last_entry_date"),
     ).join(
         AdminClientAssignment,

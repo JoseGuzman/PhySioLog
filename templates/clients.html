@@ -527,12 +527,13 @@
                         <th>Select</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Subscription</th>
+                        <th>Entries</th>
                         <th>Last Entry</th>
+                        <th>Subscription</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user, last_entry_date in users_with_last_entry %}
+                    {% for user, entry_count, last_entry_date in users_with_last_entry %}
                     <tr{% if selected_user_id == user.id %} class="is-selected"{% endif %}>
                         <td>
                             <span class="mobile-label">Select</span>
@@ -547,6 +548,14 @@
                         </td>
                         <td><span class="mobile-label">Name</span>{{ user.name or "-" }}</td>
                         <td><span class="mobile-label">Email</span>{{ user.email }}</td>
+                        <td>
+                            <span class="mobile-label">Entries</span>
+                            {{ entry_count }}
+                        </td>
+                        <td>
+                            <span class="mobile-label">Last Entry</span>
+                            {{ last_entry_date.strftime("%Y-%m-%d") if last_entry_date else "-" }}
+                        </td>
                         <td>
                             <span class="mobile-label">Subscription</span>
                             <form method="post" action="{{ url_for('web.update_client_subscription', user_id=user.id) }}"
@@ -563,10 +572,6 @@
                                 {% endif %}
                             </form>
                         </td>
-                        <td>
-                            <span class="mobile-label">Last Entry</span>
-                            {{ last_entry_date.strftime("%Y-%m-%d") if last_entry_date else "-" }}
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -578,7 +583,7 @@
         <div class="coach-toolbar">
             <span class="session-chip">
                 {% if selected_client %}
-                AI Agent · {{ selected_client.name or selected_client.email }}
+                AI Agent for {{ selected_client.name or selected_client.email }}
                 {% else %}
                 AI Agent · No client selected
                 {% endif %}
@@ -599,7 +604,7 @@
                 <div class="bubble">
                     {% if selected_client %}
                     Hi! I’m the personal agent for {{ selected_client.name }}. 🤖
-                    Ask me about progress, habits, recovery, or goals. 📈
+                    Ask me about data trends or observations during a time period. 📈
                     {% else %}
                     Select a client above to load the coach context. 👆
                     {% endif %}
