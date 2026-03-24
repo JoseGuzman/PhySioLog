@@ -532,6 +532,9 @@ Page header + cards
 }
 
 .docs-markdown li {
+    color: var(--text);
+    font-size: 0.95em;
+    line-height: 1.6;
     margin: 0 0 6px;
 }
 
