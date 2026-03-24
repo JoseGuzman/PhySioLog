@@ -8,12 +8,12 @@ Author: Jose Guzman, sjm.guzman<at>gmail.com
 
 from datetime import date, datetime, timedelta
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, Response, jsonify, request, session
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 
 from .extensions import db
-from .models import HealthEntry
+from .models import AdminClientAssignment, HealthEntry, User
 from .services import (
     build_entry_fields,
     compute_stats,
@@ -74,6 +74,30 @@ def resolve_days_from_query(days_param: int | None, window: str) -> int | None:
         except (ValueError, TypeError) as exc:
             raise ValueError("format is 7d,30d,3m,1y") from exc
     return None
+
+
+def get_effective_user() -> User:
+    """Return the user whose data should be exposed to the current session."""
+    if not current_user.is_admin:
+        return current_user
+
+    selected_user_id = session.get("selected_user_id")
+    if selected_user_id is None:
+        return current_user
+
+    selected_user = (
+        db.session.query(User)
+        .join(
+            AdminClientAssignment,
+            AdminClientAssignment.client_user_id == User.id,
+        )
+        .filter(
+            AdminClientAssignment.admin_user_id == current_user.id,
+            User.id == selected_user_id,
+        )
+        .first()
+    )
+    return selected_user or current_user
 
 
 @api_bp.route("/llm-smoke", methods=["GET"])
@@ -151,6 +175,8 @@ def entries() -> Response | tuple[Response, int]:
             flask.Response or (flask.Response, int):
                 JSON response containing success status and data or error message.
     """
+    effective_user = get_effective_user()
+
     if request.method in {"POST", "PUT"}:
         payload = parse_json_object_payload()
         if isinstance(payload, tuple):
@@ -168,7 +194,7 @@ def entries() -> Response | tuple[Response, int]:
 
         if request.method == "PUT":
             entry = HealthEntry.query.filter_by(
-                user_id=current_user.id, date=parsed_date
+                user_id=effective_user.id, date=parsed_date
             ).first()
             if not entry:
                 return jsonify(
@@ -187,7 +213,7 @@ def entries() -> Response | tuple[Response, int]:
             return jsonify({"success": True, "entry": entry.to_dict()}), 200
 
         entry = HealthEntry(
-            user_id=current_user.id,
+            user_id=effective_user.id,
             date=parsed_date,
             **entry_fields,
         )
@@ -216,7 +242,7 @@ def entries() -> Response | tuple[Response, int]:
             ), 400
         # If date is provided, return only that entry
         entry = HealthEntry.query.filter_by(
-            user_id=current_user.id, date=query_date
+            user_id=effective_user.id, date=query_date
         ).first()
         if not entry:
             return jsonify(
@@ -229,7 +255,7 @@ def entries() -> Response | tuple[Response, int]:
 
     # query = HealthEntry.query.order_by(HealthEntry.date.desc())
     # prevent auth user accessing other users' entries
-    query = HealthEntry.query.filter_by(user_id=current_user.id).order_by(
+    query = HealthEntry.query.filter_by(user_id=effective_user.id).order_by(
         HealthEntry.date.desc()
     )
     try:
@@ -239,7 +265,7 @@ def entries() -> Response | tuple[Response, int]:
 
     if days is not None:
         latest_entry = (
-            HealthEntry.query.filter_by(user_id=current_user.id)
+            HealthEntry.query.filter_by(user_id=effective_user.id)
             .order_by(HealthEntry.date.desc())
             .first()
         )
@@ -257,15 +283,17 @@ def entries() -> Response | tuple[Response, int]:
 @login_required
 def user_profile() -> Response | tuple[Response, int]:
     """Read/update authenticated user's profile inputs used by overview calculations."""
+    effective_user = get_effective_user()
+
     if request.method == "GET":
         return (
             jsonify(
                 {
                     "success": True,
                     "profile": {
-                        "age": current_user.age,
-                        "height_cm": current_user.height_cm,
-                        "weight_kg": current_user.weight_kg,
+                        "age": effective_user.age,
+                        "height_cm": effective_user.height_cm,
+                        "weight_kg": effective_user.weight_kg,
                     },
                 }
             ),
@@ -284,9 +312,9 @@ def user_profile() -> Response | tuple[Response, int]:
     except ValueError as exc:
         return jsonify({"success": False, "error": str(exc)}), 400
 
-    current_user.age = int(age_val) if age_val is not None else None
-    current_user.height_cm = height_val
-    current_user.weight_kg = weight_val
+    effective_user.age = int(age_val) if age_val is not None else None
+    effective_user.height_cm = height_val
+    effective_user.weight_kg = weight_val
 
     try:
         db.session.commit()
@@ -296,17 +324,17 @@ def user_profile() -> Response | tuple[Response, int]:
 
     return (
         jsonify(
-            {
-                "success": True,
-                "profile": {
-                    "age": current_user.age,
-                    "height_cm": current_user.height_cm,
-                    "weight_kg": current_user.weight_kg,
-                },
-            }
-        ),
-        200,
-    )
+                {
+                    "success": True,
+                    "profile": {
+                        "age": effective_user.age,
+                        "height_cm": effective_user.height_cm,
+                        "weight_kg": effective_user.weight_kg,
+                    },
+                }
+            ),
+            200,
+        )
 
 
 @api_bp.route("/user-settings", methods=["GET", "PUT"])
@@ -411,8 +439,10 @@ def stats() -> Response | tuple[Response, int]:
     except ValueError as exc:
         return jsonify({"success": False, "error": str(exc)}), 400
 
+    effective_user = get_effective_user()
+
     # query = HealthEntry.query.order_by(HealthEntry.date.desc())
-    base_query = HealthEntry.query.filter_by(user_id=current_user.id)
+    base_query = HealthEntry.query.filter_by(user_id=effective_user.id)
     query = base_query.order_by(HealthEntry.date.desc())
 
     start_date = None

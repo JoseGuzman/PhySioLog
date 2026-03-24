@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import markdown2
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func, or_
 
@@ -55,7 +55,33 @@ def build_docs_tree() -> dict[str, list[dict[str, str]]]:
 @web_bp.app_context_processor
 def inject_docs_sections():
     tree = build_docs_tree()
-    return {"docs_sections": list(tree.keys())}
+    return {
+        "docs_sections": list(tree.keys()),
+        "selected_client": get_selected_client(),
+    }
+
+
+def get_selected_client():
+    """Return the selected client for template rendering, if any."""
+    if not current_user.is_authenticated or not current_user.is_admin:
+        return None
+
+    selected_user_id = session.get("selected_user_id")
+    if selected_user_id is None:
+        return None
+
+    return (
+        db.session.query(User)
+        .join(
+            AdminClientAssignment,
+            AdminClientAssignment.client_user_id == User.id,
+        )
+        .filter(
+            AdminClientAssignment.admin_user_id == current_user.id,
+            User.id == selected_user_id,
+        )
+        .first()
+    )
 
 
 def _resolve_doc_file(doc_path: str) -> Path | None:
@@ -404,9 +430,11 @@ def clients():
         paginated_query = paginated_query.offset((page - 1) * per_page).limit(per_page)
 
     users_with_last_entry = paginated_query.all()
+    selected_user_id = session.get("selected_user_id")
     return render_template(
         "clients.html",
         users_with_last_entry=users_with_last_entry,
+        selected_user_id=selected_user_id,
         email_query=email_query,
         page=page,
         per_page=per_page,
@@ -450,6 +478,40 @@ def update_client_subscription(user_id: int):
 
     return redirect(
         url_for("web.clients", email=email_query, per_page=per_page, page=page)
+    )
+
+
+@web_bp.route("/admin/clients/<int:user_id>/select", methods=["POST"])
+@login_required
+def select_client(user_id: int):
+    """Set the currently selected client for the logged-in admin session."""
+    if not current_user.is_admin:
+        abort(403)
+
+    user = (
+        db.session.query(User)
+        .join(
+            AdminClientAssignment,
+            AdminClientAssignment.client_user_id == User.id,
+        )
+        .filter(
+            AdminClientAssignment.admin_user_id == current_user.id,
+            User.id == user_id,
+        )
+        .first()
+    )
+    if user is None:
+        abort(404)
+
+    session["selected_user_id"] = user.id
+
+    return redirect(
+        url_for(
+            "web.clients",
+            email=request.form.get("email", "").strip().lower(),
+            per_page=request.form.get("per_page", "10").strip(),
+            page=request.form.get("page", "1").strip(),
+        )
     )
 
 

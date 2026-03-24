@@ -132,17 +132,18 @@
                 </span>
             </div>
             <div class="topbar-profile">
-                <span class="topbar-user-name">{{ current_user.name or current_user.email or "User" }}</span>
+                {% set display_user = selected_client or current_user %}
+                <span class="topbar-user-name">{{ display_user.name or display_user.email or "User" }}</span>
                 <button id="profileMenuBtn" class="profile-btn" type="button" aria-haspopup="true"
                     aria-expanded="false">
-                    <span class="profile-avatar">{{ (current_user.name or current_user.email or "U")[:1] | upper
+                    <span class="profile-avatar">{{ (display_user.name or display_user.email or "U")[:1] | upper
                         }}</span>
                 </button>
 
                 <div id="profileMenu" class="profile-menu" hidden>
                     <div class="profile-menu-head">
-                        <div class="profile-name">{{ current_user.name or "User" }}</div>
-                        <div class="profile-email">{{ current_user.email }}</div>
+                        <div class="profile-name">{{ display_user.name or "User" }}</div>
+                        <div class="profile-email">{{ display_user.email }}</div>
                     </div>
 
                     <div class="theme-switcher" role="group" aria-label="Theme switcher">

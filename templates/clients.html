@@ -157,12 +157,28 @@
         letter-spacing: 0.08em;
     }
 
-    .users-table tbody tr:nth-child(even) {
-        background: color-mix(in srgb, var(--panel) 88%, var(--panel-2) 12%);
+    .users-table tbody tr {
+        background: var(--panel);
+    }
+
+    [data-theme="light"] .users-table tbody tr {
+        background: #ffffff;
     }
 
     .users-table tbody tr:hover {
-        background: var(--hover);
+        background: var(--panel);
+    }
+
+    [data-theme="light"] .users-table tbody tr:hover {
+        background: #ffffff;
+    }
+
+    .users-table tbody tr.is-selected {
+        background: var(--active);
+    }
+
+    .users-table tbody tr.is-selected:hover {
+        background: var(--active);
     }
 
     .status-pill {
@@ -346,6 +362,7 @@
         <table class="users-table">
             <thead>
                 <tr>
+                    <th>Select</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Subscription</th>
@@ -354,7 +371,18 @@
             </thead>
             <tbody>
                 {% for user, last_entry_date in users_with_last_entry %}
-                <tr>
+                <tr{% if selected_user_id == user.id %} class="is-selected"{% endif %}>
+                    <td>
+                        <span class="mobile-label">Select</span>
+                        <form method="post" action="{{ url_for('web.select_client', user_id=user.id) }}">
+                            <input type="hidden" name="email" value="{{ email_query or '' }}">
+                            <input type="hidden" name="per_page" value="{{ per_page }}">
+                            <input type="hidden" name="page" value="{{ page }}">
+                            <input type="radio" name="selected_user_id" value="{{ user.id }}"
+                                {% if selected_user_id == user.id %}checked{% endif %}
+                                onchange="this.form.submit()">
+                        </form>
+                    </td>
                     <td><span class="mobile-label">Name</span>{{ user.name or "-" }}</td>
                     <td><span class="mobile-label">Email</span>{{ user.email }}</td>
                     <td>
